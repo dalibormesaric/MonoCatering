@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using mono.Models;
+using mono.DAL;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,16 +12,46 @@ namespace mono.Controllers
 {
     public class HomeController : Controller
     {
+        public HomeController()
+            : this(new UserManager<User>(new UserStore<User>(new MonoDbContext())))
+        {
+        }
+
+        public HomeController(UserManager<User> userManager)
+        {
+            UserManager = userManager;
+        }
+
+        public UserManager<User> UserManager { get; private set; }
+
         public ActionResult Index()
         {
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult Restaurants()
         {
-            ViewBag.Message = "Your application description page.";
+            //var Db = new IdentityDbContext();
 
-            return View();
+            //var model = new List<RestaurantViewModel>();
+
+            /*
+            var resturantRole = from r in Db.Roles
+                                where r.Name == "restaurant"
+                                select r;
+
+            var restaurants = Db.Users.Where(u => u.Roles.Select(r => r.Role).FirstOrDefault() == resturantRole.FirstOrDefault());
+            
+            foreach (var restaurant in restaurants)
+            {
+                var r = new RestaurantViewModel(restaurant);
+                model.Add(r);
+            }
+             */
+
+            var db = new MonoDbContext();
+
+            return View(db.Restaurants.ToList());
         }
 
         public ActionResult Contact()
@@ -26,5 +60,7 @@ namespace mono.Controllers
 
             return View();
         }
+
+        
     }
 }
