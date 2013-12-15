@@ -17,18 +17,26 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Application name", "Index", "Home", null, new { @class = "navbar-brand" })
+                @Html.ActionLink("Home", "Index", "Home", null, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("Restaurants", "Restaurants", "Home")</li>
 
                     @if (User.IsInRole("admin"))
                     {
-                        <li>@Html.ActionLink("Users", "Index", "Account")</li>
+                        <li>@Html.ActionLink("Edit", "Index", "Admin")</li>
                     }
+                    @if (User.IsInRole("user"))
+                    {
+                        <li>@Html.ActionLink("Orders", "Orders", "Auction")</li>
+                    }
+                    @if (User.IsInRole("restaurant"))
+                    {
+                        <li>@Html.ActionLink("Offers", "Offers", "Auction")</li>
+                    }
+                    
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
@@ -38,7 +46,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <p>&copy; @DateTime.Now.Year - Restaurant application</p>
         </footer>
     </div>
 

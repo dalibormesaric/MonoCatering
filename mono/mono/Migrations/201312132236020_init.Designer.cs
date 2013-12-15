@@ -13,7 +13,7 @@ namespace mono.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201311182206249_init"; }
+            get { return "201312132236020_init"; }
         }
         
         string IMigrationMetadata.Source

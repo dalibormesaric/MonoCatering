@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "Admin home page";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3>Admin home page</h3>
+<h4>Edit restaurants, food categories, food and ingredients</h4>
+<h4>Match users with restoran (set employers)</h4>
+
+<div class="container">
+    <ul>
+        <li>@Html.ActionLink("Users", "Index", "AdminUser")</li>
+        <li>@Html.ActionLink("Restaurants", "Index", "AdminRestaurant")</li>
+        <li>@Html.ActionLink("Food categries", "Index", "AdminCategory")</li>
+        <li>@Html.ActionLink("Food", "Index", "AdminFood")</li>
+        <li>@Html.ActionLink("Ingredients", "Index", "AdminIngredient")</li>
+    </ul>
+</div>

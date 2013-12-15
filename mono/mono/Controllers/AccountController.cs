@@ -9,8 +9,11 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
 using mono.Models;
+using mono.DAL;
 using System.Net.Mail;
 using System.Net;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace mono.Controllers
 {
@@ -18,96 +21,16 @@ namespace mono.Controllers
     public class AccountController : Controller
     {
         public AccountController()
-            : this(new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(new ApplicationDbContext())))
+            : this(new UserManager<User>(new UserStore<User>(new MonoDbContext())))
         {
         }
 
-        public AccountController(UserManager<ApplicationUser> userManager)
+        public AccountController(UserManager<User> userManager)
         {
             UserManager = userManager;
         }
 
-        public UserManager<ApplicationUser> UserManager { get; private set; }
-
-        [Authorize(Roles="admin")]
-        public ActionResult Index()
-        {
-            var Db = new ApplicationDbContext();
-            var users = Db.Users;
-            var model = new List<UserViewModel>();
-            foreach (var user in users)
-            {
-                var u = new UserViewModel(user);
-                model.Add(u);
-            }
-            return View(model);
-        }
-
-        [Authorize(Roles = "admin")]
-        public ActionResult UserRoles(string id = null)
-        {
-            if (id == null)
-                return RedirectToAction("index");
-
-            var Db = new ApplicationDbContext();
-            var user = Db.Users.FirstOrDefault(u => u.UserName == id);
-
-            if (user == null)
-                return RedirectToAction("index");
-
-            var model = new SelectUserRolesViewModel(user);
-            return View(model);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "admin")]
-        [ValidateAntiForgeryToken]
-        public ActionResult UserRoles(SelectUserRolesViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var um = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(new ApplicationDbContext()));
-                var Db = new ApplicationDbContext();
-                var user = Db.Users.First(u => u.UserName == model.UserName);
-
-                //foreach(var role in Db.Roles)
-                um.RemoveFromRole(user.Id, user.Roles.First().Role.Name);
-
-                var idResult = um.AddToRole(user.Id, model.Role);
-                if(idResult.Succeeded)
-                    return RedirectToAction("index");
-                else
-                    return View(model);
-            }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
-        }
-
-        [Authorize(Roles = "admin")]
-        public ActionResult Delete(string id)
-        {
-            var Db = new ApplicationDbContext();
-            var user = Db.Users.First(u => u.UserName == id);
-            var model = new UserViewModel(user);
-            if (user == null)
-            {
-                return HttpNotFound();
-            }
-            return View(model);
-        }
-
-        [HttpPost, ActionName("delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
-        public ActionResult DeleteConfirmed(string id)
-        {
-            var Db = new ApplicationDbContext();
-            var user = Db.Users.First(u => u.UserName == id);
-            Db.Users.Remove(user);
-            Db.SaveChanges();
-            return RedirectToAction("Index");
-        }
+        public UserManager<User> UserManager { get; private set; }
 
         [AllowAnonymous]
         public ActionResult ForgotPassword()
@@ -120,13 +43,13 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ForgotPassword(ForgotPasswordModel model)
         {
-
-            var Db = new ApplicationDbContext();
+            /*
+            var Db = new IdentityDbContext();
             var user = Db.Users.FirstOrDefault(u => u.Email == model.Email);
-            
-            if(user != null)
+
+            if (user != null)
             {
-                string senderEmail = "david.gostinski1@gmail.com";
+                string senderEmail = "email@email.com";
                 string password = "password";
                 SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
                 smtpClient.EnableSsl = true;
@@ -140,7 +63,7 @@ namespace mono.Controllers
                 mail.Subject = "Password recovery";
                 mail.Body = "If you requested password rest go to link <a href='www.stranica.hr/Account/ResetPassword?token=token'>reset</a>";
                 mail.IsBodyHtml = true;
-                
+
                 //smtpClient.Send(mail);
 
                 return RedirectToAction("ResetPassword", new { token = string.Empty });
@@ -148,14 +71,15 @@ namespace mono.Controllers
 
             //ViewBag.StatusMessage = "Invalid E-mail address.";
             ModelState.AddModelError("", "Invalid e-mail address.");
+            */
             return View();
         }
 
-       
+
         [AllowAnonymous]
         public ActionResult ResetPassword(string token = null)
         {
-            if(token == null)
+            if (token == null)
             {
                 ViewBag.StatusMessage = "Password reset request was send.";
             }
@@ -217,12 +141,11 @@ namespace mono.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser() { 
+                var user = new User() { 
                     UserName = model.UserName, 
                     FirstName = model.FirstName, 
                     LastName = model.LastName, 
                     Email = model.Email, 
-                    Restaurant = model.Restaurant, 
                     Address = model.Address, 
                     Phone = model.Phone
                 };
@@ -415,7 +338,7 @@ namespace mono.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser() { UserName = model.UserName };
+                var user = new User() { UserName = model.UserName };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -481,7 +404,7 @@ namespace mono.Controllers
             }
         }
 
-        private async Task SignInAsync(ApplicationUser user, bool isPersistent)
+        private async Task SignInAsync(User user, bool isPersistent)
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
             var identity = await UserManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);

@@ -2,27 +2,39 @@
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using mono.DAL;
 
 namespace mono.Models
 {
+    public class ForgotPasswordModel
+    {
+        public string Email { get; set; }
+    }
+
+    public class ResetPasswordModel
+    {
+        public string Token { get; set; }
+    }
+
     public class UserViewModel
     {
-        public UserViewModel(ApplicationUser user)
+        public UserViewModel(IdentityUser user)
         {
             this.UserName = user.UserName;
 
-            var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(new ApplicationDbContext()));
+            var userManager = new UserManager<IdentityUser>(new UserStore<IdentityUser>(new IdentityDbContext()));
             var roles = userManager.GetRoles(user.Id);
 
             this.Role = roles[0];
 
+            /*
             this.FirstName = user.FirstName;
             this.LastName = user.LastName;
             this.Email = user.Email;
 
-            this.Restaurant = user.Restaurant;
             this.Address = user.Address;
             this.Phone = user.Phone;
+             */
         }
 
         [Required]
@@ -45,60 +57,11 @@ namespace mono.Models
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
-        [Display(Name = "Restaurant")]
-        public string Restaurant { get; set; }
-
         [Display(Name = "Address")]
         public string Address { get; set; }
 
         [Display(Name = "Phone")]
         public string Phone { get; set; }
-    }
-
-    public class SelectUserRolesViewModel
-    {
-        public SelectUserRolesViewModel()
-        {
-
-        }
-
-        // Enable initialization with an instance of ApplicationUser:
-        public SelectUserRolesViewModel(ApplicationUser user)
-        {
-            this.UserName = user.UserName;
-            this.FirstName = user.FirstName;
-            this.LastName = user.LastName;
-
-
-            var Roles = new List<string>();
-            var Db = new ApplicationDbContext();
-            foreach (var role in Db.Roles) 
-                Roles.Add(role.Name);
-
-            foreach (var userRole in user.Roles)
-            {
-                this.Role = Roles.Find(r => r == userRole.Role.Name);
-            }
-        }
-
-        [Display(Name = "User name")]
-        public string UserName { get; set; }
-        [Display(Name = "First name")]
-        public string FirstName { get; set; }
-        [Display(Name = "Last name")]
-        public string LastName { get; set; }
-        [Display(Name = "Role")]
-        public string Role { get; set; }
-    }
-    
-    public class ForgotPasswordModel
-    {
-        public string Email { get; set; }
-    }
-
-    public class ResetPasswordModel
-    {
-        public string Token { get; set; }
     }
 
     public class ExternalLoginConfirmationViewModel
@@ -172,9 +135,6 @@ namespace mono.Models
         [RegularExpression("^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", ErrorMessage = "E-mail is not valid")]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
-
-        [Display(Name = "Restaurant")]
-        public string Restaurant { get; set; }
 
         [Display(Name = "Address")]
         public string Address { get; set; }
