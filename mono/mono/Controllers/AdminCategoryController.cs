@@ -14,17 +14,7 @@ namespace mono.Controllers
 {
     public class AdminCategoryController : Controller
     {
-        private ICategoryRepository categoryRepository;
-
-        public AdminCategoryController()
-        {
-            this.categoryRepository = new CategoryRepository(new MonoDbContext());
-        }
-
-        public AdminCategoryController(ICategoryRepository categoryRepository)
-        {
-            this.categoryRepository = categoryRepository;
-        }
+        private UnitOfWork unitOfWork = new UnitOfWork();
 
         // GET: /AdminCategory/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -44,7 +34,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var categories = categoryRepository.GetCategories();
+            var categories = unitOfWork.CategoryRepository.Get();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -60,10 +50,10 @@ namespace mono.Controllers
                     categories = categories.OrderByDescending(c => c.Name);
                     break;
                 case "ParentCategory":
-                    categories = categories.OrderBy(c => c.ParentCategory.Name);
+                    categories = categories.OrderBy(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
                     break;
                 case "ParentCategory_desc":
-                    categories = categories.OrderByDescending(c => c.ParentCategory.Name);
+                    categories = categories.OrderByDescending(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
                     break;
                 default:
                     categories = categories.OrderBy(c => c.Name);
@@ -83,7 +73,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = categoryRepository.GetCategoryByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
@@ -94,7 +84,7 @@ namespace mono.Controllers
         // GET: /AdminCategory/Create
         public ActionResult Create()
         {
-            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name");
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name");
             return View();
         }
 
@@ -109,8 +99,8 @@ namespace mono.Controllers
             { 
                 if (ModelState.IsValid)
                 {
-                    categoryRepository.InsertCategory(category);
-                    categoryRepository.Save();
+                    unitOfWork.CategoryRepository.Insert(category);
+                    unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
             }
@@ -120,7 +110,7 @@ namespace mono.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
@@ -131,12 +121,12 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = categoryRepository.GetCategoryByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
@@ -151,8 +141,8 @@ namespace mono.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    categoryRepository.UpdateCategory(category);
-                    categoryRepository.Save();
+                    unitOfWork.CategoryRepository.Update(category);
+                    unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
             }
@@ -162,7 +152,7 @@ namespace mono.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
@@ -177,7 +167,7 @@ namespace mono.Controllers
             {
                 ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
-            Category category = categoryRepository.GetCategoryByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
@@ -192,9 +182,9 @@ namespace mono.Controllers
         {
             try
             {
-                Category category = categoryRepository.GetCategoryByID(id);
-                categoryRepository.DeleteCategory(id);
-                categoryRepository.Save();
+                Category category = unitOfWork.CategoryRepository.GetByID(id);
+                unitOfWork.CategoryRepository.Delete(id);
+                unitOfWork.Save();
                 return RedirectToAction("Index");
             }
             catch (DataException /* dex */)
@@ -211,7 +201,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = categoryRepository.GetCategoryByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
 
             if (category == null)
             {
@@ -224,7 +214,7 @@ namespace mono.Controllers
 
             while (category.ParentCategoryID != null)
             {
-                category = categoryRepository.GetCategoryByID((int)category.ParentCategoryID);
+                category = unitOfWork.CategoryRepository.GetByID((int)category.ParentCategoryID);
 
                 ingredients = ingredients.Union(category.Ingredients);
             }
@@ -236,7 +226,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                categoryRepository.Dispose();
+                unitOfWork.Dispose();
             }
             base.Dispose(disposing);
         }
