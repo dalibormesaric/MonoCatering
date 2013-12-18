@@ -15,20 +15,7 @@ namespace mono.Controllers
     [Authorize(Roles = "admin")]
     public class AdminRestaurantController : Controller
     {
-        private IRestaurantRepository restaurantRepository;
-        private IUserRepository userRepository;
-
-        public AdminRestaurantController()
-        {
-            this.restaurantRepository = new RestaurantRepository(new MonoDbContext());
-            this.userRepository = new UserRepository(new MonoDbContext());
-        }
-
-        public AdminRestaurantController(IRestaurantRepository restaurantRepository, IUserRepository userRepository)
-        {
-            this.restaurantRepository = restaurantRepository;
-            this.userRepository = userRepository;
-        }
+        private UnitOfWork unitOfWork = new UnitOfWork();
 
         // GET: /AdminRestaurant/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -47,7 +34,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var restaurants = restaurantRepository.GetRestaurants();
+            var restaurants = unitOfWork.RestaurantRepository.Get();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -81,9 +68,9 @@ namespace mono.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
 
-            var users = userRepository.GetUsersByRestaurantID((int)id);
+            var users = unitOfWork.UserRepository.Get(filter: u => u.RestaurantID == (int)id);
 
             if (restaurant == null)
             {
@@ -102,7 +89,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -127,8 +114,8 @@ namespace mono.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    restaurantRepository.InsertRestaurant(restaurant);
-                    restaurantRepository.Save();
+                    unitOfWork.RestaurantRepository.Insert(restaurant);
+                    unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
             }
@@ -148,7 +135,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -167,8 +154,8 @@ namespace mono.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    restaurantRepository.UpdateRestaurant(restaurant);
-                    restaurantRepository.Save();
+                    unitOfWork.RestaurantRepository.Update(restaurant);
+                    unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
             }
@@ -191,7 +178,7 @@ namespace mono.Controllers
             {
                 ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
-            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -206,9 +193,9 @@ namespace mono.Controllers
         {
             try
             {
-                Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id); ;
-                restaurantRepository.DeleteRestaurant(id);
-                restaurantRepository.Save();
+                Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id); ;
+                unitOfWork.RestaurantRepository.Delete(id);
+                unitOfWork.Save();
             }
             catch (DataException /* dex */)
             {
@@ -223,7 +210,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                restaurantRepository.Dispose();
+                unitOfWork.Dispose();
             }
             base.Dispose(disposing);
         }

@@ -182,16 +182,9 @@
     <Compile Include="Controllers\AdminRestaurantController.cs" />
     <Compile Include="Controllers\AdminUserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="DAL\UserRepository.cs" />
-    <Compile Include="DAL\IUserRepository.cs" />
-    <Compile Include="DAL\RestaurantRepository.cs" />
-    <Compile Include="DAL\CategoryRepository.cs" />
-    <Compile Include="DAL\IRestaurantRepository.cs" />
-    <Compile Include="DAL\ICategoryRepository.cs" />
-    <Compile Include="DAL\IFoodRepository.cs" />
-    <Compile Include="DAL\IIngredientRepository.cs" />
-    <Compile Include="DAL\FoodRepository.cs" />
-    <Compile Include="DAL\IngredientRepository.cs" />
+    <Compile Include="DAL\GenericRepository.cs" />
+    <Compile Include="DAL\IGenericRepository.cs" />
+    <Compile Include="DAL\UnitOfWork.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

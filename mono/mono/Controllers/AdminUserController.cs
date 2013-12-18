@@ -15,20 +15,7 @@ namespace mono.Controllers
 {
     public class AdminUserController : Controller
     {
-        private IUserRepository userRepository;
-        private IRestaurantRepository restaurantRepository;
-
-        public AdminUserController()
-        {
-            this.userRepository = new UserRepository(new MonoDbContext());
-            this.restaurantRepository = new RestaurantRepository(new MonoDbContext());
-        }
-
-        public AdminUserController(IUserRepository userRepository, IRestaurantRepository restaurantRepository)
-        {
-            this.userRepository = userRepository;
-            this.restaurantRepository = restaurantRepository;
-        }
+        private UnitOfWork unitOfWork = new UnitOfWork();
 
         // GET: /AdminUser/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -49,7 +36,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var users = userRepository.GetUsers();
+            var users = unitOfWork.UserRepository.Get();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -99,12 +86,12 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = userRepository.GetUserByID(id);
+            User user = unitOfWork.UserRepository.GetByID(id);
             if (user == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.RestaurantID = new SelectList(restaurantRepository.GetRestaurants(), "ID", "Name", user.RestaurantID);
+            ViewBag.RestaurantID = new SelectList(unitOfWork.RestaurantRepository.Get(), "ID", "Name", user.RestaurantID);
             return View(user);
         }
 
@@ -125,7 +112,7 @@ namespace mono.Controllers
             {
                 return RedirectToAction("Index");
             }
-            User user = userRepository.GetUserByID(id);
+            User user = unitOfWork.UserRepository.GetByID(id);
             
             if (user == null)
             {
@@ -134,8 +121,8 @@ namespace mono.Controllers
             try
             {
                 user.RestaurantID = restaurantID;
-                userRepository.UpdateUser(user);
-                userRepository.Save();
+                unitOfWork.UserRepository.Update(user);
+                unitOfWork.Save();
             }
             catch (DataException /* dex */)
             {
@@ -151,7 +138,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                userRepository.Dispose();
+                unitOfWork.Dispose();
             }
             base.Dispose(disposing);
         }
