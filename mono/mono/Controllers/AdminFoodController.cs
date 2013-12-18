@@ -15,7 +15,20 @@ namespace mono.Controllers
     [Authorize(Roles = "admin")]
     public class AdminFoodController : Controller
     {
-        private MonoDbContext db = new MonoDbContext();
+        private IFoodRepository foodRepository;
+        private ICategoryRepository categoryRepository;
+
+        public AdminFoodController()
+        {
+            this.foodRepository = new FoodRepository(new MonoDbContext());
+            this.categoryRepository = new CategoryRepository(new MonoDbContext());
+        }
+
+        public AdminFoodController(IFoodRepository foodRepository, ICategoryRepository categoryRepository)
+        {
+            this.foodRepository = foodRepository;
+            this.categoryRepository = categoryRepository;
+        }
 
         // GET: /AdminFood/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -35,7 +48,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var food = db.Foods.Include(f => f.Category);
+            var food = foodRepository.GetFoods();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -75,9 +88,9 @@ namespace mono.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            Category category = db.Categories.Find(id);
+            Category category = categoryRepository.GetCategoryByID((int)id);
 
-            var foods = db.Foods.Where(f => f.CategoryID == id);
+            var foods = foodRepository.GetFoodsByCategeoryID((int)id);
 
             if (category == null)
             {
@@ -98,7 +111,7 @@ namespace mono.Controllers
 
                 foreach (var childID in listChilds)
                 {
-                    var child = db.Categories.Find(childID);
+                    var child = categoryRepository.GetCategoryByID(childID);
                     var childs = child.ChildCategory.Select(c => c.ID).ToList();
 
                     list.AddRange(childs);
@@ -110,7 +123,7 @@ namespace mono.Controllers
             } while (listChilds.Count != 0);
             
             foreach (var c in list)
-                foods = foods.Union(db.Foods.Where(f => f.CategoryID == c));
+                foods = foods.Union(foodRepository.GetFoodsByCategeoryID(c));
 
             return View(foods.ToList());
         }
@@ -122,7 +135,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Food food = db.Foods.Find(id);
+            Food food = foodRepository.GetFoodByID((int)id);
             if (food == null)
             {
                 return HttpNotFound();
@@ -133,7 +146,7 @@ namespace mono.Controllers
         // GET: /AdminFood/Create
         public ActionResult Create()
         {
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name");
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name");
             return View();
         }
 
@@ -144,14 +157,23 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
         {
-            if (ModelState.IsValid)
+            try 
+            { 
+                if (ModelState.IsValid)
+                {
+                    foodRepository.InsertFood(food);
+                    foodRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
             {
-                db.Foods.Add(food);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", food.CategoryID);
+
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", food.CategoryID);
             return View(food);
         }
 
@@ -162,12 +184,12 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Food food = db.Foods.Find(id);
+            Food food = foodRepository.GetFoodByID((int)id);
             if (food == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", food.CategoryID);
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", food.CategoryID);
             return View(food);
         }
 
@@ -178,24 +200,36 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(food).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    foodRepository.UpdateFood(food);
+                    foodRepository.Save();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", food.CategoryID);
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
+            }
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", food.CategoryID);
             return View(food);
         }
 
         // GET: /AdminFood/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Food food = db.Foods.Find(id);
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+            Food food = foodRepository.GetFoodByID((int)id);
             if (food == null)
             {
                 return HttpNotFound();
@@ -208,9 +242,17 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Food food = db.Foods.Find(id);
-            db.Foods.Remove(food);
-            db.SaveChanges();
+            try
+            {
+                Food food = foodRepository.GetFoodByID(id);
+                foodRepository.DeleteFood(id);
+                foodRepository.Save();
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
             return RedirectToAction("Index");
         }
 
@@ -221,7 +263,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Food food = db.Foods.Find(id);
+            Food food = foodRepository.GetFoodByID((int)id);
             
             if (food == null)
             {
@@ -230,13 +272,13 @@ namespace mono.Controllers
             
             ViewBag.Food = food.Name;
 
-            Category category = db.Categories.Find(food.CategoryID);
+            Category category = categoryRepository.GetCategoryByID(food.CategoryID);
 
             var ingredients = category.Ingredients.Union(food.Ingredients);
 
             while (category.ParentCategoryID != null)
             {
-                category = db.Categories.Find(category.ParentCategoryID);
+                category = categoryRepository.GetCategoryByID((int)category.ParentCategoryID);
 
                 ingredients = ingredients.Union(category.Ingredients);
             }
@@ -248,7 +290,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                foodRepository.Dispose();
             }
             base.Dispose(disposing);
         }

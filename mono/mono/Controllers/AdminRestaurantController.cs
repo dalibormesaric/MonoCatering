@@ -15,7 +15,20 @@ namespace mono.Controllers
     [Authorize(Roles = "admin")]
     public class AdminRestaurantController : Controller
     {
-        private MonoDbContext db = new MonoDbContext();
+        private IRestaurantRepository restaurantRepository;
+        private IUserRepository userRepository;
+
+        public AdminRestaurantController()
+        {
+            this.restaurantRepository = new RestaurantRepository(new MonoDbContext());
+            this.userRepository = new UserRepository(new MonoDbContext());
+        }
+
+        public AdminRestaurantController(IRestaurantRepository restaurantRepository, IUserRepository userRepository)
+        {
+            this.restaurantRepository = restaurantRepository;
+            this.userRepository = userRepository;
+        }
 
         // GET: /AdminRestaurant/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -34,7 +47,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var restaurants = db.Restaurants.Select(r => r);
+            var restaurants = restaurantRepository.GetRestaurants();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -68,9 +81,9 @@ namespace mono.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            Restaurant restaurant = db.Restaurants.Find(id);
+            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
 
-            var users = db.Users.Where(u => u.RestaurantID == id);
+            var users = userRepository.GetUsersByRestaurantID((int)id);
 
             if (restaurant == null)
             {
@@ -89,7 +102,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Restaurant restaurant = db.Restaurants.Find(id);
+            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -110,11 +123,19 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include="ID,Name,Description,Address,Phone,OIB")] Restaurant restaurant)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Restaurants.Add(restaurant);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    restaurantRepository.InsertRestaurant(restaurant);
+                    restaurantRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
             return View(restaurant);
@@ -127,7 +148,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Restaurant restaurant = db.Restaurants.Find(id);
+            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -142,23 +163,35 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="ID,Name,Description,Address,Phone,OIB")] Restaurant restaurant)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(restaurant).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    restaurantRepository.UpdateRestaurant(restaurant);
+                    restaurantRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
             return View(restaurant);
         }
 
         // GET: /AdminRestaurant/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Restaurant restaurant = db.Restaurants.Find(id);
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+            Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -171,9 +204,18 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Restaurant restaurant = db.Restaurants.Find(id);
-            db.Restaurants.Remove(restaurant);
-            db.SaveChanges();
+            try
+            {
+                Restaurant restaurant = restaurantRepository.GetRestaurantByID((int)id); ;
+                restaurantRepository.DeleteRestaurant(id);
+                restaurantRepository.Save();
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
+            
             return RedirectToAction("Index");
         }
 
@@ -181,7 +223,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                restaurantRepository.Dispose();
             }
             base.Dispose(disposing);
         }

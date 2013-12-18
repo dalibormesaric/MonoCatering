@@ -14,7 +14,17 @@ namespace mono.Controllers
 {
     public class AdminCategoryController : Controller
     {
-        private MonoDbContext db = new MonoDbContext();
+        private ICategoryRepository categoryRepository;
+
+        public AdminCategoryController()
+        {
+            this.categoryRepository = new CategoryRepository(new MonoDbContext());
+        }
+
+        public AdminCategoryController(ICategoryRepository categoryRepository)
+        {
+            this.categoryRepository = categoryRepository;
+        }
 
         // GET: /AdminCategory/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -34,7 +44,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var categories = db.Categories.Include(c => c.ParentCategory);
+            var categories = categoryRepository.GetCategories();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -73,7 +83,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = db.Categories.Find(id);
+            Category category = categoryRepository.GetCategoryByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
@@ -84,7 +94,7 @@ namespace mono.Controllers
         // GET: /AdminCategory/Create
         public ActionResult Create()
         {
-            ViewBag.ParentCategoryID = new SelectList(db.Categories, "ID", "Name");
+            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name");
             return View();
         }
 
@@ -95,14 +105,22 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include="ID,Name,ParentCategoryID")] Category category)
         {
-            if (ModelState.IsValid)
+            try 
+            { 
+                if (ModelState.IsValid)
+                {
+                    categoryRepository.InsertCategory(category);
+                    categoryRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
             {
-                db.Categories.Add(category);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(db.Categories, "ID", "Name", category.ParentCategoryID);
+            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
@@ -113,12 +131,12 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = db.Categories.Find(id);
+            Category category = categoryRepository.GetCategoryByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ParentCategoryID = new SelectList(db.Categories, "ID", "Name", category.ParentCategoryID);
+            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
@@ -129,24 +147,37 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="ID,Name,ParentCategoryID")] Category category)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(category).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    categoryRepository.UpdateCategory(category);
+                    categoryRepository.Save();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.ParentCategoryID = new SelectList(db.Categories, "ID", "Name", category.ParentCategoryID);
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
+            }
+
+            ViewBag.ParentCategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", category.ParentCategoryID);
             return View(category);
         }
 
         // GET: /AdminCategory/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = db.Categories.Find(id);
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+            Category category = categoryRepository.GetCategoryByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
@@ -159,10 +190,18 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Category category = db.Categories.Find(id);
-            db.Categories.Remove(category);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                Category category = categoryRepository.GetCategoryByID(id);
+                categoryRepository.DeleteCategory(id);
+                categoryRepository.Save();
+                return RedirectToAction("Index");
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
         }
 
         // GET: /AdminCategory/Ingredients/5
@@ -172,7 +211,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = db.Categories.Find(id);
+            Category category = categoryRepository.GetCategoryByID((int)id);
 
             if (category == null)
             {
@@ -185,7 +224,7 @@ namespace mono.Controllers
 
             while (category.ParentCategoryID != null)
             {
-                category = db.Categories.Find(category.ParentCategoryID);
+                category = categoryRepository.GetCategoryByID((int)category.ParentCategoryID);
 
                 ingredients = ingredients.Union(category.Ingredients);
             }
@@ -197,7 +236,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                categoryRepository.Dispose();
             }
             base.Dispose(disposing);
         }
