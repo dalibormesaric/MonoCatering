@@ -15,7 +15,25 @@ namespace mono.Controllers
     [Authorize(Roles = "admin")]
     public class AdminIngredientController : Controller
     {
-        private MonoDbContext db = new MonoDbContext();
+        //private MonoDbContext db = new MonoDbContext();
+
+        private IIngredientRepository ingredientRepository;
+        private ICategoryRepository categoryRepository;
+        private IFoodRepository foodRepository;
+
+        public AdminIngredientController()
+        {
+            this.ingredientRepository = new IngredientRepository(new MonoDbContext());
+            this.categoryRepository = new CategoryRepository(new MonoDbContext());
+            this.foodRepository = new FoodRepository(new MonoDbContext());
+        }
+
+        public AdminIngredientController(IIngredientRepository ingredientRepository, IFoodRepository foodRepository, ICategoryRepository categoryRepository)
+        {
+            this.ingredientRepository = ingredientRepository;
+            this.categoryRepository = categoryRepository;
+            this.foodRepository = foodRepository;
+        }
 
         // GET: /AdminIngredient/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -36,7 +54,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var ingredients = db.Ingredients.Include(i => i.Category).Include(i => i.Food);
+            var ingredients = ingredientRepository.GetIngredients();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -82,7 +100,7 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Ingredient ingredient = db.Ingredients.Find(id);
+            Ingredient ingredient = ingredientRepository.GetIngredientByID((int)id);
             if (ingredient == null)
             {
                 return HttpNotFound();
@@ -93,8 +111,8 @@ namespace mono.Controllers
         // GET: /AdminIngredient/Create
         public ActionResult Create()
         {
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name");
-            ViewBag.FoodID = new SelectList(db.Foods, "ID", "Name");
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name");
+            ViewBag.FoodID = new SelectList(foodRepository.GetFoods(), "ID", "Name");
             return View();
         }
 
@@ -105,15 +123,22 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include="ID,Name,FoodID,CategoryID")] Ingredient ingredient)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Ingredients.Add(ingredient);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    ingredientRepository.InsertIngredient(ingredient);
+                    ingredientRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
+            {
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", ingredient.CategoryID);
-            ViewBag.FoodID = new SelectList(db.Foods, "ID", "Name", ingredient.FoodID);
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", ingredient.CategoryID);
+            ViewBag.FoodID = new SelectList(foodRepository.GetFoods(), "ID", "Name", ingredient.FoodID);
             return View(ingredient);
         }
 
@@ -124,13 +149,13 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Ingredient ingredient = db.Ingredients.Find(id);
+            Ingredient ingredient = ingredientRepository.GetIngredientByID((int)id);
             if (ingredient == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", ingredient.CategoryID);
-            ViewBag.FoodID = new SelectList(db.Foods, "ID", "Name", ingredient.FoodID);
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", ingredient.CategoryID);
+            ViewBag.FoodID = new SelectList(foodRepository.GetFoods(), "ID", "Name", ingredient.FoodID);
             return View(ingredient);
         }
 
@@ -141,25 +166,36 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="ID,Name,FoodID,CategoryID")] Ingredient ingredient)
         {
-            if (ModelState.IsValid)
-            {
-                db.Entry(ingredient).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+            try{
+                if (ModelState.IsValid)
+                {
+                    ingredientRepository.UpdateIngredient(ingredient);
+                    ingredientRepository.Save();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name", ingredient.CategoryID);
-            ViewBag.FoodID = new SelectList(db.Foods, "ID", "Name", ingredient.FoodID);
+             catch (DataException /* dex */)
+             {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
+             }
+            ViewBag.CategoryID = new SelectList(categoryRepository.GetCategories(), "ID", "Name", ingredient.CategoryID);
+            ViewBag.FoodID = new SelectList(foodRepository.GetFoods(), "ID", "Name", ingredient.FoodID);
             return View(ingredient);
         }
 
         // GET: /AdminIngredient/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Ingredient ingredient = db.Ingredients.Find(id);
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+            Ingredient ingredient = ingredientRepository.GetIngredientByID((int)id);
             if (ingredient == null)
             {
                 return HttpNotFound();
@@ -172,9 +208,17 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Ingredient ingredient = db.Ingredients.Find(id);
-            db.Ingredients.Remove(ingredient);
-            db.SaveChanges();
+            try
+            {
+                Ingredient ingredient = ingredientRepository.GetIngredientByID(id);
+                ingredientRepository.DeleteIngredient(id);
+                ingredientRepository.Save();
+            }
+            catch (DataException /* dex */)
+            {
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
+
             return RedirectToAction("Index");
         }
 
@@ -182,7 +226,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                ingredientRepository.Dispose();
             }
             base.Dispose(disposing);
         }

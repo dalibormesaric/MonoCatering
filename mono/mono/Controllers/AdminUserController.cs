@@ -15,7 +15,20 @@ namespace mono.Controllers
 {
     public class AdminUserController : Controller
     {
-        private MonoDbContext db = new MonoDbContext();
+        private IUserRepository userRepository;
+        private IRestaurantRepository restaurantRepository;
+
+        public AdminUserController()
+        {
+            this.userRepository = new UserRepository(new MonoDbContext());
+            this.restaurantRepository = new RestaurantRepository(new MonoDbContext());
+        }
+
+        public AdminUserController(IUserRepository userRepository, IRestaurantRepository restaurantRepository)
+        {
+            this.userRepository = userRepository;
+            this.restaurantRepository = restaurantRepository;
+        }
 
         // GET: /AdminUser/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -36,7 +49,7 @@ namespace mono.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var users = db.Users.Include(u => u.Restaurant);
+            var users = userRepository.GetUsers();
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -86,12 +99,12 @@ namespace mono.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.Users.Find(id);
+            User user = userRepository.GetUserByID(id);
             if (user == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.RestaurantID = new SelectList(db.Restaurants, "ID", "Name", user.RestaurantID);
+            ViewBag.RestaurantID = new SelectList(restaurantRepository.GetRestaurants(), "ID", "Name", user.RestaurantID);
             return View(user);
         }
 
@@ -112,17 +125,23 @@ namespace mono.Controllers
             {
                 return RedirectToAction("Index");
             }
-            User user = db.Users.Find(id);
+            User user = userRepository.GetUserByID(id);
             
             if (user == null)
             {
                 return RedirectToAction("Index");
             }
-
-            user.RestaurantID = restaurantID;
-            db.Entry(user).State = System.Data.Entity.EntityState.Modified;
-            db.SaveChanges();
-
+            try
+            {
+                user.RestaurantID = restaurantID;
+                userRepository.UpdateUser(user);
+                userRepository.Save();
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
             //todo add role restaurant to user or remove if restaurantID == null
 
             return RedirectToAction("Index");
@@ -132,7 +151,7 @@ namespace mono.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                userRepository.Dispose();
             }
             base.Dispose(disposing);
         }
