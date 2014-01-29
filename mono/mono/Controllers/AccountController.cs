@@ -21,16 +21,16 @@ namespace mono.Controllers
     public class AccountController : Controller
     {
         public AccountController()
-            : this(new UserManager<User>(new UserStore<User>(new MonoDbContext())))
+            : this(new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext())))
         {
         }
 
-        public AccountController(UserManager<User> userManager)
+        public AccountController(UserManager<MyUser> userManager)
         {
             UserManager = userManager;
         }
 
-        public UserManager<User> UserManager { get; private set; }
+        public UserManager<MyUser> UserManager { get; private set; }
 
         [AllowAnonymous]
         public ActionResult ForgotPassword()
@@ -141,7 +141,7 @@ namespace mono.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new User() { 
+                var user = new MyUser() { 
                     UserName = model.UserName, 
                     FirstName = model.FirstName, 
                     LastName = model.LastName, 
@@ -338,7 +338,7 @@ namespace mono.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new User() { UserName = model.UserName };
+                var user = new MyUser() { UserName = model.UserName };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -404,7 +404,7 @@ namespace mono.Controllers
             }
         }
 
-        private async Task SignInAsync(User user, bool isPersistent)
+        private async Task SignInAsync(MyUser user, bool isPersistent)
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
             var identity = await UserManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);

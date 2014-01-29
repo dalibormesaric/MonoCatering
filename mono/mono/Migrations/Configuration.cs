@@ -45,10 +45,10 @@ namespace mono.Migrations
             );
             */
 
-            var userManager = new UserManager<User>(new UserStore<User>(new MonoDbContext()));
+            var userManager = new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext()));
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new MonoDbContext()));
 
-            var adminUser = new User() { UserName = "admin", FirstName = "admin", LastName = "adminic", Email = "d.d@gmail.com" };
+            var adminUser = new MyUser() { UserName = "admin", FirstName = "admin", LastName = "adminic", Email = "d.d@gmail.com" };
 
             userManager.Create(adminUser, "admin123");
 

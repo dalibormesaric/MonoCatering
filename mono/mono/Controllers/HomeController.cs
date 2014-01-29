@@ -13,16 +13,16 @@ namespace mono.Controllers
     public class HomeController : Controller
     {
         public HomeController()
-            : this(new UserManager<User>(new UserStore<User>(new MonoDbContext())))
+            : this(new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext())))
         {
         }
 
-        public HomeController(UserManager<User> userManager)
+        public HomeController(UserManager<MyUser> userManager)
         {
             UserManager = userManager;
         }
 
-        public UserManager<User> UserManager { get; private set; }
+        public UserManager<MyUser> UserManager { get; private set; }
 
         public ActionResult Index()
         {
