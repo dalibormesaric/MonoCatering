@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace mono.Models
 {
-    public class User : IdentityUser
+    public class MyUser : IdentityUser
     {
         [Required]
         [Display(Name = "First name")]
@@ -47,7 +47,7 @@ namespace mono.Models
 
         public string OIB { get; set; }
 
-        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<MyUser> Users { get; set; }
 
         public virtual ICollection<Offer> Offers { get; set; }
     }
@@ -129,7 +129,7 @@ namespace mono.Models
         [Required]
         public int UserID { get; set; }
         
-        public virtual User User { get; set; }
+        public virtual MyUser User { get; set; }
         
         [Required]
         public virtual ICollection<OrderFood> FoodIngredients { get; set; }

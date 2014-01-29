@@ -7,21 +7,33 @@ namespace mono.DAL
 {
     public class UnitOfWork : IDisposable
     {
-        private MonoDbContext context = new MonoDbContext();
+        //private MonoDbContext _context = new MonoDbContext();
 
-        private GenericRepository<User> userRepository;
+        private MonoDbContext context;
+
+        public UnitOfWork()
+        {
+            context = new MonoDbContext();
+        }
+
+        public UnitOfWork(MonoDbContext context)
+        {
+            this.context = context;
+        }
+
+        private GenericRepository<MyUser> userRepository;
         private GenericRepository<Restaurant> restaurantRepository;
         private GenericRepository<Category> categoryRepository;
         private GenericRepository<Food> foodRepository;
         private GenericRepository<Ingredient> ingredientRepository;
 
-        public GenericRepository<User> UserRepository
+        public GenericRepository<MyUser> UserRepository
         {
             get
             {
                 if (userRepository == null)
                 {
-                    userRepository = new GenericRepository<User>(context);
+                    userRepository = new GenericRepository<MyUser>(context);
                 }
                 return userRepository;
             }
