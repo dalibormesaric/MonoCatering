@@ -51,8 +51,7 @@ namespace mono.Areas.Admin.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 restaurants = restaurants.Where(r =>
-                    r.Name.ToUpper().Contains(searchString.ToUpper()) ||
-                    r.Description.ToUpper().Contains(searchString.ToUpper())
+                    r.Name.ToUpper().Contains(searchString.ToUpper())
                 );
             }
 
@@ -68,8 +67,8 @@ namespace mono.Areas.Admin.Controllers
 
             int pageSize = 3;
             int pageNumber = (page ?? 1);
-
-            return View(restaurants.ToPagedList(pageNumber, pageSize));
+            
+            return View("Index", restaurants.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /AdminCategory/Employers/5
@@ -137,7 +136,7 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            return View(restaurant);
+            return View("Create", restaurant);
         }
 
         // GET: /AdminRestaurant/Edit/5
@@ -176,6 +175,7 @@ namespace mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
+
             return View(restaurant);
         }
 
