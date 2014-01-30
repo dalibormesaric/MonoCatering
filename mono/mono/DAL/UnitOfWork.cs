@@ -7,8 +7,9 @@ namespace mono.DAL
 {
     public class UnitOfWork : IDisposable
     {
-        //private MonoDbContext _context = new MonoDbContext();
+        private MonoDbContext context = new MonoDbContext();
 
+        /*
         private MonoDbContext context;
 
         public UnitOfWork()
@@ -20,6 +21,7 @@ namespace mono.DAL
         {
             this.context = context;
         }
+        */
 
         private GenericRepository<MyUser> userRepository;
         private GenericRepository<Restaurant> restaurantRepository;
@@ -39,7 +41,7 @@ namespace mono.DAL
             }
         }
 
-        public GenericRepository<Restaurant> RestaurantRepository
+        public virtual GenericRepository<Restaurant> RestaurantRepository
         {
             get
             {
@@ -51,7 +53,7 @@ namespace mono.DAL
             }
         }
 
-        public GenericRepository<Category> CategoryRepository
+        public virtual GenericRepository<Category> CategoryRepository
         {
             get
             {
@@ -63,7 +65,7 @@ namespace mono.DAL
             }
         }
 
-        public GenericRepository<Food> FoodRepository
+        public virtual GenericRepository<Food> FoodRepository
         {
             get
             {
@@ -75,7 +77,7 @@ namespace mono.DAL
             }
         }
 
-        public GenericRepository<Ingredient> IngredientRepository
+        public virtual GenericRepository<Ingredient> IngredientRepository
         {
             get
             {
@@ -87,7 +89,7 @@ namespace mono.DAL
             }
         }
 
-        public void Save()
+        public virtual void Save()
         {
             context.SaveChanges();
         }

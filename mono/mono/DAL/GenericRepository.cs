@@ -6,10 +6,14 @@ using System.Linq.Expressions;
 
 namespace mono.DAL
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+    public class GenericRepository<TEntity> where TEntity : class
     {
         internal MonoDbContext context;
         internal DbSet<TEntity> dbSet;
+
+        public GenericRepository()
+        {
+        }
 
         public GenericRepository(MonoDbContext context)
         {

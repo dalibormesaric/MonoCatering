@@ -38,6 +38,7 @@ namespace mono.Areas.Admin.Controllers
 
             var ingredients = unitOfWork.IngredientRepository.Get();
 
+            //error - Category.Name == null || Food.Name == null
             if (!String.IsNullOrEmpty(searchString))
             {
                 ingredients = ingredients.Where(i =>
