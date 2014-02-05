@@ -81,16 +81,21 @@ namespace mono.Areas.Admin.Controllers
 
             Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
 
-            var users = unitOfWork.UserRepository.Get(filter: u => u.RestaurantID == (int)id);
-
             if (restaurant == null)
             {
                 return HttpNotFound();
             }
 
+           /*
+            if (actionResult != null)
+                return actionResult;
+            */
+
+            var users = unitOfWork.UserRepository.Get(filter: u => u.RestaurantID == (int)id, orderBy: q => q.OrderBy(r => r.LastName + " " + r.LastName));
+
             ViewBag.Restaurant = restaurant.Name;
 
-            return View(users.ToList());
+            return View("Employers", users.ToList());
         }
 
         // GET: /AdminRestaurant/Details/5
@@ -105,13 +110,13 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(restaurant);
+            return View("Details", restaurant);
         }
 
         // GET: /AdminRestaurant/Create
         public ActionResult Create()
         {
-            return View();
+            return View("Create");
         }
 
         // POST: /AdminRestaurant/Create
@@ -151,7 +156,8 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(restaurant);
+
+            return View("Edit", restaurant);
         }
 
         // POST: /AdminRestaurant/Edit/5
@@ -176,7 +182,7 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            return View(restaurant);
+            return View("Edit", restaurant);
         }
 
         // GET: /AdminRestaurant/Delete/5
@@ -195,7 +201,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(restaurant);
+            return View("Delete", restaurant);
         }
 
         // POST: /AdminRestaurant/Delete/5

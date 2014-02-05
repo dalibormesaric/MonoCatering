@@ -92,7 +92,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.RestaurantID = new SelectList(unitOfWork.RestaurantRepository.Get(), "ID", "Name", user.RestaurantID);
+            ViewBag.RestaurantID = new SelectList(unitOfWork.RestaurantRepository.Get(orderBy: q => q.OrderBy(r => r.Name)), "ID", "Name", user.RestaurantID);
             return View(user);
         }
 
