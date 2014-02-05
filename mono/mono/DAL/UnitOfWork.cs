@@ -29,7 +29,7 @@ namespace mono.DAL
         private GenericRepository<Food> foodRepository;
         private GenericRepository<Ingredient> ingredientRepository;
 
-        public GenericRepository<MyUser> UserRepository
+        public virtual GenericRepository<MyUser> UserRepository
         {
             get
             {
