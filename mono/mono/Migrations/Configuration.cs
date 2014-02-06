@@ -18,45 +18,195 @@ namespace mono.Migrations
 
         protected override void Seed(mono.DAL.MonoDbContext context)
         {
-            /*
-            var ph = new PasswordHasher();
-
-
-            var adminRole = new IdentityRole("admin");
-            var userRole = new IdentityRole("user");
-
-            context.Roles.AddOrUpdate(
-                adminRole,
-                userRole
-            );
-
-            ApplicationUser adminUser = new ApplicationUser() { UserName = "admin", PasswordHash = ph.HashPassword("test123") };
-            ApplicationUser userUser = new ApplicationUser() { UserName = "user", PasswordHash = ph.HashPassword("test123") };                      
-
-            var adminUserRole = new IdentityUserRole() { Role = adminRole, User = adminUser};
-            var userUserRole = new IdentityUserRole() { Role = userRole, User = userUser };
-
-            adminUser.Roles.Add(adminUserRole);
-            userUser.Roles.Add(userUserRole);
-
-            context.Users.AddOrUpdate(
-                adminUser,
-                userUser
-            );
-            */
-
             var userManager = new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext()));
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new MonoDbContext()));
-
-            var adminUser = new MyUser() { UserName = "admin", FirstName = "admin", LastName = "adminic", Email = "d.d@gmail.com" };
-
-            userManager.Create(adminUser, "admin123");
 
             roleManager.Create(new IdentityRole("admin"));
             roleManager.Create(new IdentityRole("restaurant"));
             roleManager.Create(new IdentityRole("user"));
 
+            var adminUser = new MyUser() { 
+                UserName = "admin", 
+                FirstName = "adminFirst", 
+                LastName = "adminLast", 
+                Email = "u.a@mail.com"
+            };
+            userManager.Create(adminUser, "admin12345");
             userManager.AddToRole(adminUser.Id, "admin");
+
+            var userUser = new MyUser() { 
+                UserName = "user", 
+                FirstName = "userFirst", 
+                LastName = "userLast", 
+                Email = "u.u@mail.com"
+            };
+            userManager.Create(userUser, "user12345");
+            userManager.AddToRole(userUser.Id, "user");
+
+            var unitOfWork = new UnitOfWork();
+
+            Restaurant restaurant1 = new Restaurant { 
+                Name = "restaurant1", 
+                Description = "Description restaurant 1", 
+                Address = "Address 11, City", 
+                Phone = "111 111 111",
+                OIB = "1111111111"
+            };
+            Restaurant restaurant2 = new Restaurant
+            {
+                Name = "restaurant2",
+                Description = "Description restaurant 2",
+                Address = "Address 22, City",
+                Phone = "222 222 222",
+                OIB = "2222222222"
+            };
+            Restaurant restaurant3 = new Restaurant
+            {
+                Name = "restaurant3",
+                Description = "Description restaurant 3",
+                Address = "Address 33, City",
+                Phone = "333 333 333",
+                OIB = "3333333333"
+            };
+
+            unitOfWork.RestaurantRepository.Insert(restaurant1);
+            unitOfWork.RestaurantRepository.Insert(restaurant2);
+            unitOfWork.RestaurantRepository.Insert(restaurant3);
+            unitOfWork.Save();
+
+            var restaurant1User = new MyUser()
+            {
+                UserName = "restaurant1",
+                FirstName = "userFirstR1",
+                LastName = "userLastR3",
+                Email = "r.1@mail.com",
+                RestaurantID = restaurant1.ID
+            };
+            userManager.Create(restaurant1User, "restaurant1");
+            userManager.AddToRole(restaurant1User.Id, "restaurant");
+
+            var restaurant2User = new MyUser()
+            {
+                UserName = "restaurant2",
+                FirstName = "userFirstR2",
+                LastName = "userLastR3",
+                Email = "r.2@mail.com",
+                RestaurantID = restaurant1.ID
+            };
+            userManager.Create(restaurant2User, "restaurant2");
+            userManager.AddToRole(restaurant2User.Id, "restaurant");
+
+            var restaurant3User = new MyUser()
+            {
+                UserName = "restaurant3",
+                FirstName = "userFirstR3",
+                LastName = "userLastR3",
+                Email = "r.3@mail.com",
+                RestaurantID = restaurant2.ID
+            };
+            userManager.Create(restaurant3User, "restaurant3");
+            userManager.AddToRole(restaurant3User.Id, "restaurant");
+
+            Category food = new Category { 
+                Name = "FOOD"
+            };
+            unitOfWork.CategoryRepository.Insert(food);
+            Category fish = new Category { 
+                Name = "FISH", 
+                ParentCategory = food
+            };
+            unitOfWork.CategoryRepository.Insert(fish);
+            Category italian = new Category { 
+                Name = "ITALIAN", 
+                ParentCategory = food
+            };
+            unitOfWork.CategoryRepository.Insert(italian);
+            Category pizza = new Category {
+                Name = "PIZZA", 
+                ParentCategory = italian
+            };
+            unitOfWork.CategoryRepository.Insert(pizza);
+            Category beverage = new Category { 
+                Name = "BEVERAGE"
+            };
+            unitOfWork.CategoryRepository.Insert(beverage);
+
+            Food carp = new Food { 
+                Name = "CARP", 
+                Category = fish
+            };
+            Food trout = new Food { 
+                Name = "TROUT", 
+                Category = fish
+            };
+            Food spaghetti = new Food { 
+                Name = "SPAGHETII", 
+                Category = italian
+            };
+            Food margarita = new Food { 
+                Name = "MARGARITA", 
+                Category = pizza
+            };
+            Food capricciosa = new Food { 
+                Name = "CAPRICCIOSA", 
+                Category = pizza
+            };
+            Food funghi = new Food { 
+                Name = "FUNGHI", 
+                Category = pizza
+            };
+            Food napolitana = new Food { 
+                Name = "NAPOLITANA", 
+                Category = pizza
+            };
+            Food milaneze = new Food { 
+                Name = "MILANEZE", 
+                Category = pizza
+            };
+
+            unitOfWork.FoodRepository.Insert(carp);
+            unitOfWork.FoodRepository.Insert(trout);
+            unitOfWork.FoodRepository.Insert(spaghetti);
+            unitOfWork.FoodRepository.Insert(margarita);
+            unitOfWork.FoodRepository.Insert(capricciosa);
+            unitOfWork.FoodRepository.Insert(funghi);
+            unitOfWork.FoodRepository.Insert(napolitana);
+            unitOfWork.FoodRepository.Insert(milaneze);
+            
+
+            Ingredient ketchup = new Ingredient { 
+                Name = "KETCHUP", 
+                Category = pizza
+            };
+            Ingredient pepperoni = new Ingredient {
+                Name = "PEPPERONI", 
+                Category = pizza
+            };
+            Ingredient corn = new Ingredient { 
+                Name = "CORN", 
+                Category = pizza
+            };
+            Ingredient sausage = new Ingredient { 
+                Name = "SAUSAGE", 
+                Food = capricciosa
+            };
+            Ingredient egg = new Ingredient { 
+                Name = "EGG", 
+                Food = capricciosa
+            };
+            Ingredient mayonnaise = new Ingredient { 
+                Name = "MAYONNAISE", 
+                Category = fish
+            };
+
+            unitOfWork.IngredientRepository.Insert(ketchup);
+            unitOfWork.IngredientRepository.Insert(pepperoni);
+            unitOfWork.IngredientRepository.Insert(corn);
+            unitOfWork.IngredientRepository.Insert(sausage);
+            unitOfWork.IngredientRepository.Insert(egg);
+            unitOfWork.IngredientRepository.Insert(mayonnaise);
+
+            unitOfWork.Save();
 
             base.Seed(context);
          }
