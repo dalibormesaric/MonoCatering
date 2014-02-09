@@ -109,40 +109,34 @@ namespace mono.Migrations
 
             Category food = new Category { 
                 Name = "FOOD"
-            };
-            unitOfWork.CategoryRepository.Insert(food);
+            };           
             Category fish = new Category { 
                 Name = "FISH", 
                 ParentCategory = food
             };
-            unitOfWork.CategoryRepository.Insert(fish);
+            Food carp = new Food
+            {
+                Name = "CARP",
+                Category = fish
+            };
+            Food trout = new Food
+            {
+                Name = "TROUT",
+                Category = fish
+            };
             Category italian = new Category { 
                 Name = "ITALIAN", 
                 ParentCategory = food
             };
-            unitOfWork.CategoryRepository.Insert(italian);
+            Food spaghetti = new Food
+            {
+                Name = "SPAGHETII",
+                Category = italian
+            };
             Category pizza = new Category {
                 Name = "PIZZA", 
                 ParentCategory = italian
-            };
-            unitOfWork.CategoryRepository.Insert(pizza);
-            Category beverage = new Category { 
-                Name = "BEVERAGE"
-            };
-            unitOfWork.CategoryRepository.Insert(beverage);
-
-            Food carp = new Food { 
-                Name = "CARP", 
-                Category = fish
-            };
-            Food trout = new Food { 
-                Name = "TROUT", 
-                Category = fish
-            };
-            Food spaghetti = new Food { 
-                Name = "SPAGHETII", 
-                Category = italian
-            };
+            };                    
             Food margarita = new Food { 
                 Name = "MARGARITA", 
                 Category = pizza
@@ -163,17 +157,30 @@ namespace mono.Migrations
                 Name = "MILANEZE", 
                 Category = pizza
             };
+            Category beverage = new Category
+            {
+                Name = "BEVERAGE"
+            };
 
-            unitOfWork.FoodRepository.Insert(carp);
-            unitOfWork.FoodRepository.Insert(trout);
+            unitOfWork.CategoryRepository.Insert(food);
+            unitOfWork.CategoryRepository.Insert(italian);
             unitOfWork.FoodRepository.Insert(spaghetti);
+            unitOfWork.CategoryRepository.Insert(pizza);
             unitOfWork.FoodRepository.Insert(margarita);
             unitOfWork.FoodRepository.Insert(capricciosa);
             unitOfWork.FoodRepository.Insert(funghi);
             unitOfWork.FoodRepository.Insert(napolitana);
             unitOfWork.FoodRepository.Insert(milaneze);
-            
+            unitOfWork.CategoryRepository.Insert(fish);
+            unitOfWork.FoodRepository.Insert(carp);
+            unitOfWork.FoodRepository.Insert(trout);
+            unitOfWork.CategoryRepository.Insert(beverage);
 
+            Ingredient bread = new Ingredient
+            {
+                Name = "BREAD",
+                Category = food
+            };
             Ingredient ketchup = new Ingredient { 
                 Name = "KETCHUP", 
                 Category = pizza
@@ -199,6 +206,7 @@ namespace mono.Migrations
                 Category = fish
             };
 
+            unitOfWork.IngredientRepository.Insert(bread);
             unitOfWork.IngredientRepository.Insert(ketchup);
             unitOfWork.IngredientRepository.Insert(pepperoni);
             unitOfWork.IngredientRepository.Insert(corn);

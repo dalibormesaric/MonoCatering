@@ -103,9 +103,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\Admin\AdminRestaurantControllerTest.cs" />
+    <Compile Include="Controllers\Admin\AdminControllerTest.cs" />
+    <Compile Include="Controllers\Admin\CategoryControllerTest.cs" />
+    <Compile Include="Controllers\Admin\FoodControllerTest.cs" />
+    <Compile Include="Controllers\Admin\RestaurantControllerTest.cs" />
+    <Compile Include="Controllers\Admin\IngredientControllerTest.cs" />
+    <Compile Include="Controllers\Admin\UserControllerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Controllers\HomeControllerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

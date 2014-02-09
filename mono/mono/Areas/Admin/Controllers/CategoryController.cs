@@ -15,8 +15,6 @@ namespace mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class CategoryController : Controller
     {
-        //private UnitOfWork unitOfWork = new UnitOfWork();
-
         private UnitOfWork unitOfWork;
 
         public CategoryController()
@@ -75,7 +73,7 @@ namespace mono.Areas.Admin.Controllers
             int pageSize = 3;
             int pageNumber = (page ?? 1);
 
-            return View(categories.ToPagedList(pageNumber, pageSize));
+            return View("Index", categories.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /AdminCategory/Details/5
@@ -90,14 +88,14 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(category);
+            return View("Details", category);
         }
 
         // GET: /AdminCategory/Create
         public ActionResult Create()
         {
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name");
-            return View();
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
+            return View("Create");
         }
 
         // POST: /AdminCategory/Create
@@ -122,8 +120,8 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
-            return View(category);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
+            return View("Create", category);
         }
 
         // GET: /AdminCategory/Edit/5
@@ -138,8 +136,8 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
-            return View(category);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
+            return View("Edit", category);
         }
 
         // POST: /AdminCategory/Edit/5
@@ -164,8 +162,8 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", category.ParentCategoryID);
-            return View(category);
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
+            return View("Edit", category);
         }
 
         // GET: /AdminCategory/Delete/5
@@ -184,7 +182,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(category);
+            return View("Delete", category);
         }
 
         // POST: /AdminCategory/Delete/5
@@ -197,13 +195,13 @@ namespace mono.Areas.Admin.Controllers
                 Category category = unitOfWork.CategoryRepository.GetByID(id);
                 unitOfWork.CategoryRepository.Delete(id);
                 unitOfWork.Save();
-                return RedirectToAction("Index");
             }
             catch (DataException /* dex */)
             {
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
+            return RedirectToAction("Index");
         }
 
         // GET: /AdminCategory/Ingredients/5
@@ -231,7 +229,9 @@ namespace mono.Areas.Admin.Controllers
                 ingredients = ingredients.Union(category.Ingredients);
             }
 
-            return View(ingredients.ToList());
+            ingredients = ingredients.OrderBy(i => i.Name);
+
+            return View("Ingredients", ingredients.ToList());
         }
 
         protected override void Dispose(bool disposing)
