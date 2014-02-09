@@ -15,7 +15,17 @@ namespace mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class FoodController : Controller
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private UnitOfWork unitOfWork;
+
+        public FoodController()
+        {
+            unitOfWork = new UnitOfWork();
+        }
+
+        public FoodController(UnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
+        }
 
         // GET: /AdminFood/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -64,9 +74,9 @@ namespace mono.Areas.Admin.Controllers
             int pageSize = 3;
             int pageNumber = (page ?? 1);
 
-            return View(food.ToPagedList(pageNumber, pageSize));
+            return View("Index", food.ToPagedList(pageNumber, pageSize));
         }
-
+      
         // GET: /AdminCategory/Category/5
         public ActionResult Category(int? id)
         {
@@ -76,10 +86,7 @@ namespace mono.Areas.Admin.Controllers
             }
 
             Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-
-            var foods = unitOfWork.FoodRepository.Get(filter: f => f.CategoryID == (int)id);
-            
-
+           
             if (category == null)
             {
                 return HttpNotFound();
@@ -87,33 +94,23 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.Category = category.Name;
           
-            //???????????????
-            List<int> list = new List<int>();
-            List<int> listChilds = new List<int>();
+            var foods = category.Food.AsEnumerable();
 
-            listChilds.Add(category.ID);
+            Stack<Category> childs = new Stack<Category>();
+            childs.Push(category);
 
             do
             {
-                List<int> listChildsTemp = new List<int>();
+                category = childs.Pop();
 
-                foreach (var childID in listChilds)
-                {
-                    var child = unitOfWork.CategoryRepository.GetByID(childID);
-                    var childs = child.ChildCategory.Select(c => c.ID).ToList();
+                foods = foods.Union(category.Food);
 
-                    list.AddRange(childs);
-                    listChildsTemp.AddRange(childs);
-                }
+                foreach (var child in category.ChildCategory)
+                    childs.Push(child);
 
-                listChilds.Clear();
-                listChilds .AddRange(listChildsTemp);
-            } while (listChilds.Count != 0);
-            
-            foreach (var c in list)
-                foods = foods.Union(unitOfWork.FoodRepository.Get(filter: f => f.CategoryID == c));
+            } while (childs.Count != 0);
 
-            return View(foods.ToList());
+            return View("Category", foods.OrderBy(f => f.Name).ToList());
         }
 
         // GET: /AdminFood/Details/5
@@ -128,14 +125,14 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(food);
+            return View("Details", food);
         }
 
         // GET: /AdminFood/Create
         public ActionResult Create()
         {
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name");
-            return View();
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
+            return View("Create");
         }
 
         // POST: /AdminFood/Create
@@ -160,9 +157,8 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", food.CategoryID);
-            return View(food);
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            return View("Create", food);
         }
 
         // GET: /AdminFood/Edit/5
@@ -177,8 +173,8 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", food.CategoryID);
-            return View(food);
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            return View("Edit", food);
         }
 
         // POST: /AdminFood/Edit/5
@@ -202,8 +198,8 @@ namespace mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", food.CategoryID);
-            return View(food);
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            return View("Edit", food);
         }
 
         // GET: /AdminFood/Delete/5
@@ -222,7 +218,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(food);
+            return View("Delete", food);
         }
 
         // POST: /AdminFood/Delete/5
@@ -262,7 +258,7 @@ namespace mono.Areas.Admin.Controllers
 
             Category category = unitOfWork.CategoryRepository.GetByID(food.CategoryID);
 
-            var ingredients = category.Ingredients.Union(food.Ingredients);
+            IEnumerable<Ingredient> ingredients = category.Ingredients.Union(food.Ingredients);
 
             while (category.ParentCategoryID != null)
             {
@@ -271,7 +267,9 @@ namespace mono.Areas.Admin.Controllers
                 ingredients = ingredients.Union(category.Ingredients);
             }
 
-            return View(ingredients.ToList());
+            ingredients = ingredients.OrderBy(i => i.Name);
+
+            return View("Ingredients", ingredients.ToList());
         }
 
         protected override void Dispose(bool disposing)

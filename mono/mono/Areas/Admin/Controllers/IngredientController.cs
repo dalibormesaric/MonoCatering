@@ -15,7 +15,17 @@ namespace mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class IngredientController : Controller
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private UnitOfWork unitOfWork;
+
+        public IngredientController()
+        {
+            unitOfWork = new UnitOfWork();
+        }
+
+        public IngredientController(UnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
+        }
 
         // GET: /AdminIngredient/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -38,7 +48,6 @@ namespace mono.Areas.Admin.Controllers
 
             var ingredients = unitOfWork.IngredientRepository.Get();
 
-            //error - Category.Name == null || Food.Name == null
             if (!String.IsNullOrEmpty(searchString))
             {
                 ingredients = ingredients.Where(i =>
@@ -73,7 +82,7 @@ namespace mono.Areas.Admin.Controllers
             int pageSize = 3;
             int pageNumber = (page ?? 1);
 
-            return View(ingredients.ToPagedList(pageNumber, pageSize));
+            return View("Index", ingredients.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /AdminIngredient/Details/5
@@ -88,7 +97,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(ingredient);
+            return View("Details", ingredient);
         }
 
         // GET: /AdminIngredient/Create
@@ -96,7 +105,7 @@ namespace mono.Areas.Admin.Controllers
         {
             ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name");
             ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name");
-            return View();
+            return View("Create");
         }
 
         // POST: /AdminIngredient/Create
@@ -120,9 +129,9 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", ingredient.CategoryID);
-            ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name", ingredient.FoodID);
-            return View(ingredient);
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.CategoryID);
+            ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.FoodID);
+            return View("Create", ingredient);
         }
 
         // GET: /AdminIngredient/Edit/5
@@ -137,9 +146,9 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", ingredient.CategoryID);
-            ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name", ingredient.FoodID);
-            return View(ingredient);
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.CategoryID);
+            ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.FoodID);
+            return View("Edit", ingredient);
         }
 
         // POST: /AdminIngredient/Edit/5
@@ -149,7 +158,8 @@ namespace mono.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="ID,Name,FoodID,CategoryID")] Ingredient ingredient)
         {
-            try{
+            try
+            {
                 if (ModelState.IsValid)
                 {
                     unitOfWork.IngredientRepository.Update(ingredient);
@@ -157,14 +167,14 @@ namespace mono.Areas.Admin.Controllers
                     return RedirectToAction("Index");
                 }
             }
-             catch (DataException /* dex */)
-             {
+            catch (DataException /* dex */)
+            {
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
-             }
+            }
             ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", ingredient.CategoryID);
             ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name", ingredient.FoodID);
-            return View(ingredient);
+            return View("Edit", ingredient);
         }
 
         // GET: /AdminIngredient/Delete/5
@@ -183,7 +193,7 @@ namespace mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            return View(ingredient);
+            return View("Delete", ingredient);
         }
 
         // POST: /AdminIngredient/Delete/5
@@ -199,9 +209,9 @@ namespace mono.Areas.Admin.Controllers
             }
             catch (DataException /* dex */)
             {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
-
             return RedirectToAction("Index");
         }
 

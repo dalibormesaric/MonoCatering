@@ -16,7 +16,17 @@ namespace mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class UserController : Controller
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private UnitOfWork unitOfWork;
+
+        public UserController()
+        {
+            unitOfWork = new UnitOfWork();
+        }
+
+        public UserController(UnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
+        }
 
         // GET: /AdminUser/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -74,10 +84,9 @@ namespace mono.Areas.Admin.Controllers
             int pageNumber = (page ?? 1);
 
             Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
-
             IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
 
-            return View(model.ToPagedList(pageNumber, pageSize));
+            return View("Index", model.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /AdminUser/Edit/5
@@ -93,7 +102,7 @@ namespace mono.Areas.Admin.Controllers
                 return HttpNotFound();
             }
             ViewBag.RestaurantID = new SelectList(unitOfWork.RestaurantRepository.Get(orderBy: q => q.OrderBy(r => r.Name)), "ID", "Name", user.RestaurantID);
-            return View(user);
+            return View("Edit", user);
         }
 
         public class EditUserRestaurant
@@ -128,7 +137,7 @@ namespace mono.Areas.Admin.Controllers
             catch (DataException /* dex */)
             {
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
-                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+                return RedirectToAction("Edit", new { id = id, saveChangesError = true });
             }
             //todo add role restaurant to user or remove if restaurantID == null
 

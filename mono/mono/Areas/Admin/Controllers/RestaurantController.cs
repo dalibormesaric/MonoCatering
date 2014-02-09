@@ -14,9 +14,7 @@ namespace mono.Areas.Admin.Controllers
 {
     [Authorize(Roles = "admin")]
     public class RestaurantController : Controller
-    {
-        //private UnitOfWork unitOfWork = new UnitOfWork();
-        
+    {      
         private UnitOfWork unitOfWork;
 
         public RestaurantController()
