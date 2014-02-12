@@ -41,12 +41,10 @@ namespace mono.DAL
 
             if (orderBy != null)
             {
-                return orderBy(query).ToList();
+                query = orderBy(query);
             }
-            else
-            {
-                return query.ToList();
-            }
+
+            return query.ToList();
         }
 
         public virtual TEntity GetByID(object id)

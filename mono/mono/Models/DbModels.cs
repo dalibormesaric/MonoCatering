@@ -27,6 +27,10 @@ namespace mono.Models
         [Display(Name = "Phone")]
         public string Phone { get; set; }
 
+        public Guid Token { get; set; }
+
+        public DateTime? TokenDateTime { get; set; }
+
         public int? RestaurantID { get; set; }
 
         public virtual Restaurant Restaurant { get; set; }
