@@ -14,6 +14,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography;
+using System.Data.Entity;
 
 namespace mono.Controllers
 {
@@ -43,49 +44,77 @@ namespace mono.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ForgotPassword(ForgotPasswordModel model)
         {
-            /*
-            var Db = new IdentityDbContext();
-            var user = Db.Users.FirstOrDefault(u => u.Email == model.Email);
+            var monoDbContext = new MonoDbContext();
+            var user = monoDbContext.Users.FirstOrDefault(u => u.Email == model.Email);
 
             if (user != null)
             {
-                string senderEmail = "email@email.com";
+                MyUser userSameToken;
+
+                do
+                {
+                    user.Token = Guid.NewGuid();
+
+                    userSameToken = monoDbContext.Users.FirstOrDefault(u => u.Token == user.Token && System.DateTime.Now < u.TokenDateTime.Value);
+
+                } while (user.Token == Guid.Empty || userSameToken != null);
+                user.TokenDateTime = System.DateTime.Now.AddMinutes(15);
+
+                monoDbContext.Set<MyUser>().Attach(user);
+                monoDbContext.Entry(user).State = EntityState.Modified;
+                monoDbContext.SaveChanges();
+
+                string senderEmail = "email@gmail.com";
                 string password = "password";
                 SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
                 smtpClient.EnableSsl = true;
                 smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential(senderEmail, password); ;
+                smtpClient.Credentials = new NetworkCredential(senderEmail, password);
 
                 MailMessage mail = new MailMessage();
 
                 mail.From = new MailAddress(senderEmail);
                 mail.To.Add(new MailAddress(model.Email));
                 mail.Subject = "Password recovery";
-                mail.Body = "If you requested password rest go to link <a href='www.stranica.hr/Account/ResetPassword?token=token'>reset</a>";
+                mail.Body = "If you requested password rest go to link:<br><br><a href='www.stranica.hr/Account/ResetPassword?token=" + user.Token + "'>reset password</a><br><br>Link will be available for 15 minutes.";
                 mail.IsBodyHtml = true;
 
-                //smtpClient.Send(mail);
+                smtpClient.Send(mail);
 
-                return RedirectToAction("ResetPassword", new { token = string.Empty });
+                return RedirectToAction("ResetPassword", new { token = Guid.Empty });
             }
 
-            //ViewBag.StatusMessage = "Invalid E-mail address.";
             ModelState.AddModelError("", "Invalid e-mail address.");
-            */
             return View();
         }
 
-
         [AllowAnonymous]
-        public ActionResult ResetPassword(string token = null)
+        public async Task<ActionResult> ResetPassword(Guid token)
         {
-            if (token == null)
+            if (token == Guid.Empty)
             {
                 ViewBag.StatusMessage = "Password reset request was send.";
             }
             else
             {
+                var monoDbContext = new MonoDbContext();
+                var user = monoDbContext.Users.FirstOrDefault(u => u.Token == token && System.DateTime.Now < u.TokenDateTime.Value);
 
+                if (user == null)
+                {
+                    ViewBag.StatusMessage = "Invalid token";
+                }
+                else
+                {
+                    user.Token = Guid.Empty;
+
+                    monoDbContext.Set<MyUser>().Attach(user);
+                    monoDbContext.Entry(user).State = EntityState.Modified;
+                    monoDbContext.SaveChanges();
+
+                    await SignInAsync(user, true);
+                    return RedirectToAction("Manage");
+                }
             }
             return View();
         }

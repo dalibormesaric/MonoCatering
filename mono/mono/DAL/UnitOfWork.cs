@@ -9,20 +9,6 @@ namespace mono.DAL
     {
         private MonoDbContext context = new MonoDbContext();
 
-        /*
-        private MonoDbContext context;
-
-        public UnitOfWork()
-        {
-            context = new MonoDbContext();
-        }
-
-        public UnitOfWork(MonoDbContext context)
-        {
-            this.context = context;
-        }
-        */
-
         private GenericRepository<MyUser> userRepository;
         private GenericRepository<Restaurant> restaurantRepository;
         private GenericRepository<Category> categoryRepository;
