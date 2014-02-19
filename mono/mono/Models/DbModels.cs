@@ -56,11 +56,29 @@ namespace mono.Models
         public virtual ICollection<Offer> Offers { get; set; }
     }
 
+    public class CategorySize
+    {
+        public int ID { get; set; }
+
+        [Required]
+        public int Type { get; set; }
+
+        [Required]
+        public string Value { get; set; }
+
+        [Required]
+        public int Order { get; set; }
+    }
+
     public class Category
     {
         public int ID { get; set; }
-       
+
+        [Required]
         public string Name { get; set; }
+
+        [Required]
+        public int SizeType { get; set; }
 
         [Display(Name = "Parent category")]
         //[ForeignKey("Category")]
@@ -111,6 +129,8 @@ namespace mono.Models
 
         [Display(Name = "Category")]
         public virtual Category Category { get; set; }
+
+        public virtual ICollection<FoodIngredient> FoodIngredients { get; set; }
     }
 
     public enum Status
@@ -122,7 +142,7 @@ namespace mono.Models
     {
         public int ID { get; set; }
 
-        public int Description { get; set; }
+        public string Description { get; set; }
 
         [Required]
         public DateTime DateTime { get; set; }
@@ -131,34 +151,43 @@ namespace mono.Models
         public Status Status { get; set; }
         
         [Required]
-        public int UserID { get; set; }
+        public string UserID { get; set; }
         
         public virtual MyUser User { get; set; }
-        
-        [Required]
-        public virtual ICollection<OrderFood> FoodIngredients { get; set; }
+
+        [Display(Name="Items")]
+        public virtual ICollection<FoodIngredient> FoodIngredients { get; set; }
         
         public virtual ICollection<Offer> Offers { get; set; }
     }
 
-    public class OrderFood
+    public class FoodIngredient
     {
         public int ID { get; set; }
 
         public string Description { get; set; } //description for specific food
 
         [Required]
-        public int OrderID { get; set; }
+        public int FoodID { get; set; }
+
+        public virtual Food Food { get; set; }
+
+        public int? OrderID { get; set; }
         
         public virtual Order Order { get; set; }
-        
-        public virtual ICollection<Food> Food { get; set; }
-        
+               
         public virtual ICollection<Ingredient> Ingredients { get; set; }
 
-        public string Size { get; set; } // name should be defined by category
+        public int CategorySizeID { get; set; }
 
-        public string Pieces { get; set; }
+        [Display(Name="Size")]
+        public virtual CategorySize CategorySize { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int Pieces { get; set; }
+
+        [Required]
+        public string UserID { get; set; }
     }
 
     public class Offer
@@ -169,7 +198,6 @@ namespace mono.Models
         public decimal Price { get; set; }
         
         [Required]
-        
         public DateTime DeliveryTime { get; set; }
         
         public string Description { get; set; } //if they don't have something

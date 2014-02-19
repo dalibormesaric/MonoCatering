@@ -175,6 +175,11 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
+    <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
+    <Compile Include="Areas\Auction\Controllers\ItemController.cs" />
+    <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
+    <Compile Include="Areas\Auction\Models\ItemViewModels.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\CategoryController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
@@ -225,6 +230,22 @@
       <LastGenOutput>Model1.cs</LastGenOutput>
     </Content>
     <Content Include="Areas\Admin\Views\web.config" />
+    <Content Include="Areas\Auction\Views\web.config" />
+    <Content Include="Areas\Auction\Views\Order\Edit.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\CategorySize\Type.cshtml" />
+    <Content Include="Areas\Auction\Views\Item\Basket.cshtml" />
+    <Content Include="Areas\Auction\Views\Item\Index.cshtml" />
+    <Content Include="Areas\Auction\Views\Item\Add.cshtml" />
+    <Content Include="Areas\Auction\Views\Item\Delete.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Create.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
+    <Content Include="Areas\Auction\Views\Item\Details.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -296,6 +317,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Auction\Views\Shared\" />
     <Folder Include="Views\Auction\" />
   </ItemGroup>
   <ItemGroup>

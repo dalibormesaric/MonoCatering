@@ -25,8 +25,13 @@ namespace mono.DAL
         */
         
         public virtual DbSet<Restaurant> Restaurants { get; set; }
+        public virtual DbSet<CategorySize> CategorySizes { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Food> Foods { get; set; }
         public virtual DbSet<Ingredient> Ingredients { get; set; }
+
+        public System.Data.Entity.DbSet<mono.Models.Order> Orders { get; set; }
+
+        public System.Data.Entity.DbSet<mono.Models.FoodIngredient> FoodIngredients { get; set; }
     }
 }

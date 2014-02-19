@@ -389,7 +389,7 @@ namespace mono.Tests.Controllers.Admin
             Models.Ingredient parentIngredient1 = new Models.Ingredient { Name = "parentIngredient1", Category = parentCategory };
             Models.Ingredient parentIngredient2 = new Models.Ingredient { Name = "parentIngredient2", Category = parentCategory };
             parentCategory.Ingredients = new List<Models.Ingredient> { parentIngredient1, parentIngredient2 };
-            Models.Category childCategory = new Models.Category { ID = 6, Name ="childCategory", ParentCategoryID = 3 };
+            Models.Category childCategory = new Models.Category { ID = 6, Name = "childCategory", ParentCategoryID = 3 };
             Models.Ingredient childIngredient1 = new Models.Ingredient { Name = "childIngredient1", Category = childCategory };
             Models.Ingredient childIngredient2 = new Models.Ingredient { Name = "achildIngredient2", Category = childCategory };
             childCategory.Ingredients = new List<Models.Ingredient> { childIngredient1, childIngredient2 };
@@ -398,8 +398,9 @@ namespace mono.Tests.Controllers.Admin
 
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodRepository.GetByID(6)).Returns(food);
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(childCategory);
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(3)).Returns(parentCategory);
+            //mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(childCategory);
+            //mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(3)).Returns(parentCategory);
+            mockUnitOfWork.Setup(m => m.IngredientsForFood(food)).Returns(allIngreients);
 
             var FoodController = new FoodController(mockUnitOfWork.Object);
 

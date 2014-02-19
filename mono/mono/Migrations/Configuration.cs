@@ -107,11 +107,45 @@ namespace mono.Migrations
             userManager.Create(restaurant3User, "restaurant3");
             userManager.AddToRole(restaurant3User.Id, "restaurant");
 
-            Category food = new Category { 
-                Name = "FOOD"
+            CategorySize sizePortion = new CategorySize
+            {
+                Type = 0,
+                Value = "Portion",
+                Order = 0
+            };
+            CategorySize sizeSmall = new CategorySize
+            {
+                Type = 1,
+                Value = "Small",
+                Order = 0
+            };
+            CategorySize sizeBig = new CategorySize
+            {
+                Type = 1,
+                Value = "Big",
+                Order = 1
+            };
+            CategorySize sizeJumbo = new CategorySize
+            {
+                Type = 1,
+                Value = "Jumbo",
+                Order = 2
+            };
+
+            unitOfWork.CategorySizeRepository.Insert(sizePortion);
+            unitOfWork.CategorySizeRepository.Insert(sizeSmall);
+            unitOfWork.CategorySizeRepository.Insert(sizeBig);
+            unitOfWork.CategorySizeRepository.Insert(sizeJumbo);
+
+            Category food = new Category 
+            { 
+                Name = "FOOD",
+                SizeType = 0
             };           
-            Category fish = new Category { 
-                Name = "FISH", 
+            Category fish = new Category 
+            { 
+                Name = "FISH",
+                SizeType = 0,
                 ParentCategory = food
             };
             Food carp = new Food
@@ -126,6 +160,7 @@ namespace mono.Migrations
             };
             Category italian = new Category { 
                 Name = "ITALIAN", 
+                SizeType = 0,
                 ParentCategory = food
             };
             Food spaghetti = new Food
@@ -134,7 +169,8 @@ namespace mono.Migrations
                 Category = italian
             };
             Category pizza = new Category {
-                Name = "PIZZA", 
+                Name = "PIZZA",
+                SizeType = 1,
                 ParentCategory = italian
             };                    
             Food margarita = new Food { 
@@ -159,7 +195,8 @@ namespace mono.Migrations
             };
             Category beverage = new Category
             {
-                Name = "BEVERAGE"
+                Name = "BEVERAGE",
+                SizeType = 0
             };
 
             unitOfWork.CategoryRepository.Insert(food);

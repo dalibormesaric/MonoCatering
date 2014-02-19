@@ -1,4 +1,4 @@
-﻿@model mono.Models.Category
+﻿@model mono.Models.CategorySize
 
 @{
     ViewBag.Title = "Edit";
@@ -12,32 +12,32 @@
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>Category</h4>
+        <h4>Category size</h4>
         <hr />
         @Html.ValidationSummary(true)
         @Html.HiddenFor(model => model.ID)
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.Type, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Name)
-                @Html.ValidationMessageFor(model => model.Name)
+                @Html.EditorFor(model => model.Type)
+                @Html.ValidationMessageFor(model => model.Type)
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.ParentCategoryID, new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.Value, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("ParentCategoryID", String.Empty)
-                @Html.ValidationMessageFor(model => model.ParentCategoryID)
+                @Html.EditorFor(model => model.Value)
+                @Html.ValidationMessageFor(model => model.Value)
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.SizeType, new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.Order, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("SizeType")
-                @Html.ValidationMessageFor(model => model.SizeType)
+                @Html.EditorFor(model => model.Order)
+                @Html.ValidationMessageFor(model => model.Order)
             </div>
         </div>
 
