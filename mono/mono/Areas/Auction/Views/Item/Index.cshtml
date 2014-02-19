@@ -1,0 +1,49 @@
+﻿@model mono.Areas.Auction.Models.ItemViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @if (Model.Name != "All")
+    {
+        if (Model.ParentCategoryID == null)
+        { 
+            @Html.ActionLink("Up", "Index", new { id = "" })
+        }
+        else
+        {
+            @Html.ActionLink("Up", "Index", new { id = Model.ParentCategoryID })
+        }
+    }
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+    </tr>
+
+@foreach (var item in Model.ListCategoryFood)
+{
+    <tr>
+        <td>
+            @if(item.Type == mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
+            { 
+                @Html.ActionLink(item.Name, "Index", new { id = item.ItemID })
+            }
+            else
+            {
+                @item.Name
+                @Html.ActionLink("Add", "Add", new { id = item.ItemID })
+            }
+            
+        </td>
+    </tr>
+}
+
+</table>

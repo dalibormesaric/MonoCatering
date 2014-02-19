@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\Admin\AdminControllerTest.cs" />
+    <Compile Include="Controllers\Admin\CategorySizeControllerTest.cs" />
     <Compile Include="Controllers\Admin\CategoryControllerTest.cs" />
     <Compile Include="Controllers\Admin\FoodControllerTest.cs" />
     <Compile Include="Controllers\Admin\RestaurantControllerTest.cs" />

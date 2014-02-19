@@ -110,7 +110,16 @@ namespace mono.Areas.Admin.Controllers
 
             } while (childs.Count != 0);
 
-            return View("Category", foods.OrderBy(f => f.Name).ToList());
+            foods = foods.OrderBy(f => f.Name);
+
+            /*
+            if(Request.IsAjaxRequest())
+            {
+                return Json(foods.ToList());
+            }
+            */
+            
+            return View("Category", foods.ToList());
         }
 
         // GET: /AdminFood/Details/5
@@ -256,20 +265,7 @@ namespace mono.Areas.Admin.Controllers
             
             ViewBag.Food = food.Name;
 
-            Category category = unitOfWork.CategoryRepository.GetByID(food.CategoryID);
-
-            IEnumerable<Ingredient> ingredients = category.Ingredients.Union(food.Ingredients);
-
-            while (category.ParentCategoryID != null)
-            {
-                category = unitOfWork.CategoryRepository.GetByID((int)category.ParentCategoryID);
-
-                ingredients = ingredients.Union(category.Ingredients);
-            }
-
-            ingredients = ingredients.OrderBy(i => i.Name);
-
-            return View("Ingredients", ingredients.ToList());
+            return View("Ingredients", unitOfWork.IngredientsForFood(food));
         }
 
         protected override void Dispose(bool disposing)

@@ -107,6 +107,7 @@ namespace mono.Controllers
                 else
                 {
                     user.Token = Guid.Empty;
+                    user.PasswordHash = null;
 
                     monoDbContext.Set<MyUser>().Attach(user);
                     monoDbContext.Entry(user).State = EntityState.Modified;

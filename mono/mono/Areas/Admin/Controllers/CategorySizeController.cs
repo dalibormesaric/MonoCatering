@@ -13,26 +13,26 @@ using PagedList;
 namespace mono.Areas.Admin.Controllers
 {
     [Authorize(Roles = "admin")]
-    public class CategoryController : Controller
+    public class CategorySizeController : Controller
     {
         private UnitOfWork unitOfWork;
 
-        public CategoryController()
+        public CategorySizeController()
         {
             unitOfWork = new UnitOfWork();
         }
 
-        public CategoryController(UnitOfWork unitOfWork)
+        public CategorySizeController(UnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
 
-        // GET: /AdminCategory/
+        // GET: /Admin/CategorySize/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            ViewBag.ParentCategorySortParm = sortOrder == "ParentCategory" ? "ParentCategory_desc" : "ParentCategory";
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Value_desc" : "";
+            ViewBag.TypeSortParm = sortOrder == "Type" ? "Type_desc" : "Type";
 
             if (searchString != null)
             {
@@ -45,74 +45,71 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var categories = unitOfWork.CategoryRepository.Get();
+            var categorySizes = unitOfWork.CategorySizeRepository.Get();
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                categories = categories.Where(c =>
-                    c.Name.ToUpper().Contains(searchString.ToUpper())
+                categorySizes = categorySizes.Where(s =>
+                    s.Type.ToString().Contains(searchString.ToUpper()) ||
+                    s.Value.ToUpper().Contains(searchString.ToUpper())
                 );
             }
 
             switch (sortOrder)
             {
-                case "Name_desc":
-                    categories = categories.OrderByDescending(c => c.Name);
+                case "Value_desc":
+                    categorySizes = categorySizes.OrderByDescending(s => s.Value);
                     break;
-                case "ParentCategory":
-                    categories = categories.OrderBy(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
+                case "Type":
+                    categorySizes = categorySizes.OrderBy(s => s.Type);
                     break;
-                case "ParentCategory_desc":
-                    categories = categories.OrderByDescending(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
+                case "Type_desc":
+                    categorySizes = categorySizes.OrderByDescending(s => s.Type);
                     break;
                 default:
-                    categories = categories.OrderBy(c => c.Name);
+                    categorySizes = categorySizes.OrderBy(s => s.Value);
                     break;
             }
 
             int pageSize = 3;
             int pageNumber = (page ?? 1);
 
-            return View("Index", categories.ToPagedList(pageNumber, pageSize));
+            return View("Index", categorySizes.ToPagedList(pageNumber, pageSize));
         }
 
-        // GET: /AdminCategory/Details/5
+        // GET: /Admin/CategorySize/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-            if (category == null)
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            if (categorySize == null)
             {
                 return HttpNotFound();
             }
-
-            ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
-            return View("Details", category);
+            return View("Details", categorySize);
         }
 
-        // GET: /AdminCategory/Create
+        // GET: /Admin/CategorySize/Create
         public ActionResult Create()
         {
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString");
             return View("Create");
         }
 
-        // POST: /AdminCategory/Create
+        // POST: /Admin/CategorySize/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Name,ParentCategoryID,SizeType")] Category category)
+        public ActionResult Create([Bind(Include="ID,Type,Value,Order")] CategorySize categorySize)
         {
-            try 
-            { 
+            try
+            {
                 if (ModelState.IsValid)
                 {
-                    unitOfWork.CategoryRepository.Insert(category);
+                    unitOfWork.CategorySizeRepository.Insert(categorySize);
                     unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
@@ -123,40 +120,36 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString");
-            return View("Create", category);
+            return View("Create", categorySize);
         }
 
-        // GET: /AdminCategory/Edit/5
+        // GET: /Admin/CategorySize/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-            if (category == null)
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            if (categorySize == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", category.SizeType);
-            return View("Edit", category);
+            return View("Edit", categorySize);
         }
 
-        // POST: /AdminCategory/Edit/5
+        // POST: /Admin/CategorySize/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Name,ParentCategoryID,SizeType")] Category category)
+        public ActionResult Edit([Bind(Include="ID,Type,Value,Order")] CategorySize categorySize)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    unitOfWork.CategoryRepository.Update(category);
+                    unitOfWork.CategorySizeRepository.Update(categorySize);
                     unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
@@ -167,12 +160,10 @@ namespace mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", category.SizeType);
-            return View("Edit", category);
+            return View("Edit", categorySize);
         }
 
-        // GET: /AdminCategory/Delete/5
+        // GET: /Admin/CategorySize/Delete/5
         public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
@@ -183,24 +174,23 @@ namespace mono.Areas.Admin.Controllers
             {
                 ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-            if (category == null)
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            if (categorySize == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
-            return View("Delete", category);
+            return View("Delete", categorySize);
         }
 
-        // POST: /AdminCategory/Delete/5
+        // POST: /Admin/CategorySize/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             try
             {
-                Category category = unitOfWork.CategoryRepository.GetByID(id);
-                unitOfWork.CategoryRepository.Delete(id);
+                CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID(id);
+                unitOfWork.CategorySizeRepository.Delete(id);
                 unitOfWork.Save();
             }
             catch (DataException /* dex */)
@@ -211,34 +201,22 @@ namespace mono.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: /AdminCategory/Ingredients/5
-        public ActionResult Ingredients(int? id)
+        // GET: /Admin/CategorySize/Type/5
+        public ActionResult Type(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-
-            if (category == null)
+            
+            if (unitOfWork.CategorySizeRepository.Get(s => s.Type == (int)id).FirstOrDefault() == null)
             {
                 return HttpNotFound();
             }
 
-            ViewBag.Category = category.Name;
+            ViewBag.SizeValuesString = unitOfWork.SizeValuesString((int)id);
 
-            IEnumerable<Ingredient> ingredients = category.Ingredients;
-
-            while (category.ParentCategoryID != null)
-            {
-                category = unitOfWork.CategoryRepository.GetByID((int)category.ParentCategoryID);
-
-                ingredients = ingredients.Union(category.Ingredients);
-            }
-
-            ingredients = ingredients.OrderBy(i => i.Name);
-
-            return View("Ingredients", ingredients.ToList());
+            return View("Type");
         }
 
         protected override void Dispose(bool disposing)

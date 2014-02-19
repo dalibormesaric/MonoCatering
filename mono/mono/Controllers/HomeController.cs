@@ -31,24 +31,6 @@ namespace mono.Controllers
 
         public ActionResult Restaurants()
         {
-            //var Db = new IdentityDbContext();
-
-            //var model = new List<RestaurantViewModel>();
-
-            /*
-            var resturantRole = from r in Db.Roles
-                                where r.Name == "restaurant"
-                                select r;
-
-            var restaurants = Db.Users.Where(u => u.Roles.Select(r => r.Role).FirstOrDefault() == resturantRole.FirstOrDefault());
-            
-            foreach (var restaurant in restaurants)
-            {
-                var r = new RestaurantViewModel(restaurant);
-                model.Add(r);
-            }
-             */
-
             var db = new MonoDbContext();
 
             return View(db.Restaurants.ToList());
