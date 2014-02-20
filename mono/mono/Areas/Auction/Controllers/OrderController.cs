@@ -32,7 +32,7 @@ namespace mono.Areas.Auction.Controllers
         // GET: /Auction/Order/
         public ActionResult Index()
         {
-            var orders = unitOfWork.OrderRepository.Get().ToList();
+            var orders = unitOfWork.OrderRepository.Get().OrderByDescending(o => o.DateTime).ToList();
             return View("Index", orders);
         }
 
