@@ -105,7 +105,7 @@ namespace mono.Areas.Auction.Controllers
 
             Category category = unitOfWork.CategoryRepository.GetByID(food.CategoryID);
             ViewBag.CategorySizeID = new SelectList(unitOfWork.SizeValues(category.SizeType), "ID", "Value");
-            ViewBag.IngredientsList = unitOfWork.IngredientsForFood(food);
+            ViewBag.IngredientsList = new MultiSelectList(unitOfWork.IngredientsForFood(food), "ID", "Name");
 
             FoodIngredientViewModel foodIngredientViewModel = new FoodIngredientViewModel();
             foodIngredientViewModel.FoodID = (int)id;
@@ -178,7 +178,7 @@ namespace mono.Areas.Auction.Controllers
             Category category = unitOfWork.CategoryRepository.GetByID(food.CategoryID);
 
             ViewBag.CategorySizeID = new SelectList(unitOfWork.SizeValues(category.SizeType), "ID", "Value");
-            ViewBag.IngredientsList = unitOfWork.IngredientsForFood(food);
+            ViewBag.IngredientsList = new MultiSelectList(unitOfWork.IngredientsForFood(food), "ID", "Name");
 
             return View(foodIngredientViewModel);
         }

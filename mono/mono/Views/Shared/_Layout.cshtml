@@ -51,6 +51,13 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/chosen")
     @RenderSection("scripts", required: false)
+    <script>
+        $(function() {
+            $('.chosen-select').chosen();
+            $('.chosen-select-deselect').chosen({ allow_single_deselect: true });
+        });
+    </script>
 </body>
 </html>
