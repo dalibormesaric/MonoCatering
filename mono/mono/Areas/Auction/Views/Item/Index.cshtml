@@ -21,29 +21,6 @@
     }
 </p>
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-    </tr>
+@Html.Partial("_Category", Model)
 
-@foreach (var item in Model.ListCategoryFood)
-{
-    <tr>
-        <td>
-            @if(item.Type == mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
-            { 
-                @Html.ActionLink(item.Name, "Index", new { id = item.ItemID })
-            }
-            else
-            {
-                @item.Name
-                @Html.ActionLink("Add", "Add", new { id = item.ItemID })
-            }
-            
-        </td>
-    </tr>
-}
 
-</table>

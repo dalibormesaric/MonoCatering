@@ -52,8 +52,6 @@ namespace mono.Areas.Auction.Controllers
                     };
                     itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);
                 }
-
-                return View("Index", itemViewModel);
             }
             else
             {
@@ -65,9 +63,14 @@ namespace mono.Areas.Auction.Controllers
                 itemViewModel.Name = category.Name;
                 itemViewModel.ParentCategoryID = category.ParentCategoryID;
                 AddCategoryFood(itemViewModel, category);
-
-                return View("Index", itemViewModel);
             }
+            
+            if(Request.IsAjaxRequest())
+            {
+                return PartialView("_Category", itemViewModel);
+            }
+
+            return View("Index", itemViewModel);
         }
 
         //
