@@ -1,0 +1,31 @@
+﻿@model mono.Areas.Auction.Models.ItemViewModel
+
+<table class="table">
+    @foreach (var item in Model.ListCategoryFood)
+    {
+        <tr>
+            <td>
+                @if (item.Type == mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
+                {
+                    using (Ajax.BeginForm("Index",new { id = item.ItemID }, 
+                        new AjaxOptions
+                        {
+                            HttpMethod = "get",
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "subCategory" + item.ItemID.ToString()
+                        }))
+                    {
+                        <input type="submit" value=@item.Name class="btn btn-default" />
+                    }
+                    <div id="subCategory@(item.ItemID)"></div>
+                }
+                else
+                {
+                    @item.Name
+                    @Html.ActionLink("Add", "Add", new { id = item.ItemID })
+                }
+            </td>
+        </tr>
+    }
+
+</table>
