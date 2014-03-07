@@ -178,8 +178,10 @@
     <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
     <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
     <Compile Include="Areas\Auction\Controllers\ItemController.cs" />
+    <Compile Include="Areas\Auction\Controllers\OfferController.cs" />
     <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
     <Compile Include="Areas\Auction\Models\ItemViewModels.cs" />
+    <Compile Include="Global.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\CategoryController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
@@ -333,7 +335,9 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -391,6 +395,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Auction\Views\Offer\" />
     <Folder Include="Areas\Auction\Views\Shared\" />
     <Folder Include="Views\Auction\" />
   </ItemGroup>

@@ -95,15 +95,23 @@ namespace mono.Tests.Controllers.Admin
             CategorySizeNull(id, action);
         }
 
+        private static string searchString = "categorySize";
+        private Expression<Func<Models.CategorySize, bool>> filter = (s =>
+            s.Type.ToString().Contains(searchString.ToUpper()) ||
+            s.Value.ToUpper().Contains(searchString.ToUpper())
+        );
+        private Func<IQueryable<Models.CategorySize>, IOrderedQueryable<Models.CategorySize>> orderBy = (q => q.OrderBy(s => s.Value));
+        private Func<IQueryable<Models.CategorySize>, IOrderedQueryable<Models.CategorySize>> orderByDescending = (q => q.OrderByDescending(s => s.Value));
+
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(null, null, "")).Returns(categorySizes);
+            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<Models.CategorySize, bool>>>(), It.IsAny<Func<IQueryable<Models.CategorySize>, IOrderedQueryable<Models.CategorySize>>>(), It.IsAny<String>())).Returns(orderBy(categorySizes.Where(filter)));
 
             var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
 
-            var result = categorySizeController.Index(null, "categorySize", null, 2) as ViewResult;
+            var result = categorySizeController.Index(null, searchString, null, 2) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.CategorySize>;
 
             Assert.Equal("Index", result.ViewName);
@@ -116,11 +124,11 @@ namespace mono.Tests.Controllers.Admin
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(null, null, "")).Returns(categorySizes);
+            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<Models.CategorySize, bool>>>(), It.IsAny<Func<IQueryable<Models.CategorySize>, IOrderedQueryable<Models.CategorySize>>>(), It.IsAny<String>())).Returns(orderByDescending(categorySizes.Where(filter)));
 
             var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
 
-            var result = categorySizeController.Index("Value_desc", "categorySize", null, 2) as ViewResult;
+            var result = categorySizeController.Index("Value_desc", searchString, null, 2) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.CategorySize>;
 
             Assert.Equal("Index", result.ViewName);

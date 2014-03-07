@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using mono.Models;
 using mono.DAL;
 using PagedList;
+using System.Linq.Expressions;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -46,43 +47,45 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var ingredients = unitOfWork.IngredientRepository.Get();
+            Expression<Func<Ingredient, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                ingredients = ingredients.Where(i =>
-                    i.Name.ToUpper().Contains(searchString.ToUpper()) || 
-                    i.Category.Name.ToUpper().Contains(searchString.ToUpper()) ||
-                    i.Food.Name.ToUpper().Contains(searchString.ToUpper())
+                filter = (i =>
+                    i.Name.ToUpper().Contains(searchString.ToUpper()) ||
+                    (i.Category != null && i.Category.Name.ToUpper().Contains(searchString.ToUpper())) ||
+                    (i.Food != null && i.Food.Name.ToUpper().Contains(searchString.ToUpper()))
                 );
             }
+
+            Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>> orderBy = null;
 
             switch (sortOrder)
             {
                 case "Name_desc":
-                    ingredients = ingredients.OrderByDescending(i => i.Name);
+                    orderBy = (q => q.OrderByDescending(i => i.Name));
                     break;
                 case "Category":
-                    ingredients = ingredients.OrderBy(i => i.Category == null ? "" : i.Category.Name);
+                    orderBy = (q => q.OrderBy(i => i.Category == null ? "" : i.Category.Name));
                     break;
                 case "Category_desc":
-                    ingredients = ingredients.OrderByDescending(i => i.Category == null ? "" : i.Category.Name);
+                    orderBy = (q => q.OrderByDescending(i => i.Category == null ? "" : i.Category.Name));
                     break;
                 case "Food":
-                    ingredients = ingredients.OrderBy(i => i.Food == null ? "" : i.Food.Name);
+                    orderBy = (q => q.OrderBy(i => i.Food == null ? "" : i.Food.Name));
                     break;
                 case "Food_desc":
-                    ingredients = ingredients.OrderByDescending(i => i.Food == null ? "" : i.Food.Name);
+                    orderBy = (q => q.OrderByDescending(i => i.Food == null ? "" : i.Food.Name));
                     break;
                 default:
-                    ingredients = ingredients.OrderBy(i => i.Name);
+                    orderBy = (q => q.OrderBy(i => i.Name));
                     break;
             }
 
-            int pageSize = 3;
+            var ingredients = unitOfWork.IngredientRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category, Food");
             int pageNumber = (page ?? 1);
 
-            return View("Index", ingredients.ToPagedList(pageNumber, pageSize));
+            return View("Index", ingredients.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /AdminIngredient/Details/5

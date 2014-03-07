@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace mono.Tests.Controllers.Admin
 {
@@ -112,15 +113,24 @@ namespace mono.Tests.Controllers.Admin
             Ingredient1Null(id, action);
         }
 
+        private static string searchString = "ingredient";
+        private Expression<Func<Models.Ingredient, bool>> filter = (i =>
+            i.Name.ToUpper().Contains(searchString.ToUpper()) ||
+            (i.Category != null && i.Category.Name.ToUpper().Contains(searchString.ToUpper())) ||
+            (i.Food != null && i.Food.Name.ToUpper().Contains(searchString.ToUpper()))
+        );
+        private Func<IQueryable<Models.Ingredient>, IOrderedQueryable<Models.Ingredient>> orderBy = (q => q.OrderBy(i => i.Name));
+        private Func<IQueryable<Models.Ingredient>, IOrderedQueryable<Models.Ingredient>> orderByDescending = (q => q.OrderByDescending(i => i.Name));
+
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.IngredientRepository.Get(null, null, "")).Returns(ingredients);
+            mockUnitOfWork.Setup(m => m.IngredientRepository.Get(It.IsAny<Expression<Func<Models.Ingredient, bool>>>(), It.IsAny<Func<IQueryable<Models.Ingredient>, IOrderedQueryable<Models.Ingredient>>>(), It.IsAny<String>())).Returns(orderBy(ingredients.Where(filter)));
 
             var IngredientController = new IngredientController(mockUnitOfWork.Object);
 
-            var result = IngredientController.Index(null, "ingredient", null, 2) as ViewResult;
+            var result = IngredientController.Index(null, searchString, null, 2) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Ingredient>;
 
             Assert.Equal("Index", result.ViewName);
@@ -133,11 +143,11 @@ namespace mono.Tests.Controllers.Admin
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.IngredientRepository.Get(null, null, "")).Returns(ingredients);
+            mockUnitOfWork.Setup(m => m.IngredientRepository.Get(It.IsAny<Expression<Func<Models.Ingredient, bool>>>(), It.IsAny<Func<IQueryable<Models.Ingredient>, IOrderedQueryable<Models.Ingredient>>>(), It.IsAny<String>())).Returns(orderByDescending(ingredients.Where(filter)));
 
             var IngredientController = new IngredientController(mockUnitOfWork.Object);
 
-            var result = IngredientController.Index("Name_desc", "ingredient", null, 2) as ViewResult;
+            var result = IngredientController.Index("Name_desc", searchString, null, 2) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Ingredient>;
 
             Assert.Equal("Index", result.ViewName);

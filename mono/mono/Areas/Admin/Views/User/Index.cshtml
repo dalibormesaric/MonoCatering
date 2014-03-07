@@ -9,10 +9,10 @@
 
 <h2>Users</h2>
 
-@using (Html.BeginForm("Index", "Restaurant", FormMethod.Get))
+@using (Html.BeginForm("Index", "User", FormMethod.Get))
 {
     <p>
-        Find by name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+        Find by user name, first name or last name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
         <input type="submit" value="Search" />
     </p>
 }

@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using mono.Models;
 using mono.DAL;
 using PagedList;
+using System.Linq.Expressions;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -45,35 +46,38 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var categories = unitOfWork.CategoryRepository.Get();
+            Expression<Func<Category, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                categories = categories.Where(c =>
-                    c.Name.ToUpper().Contains(searchString.ToUpper())
+                filter = (c =>
+                    c.Name.ToUpper().Contains(searchString.ToUpper()) || 
+                    (c.ParentCategory != null && c.ParentCategory.Name.ToUpper().Contains(searchString.ToUpper()))
                 );
             }
+
+            Func<IQueryable<Category>, IOrderedQueryable<Category>> orderBy = null;
 
             switch (sortOrder)
             {
                 case "Name_desc":
-                    categories = categories.OrderByDescending(c => c.Name);
+                    orderBy = (q => q.OrderByDescending(c => c.Name));
                     break;
                 case "ParentCategory":
-                    categories = categories.OrderBy(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
+                    orderBy = (q => q.OrderBy(c => c.ParentCategory == null ? "" : c.ParentCategory.Name));
                     break;
                 case "ParentCategory_desc":
-                    categories = categories.OrderByDescending(c => c.ParentCategory == null ? "" : c.ParentCategory.Name);
+                    orderBy = (q => q.OrderByDescending(c => c.ParentCategory == null ? "" : c.ParentCategory.Name));
                     break;
                 default:
-                    categories = categories.OrderBy(c => c.Name);
+                    orderBy = (q => q.OrderBy(c => c.Name));
                     break;
             }
 
-            int pageSize = 3;
+            var categories = unitOfWork.CategoryRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "ParentCategory");
             int pageNumber = (page ?? 1);
 
-            return View("Index", categories.ToPagedList(pageNumber, pageSize));
+            return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /AdminCategory/Details/5

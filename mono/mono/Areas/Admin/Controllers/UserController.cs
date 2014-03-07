@@ -10,6 +10,7 @@ using mono.Models;
 using mono.DAL;
 using PagedList;
 using AutoMapper;
+using System.Linq.Expressions;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -47,46 +48,48 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var users = unitOfWork.UserRepository.Get();
+            Expression<Func<MyUser, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                users = users.Where(u =>
+                filter = (u =>
                     u.UserName.ToUpper().Contains(searchString.ToUpper()) ||
                     u.FirstName.ToUpper().Contains(searchString.ToUpper()) ||
                     u.LastName.ToUpper().Contains(searchString.ToUpper())
                 );
             }
 
+            Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>> orderBy = null;
+
             switch (sortOrder)
             {
                 case "Name_desc":
-                    users = users.OrderByDescending(u => u.UserName);
+                    orderBy = (q => q.OrderByDescending(u => u.UserName));
                     break;
                 case "FirstName":
-                    users = users.OrderBy(u => u.FirstName);
+                    orderBy = (q => q.OrderBy(u => u.FirstName));
                     break;
                 case "FirstName_desc":
-                    users = users.OrderByDescending(u => u.FirstName);
+                    orderBy = (q => q.OrderByDescending(u => u.FirstName));
                     break;
                 case "LastName":
-                    users = users.OrderBy(u => u.LastName);
+                    orderBy = (q => q.OrderBy(u => u.LastName));
                     break;
                 case "LastName_desc":
-                    users = users.OrderByDescending(u => u.LastName);
+                    orderBy = (q => q.OrderByDescending(u => u.LastName));
                     break;
                 default:
-                    users = users.OrderBy(r => r.UserName);
+                    orderBy = (q => q.OrderBy(r => r.UserName));
                     break;
             }
 
-            int pageSize = 3;
+            var users = unitOfWork.UserRepository.Get(filter: filter, orderBy: orderBy);
             int pageNumber = (page ?? 1);
 
             Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
             IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
 
-            return View("Index", model.ToPagedList(pageNumber, pageSize));
+            return View("Index", model.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /AdminUser/Edit/5
