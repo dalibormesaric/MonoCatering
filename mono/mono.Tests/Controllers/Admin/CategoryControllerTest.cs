@@ -22,8 +22,8 @@ namespace mono.Tests.Controllers.Admin
             category = new Models.Category { Name = "category", SizeType = 0 };
 
             category1 = new Models.Category { Name = "category1", SizeType = 0  };
-            category2 = new Models.Category { Name = "cdfgegry2", SizeType = 0, ParentCategory = category1 };
-            category3 = new Models.Category { Name = "casdfgry3", SizeType = 0 };
+            category2 = new Models.Category { Name = "category2", SizeType = 0, ParentCategory = category1 };
+            category3 = new Models.Category { Name = "caadfgry3", SizeType = 0 };
             category4 = new Models.Category { Name = "category4", SizeType = 0, ParentCategory = category1 };
             category5 = new Models.Category { Name = "category5", SizeType = 0 };
             category6 = new Models.Category { Name = "category6", SizeType = 0 };
@@ -117,13 +117,12 @@ namespace mono.Tests.Controllers.Admin
 
             var CategoryController = new CategoryController(mockUnitOfWork.Object);
 
-            var result = CategoryController.Index(null, searchString, null, 2) as ViewResult;
+            var result = CategoryController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Category>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(2, model.Count());
-            Assert.Equal(category6.Name, model.ElementAt(0).Name);
+            Assert.Equal(category1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
@@ -134,13 +133,12 @@ namespace mono.Tests.Controllers.Admin
 
             var CategoryController = new CategoryController(mockUnitOfWork.Object);
 
-            var result = CategoryController.Index("Name_desc", searchString, null, 2) as ViewResult;
+            var result = CategoryController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Category>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(2, model.Count());
-            Assert.Equal(category4.Name, model.ElementAt(0).Name);
+            Assert.Equal(category6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]

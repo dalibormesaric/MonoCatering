@@ -137,13 +137,12 @@ namespace mono.Tests.Controllers.Admin
 
             var FoodController = new FoodController(mockUnitOfWork.Object);
 
-            var result = FoodController.Index(null, searchString, null, 2) as ViewResult;
+            var result = FoodController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Food>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(food6.Name, model.ElementAt(0).Name);
+            Assert.Equal(food1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
@@ -154,13 +153,12 @@ namespace mono.Tests.Controllers.Admin
 
             var FoodController = new FoodController(mockUnitOfWork.Object);
 
-            var result = FoodController.Index("Name_desc", searchString, null, 2) as ViewResult;
+            var result = FoodController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Food>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(food1.Name, model.ElementAt(0).Name);
+            Assert.Equal(food6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]

@@ -121,13 +121,12 @@ namespace mono.Tests.Controllers.Admin
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
-            var result = restaurantController.Index(null, searchString, null, 2) as ViewResult;
+            var result = restaurantController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(restaurant6.Name, model.ElementAt(0).Name);
+            Assert.Equal(restaurant1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
@@ -138,13 +137,12 @@ namespace mono.Tests.Controllers.Admin
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
-            var result = restaurantController.Index("Name_desc", searchString, null, 2) as ViewResult;
+            var result = restaurantController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(restaurant1.Name, model.ElementAt(0).Name);
+            Assert.Equal(restaurant6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]

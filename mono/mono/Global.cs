@@ -7,7 +7,7 @@ namespace mono
 {
     public static class Global
     {
-        private const int pageSize = 3;
+        private const int pageSize = 5;
 
         public static int PageSize
         {

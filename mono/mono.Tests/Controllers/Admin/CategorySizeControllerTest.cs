@@ -111,13 +111,12 @@ namespace mono.Tests.Controllers.Admin
 
             var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
 
-            var result = categorySizeController.Index(null, searchString, null, 2) as ViewResult;
+            var result = categorySizeController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.CategorySize>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(categorySize6.Value, model.ElementAt(0).Value);
+            Assert.Equal(categorySize1.Value, model.ElementAt(0).Value);
         }
 
         [Fact]
@@ -128,13 +127,12 @@ namespace mono.Tests.Controllers.Admin
 
             var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
 
-            var result = categorySizeController.Index("Value_desc", searchString, null, 2) as ViewResult;
+            var result = categorySizeController.Index("Value_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.CategorySize>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(categorySize1.Value, model.ElementAt(0).Value);
+            Assert.Equal(categorySize6.Value, model.ElementAt(0).Value);
         }
 
         [Fact]

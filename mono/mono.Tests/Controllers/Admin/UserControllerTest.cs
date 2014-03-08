@@ -85,13 +85,12 @@ namespace mono.Tests.Controllers.Admin
 
             var UserController = new UserController(mockUnitOfWork.Object);
 
-            var result = UserController.Index(null, searchString, null, 2) as ViewResult;
+            var result = UserController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.AdminUserViewModel>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(user6.UserName, model.ElementAt(0).UserName);
+            Assert.Equal(user1.UserName, model.ElementAt(0).UserName);
         }
 
         [Fact]
@@ -102,13 +101,12 @@ namespace mono.Tests.Controllers.Admin
 
             var UserController = new UserController(mockUnitOfWork.Object);
 
-            var result = UserController.Index("Name_desc", searchString, null, 2) as ViewResult;
+            var result = UserController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.AdminUserViewModel>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(user1.UserName, model.ElementAt(0).UserName);
+            Assert.Equal(user6.UserName, model.ElementAt(0).UserName);
         }
 
         [Fact]
