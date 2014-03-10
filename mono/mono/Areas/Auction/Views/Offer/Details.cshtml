@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<mono.Models.FoodIngredient>
 
 @{
-    ViewBag.Title = "Basket";
+    ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -17,6 +17,14 @@
 
         <dd>
             @ViewBag.Description
+        </dd>
+
+        <dt>
+            Address
+        </dt>
+
+        <dd>
+            @ViewBag.Address
         </dd>
 
         <dt>
@@ -69,4 +77,9 @@
     </dl>
 </div>
 
-@Html.ActionLink("Orders", "Index", "Order")
+<p>
+    @Html.ActionLink("Make offer", "MakeOffer", "Offer", new { id = @ViewBag.OrderID }, null)
+</p>
+<p>
+    @Html.ActionLink("Orders", "Orders", "Offer")
+</p>

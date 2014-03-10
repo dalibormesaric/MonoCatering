@@ -74,23 +74,6 @@ namespace mono.Areas.Auction.Controllers
         }
 
         //
-        // GET: /Auction/Item/Details
-        public ActionResult Details(int id)
-        {
-            var userID = User.Identity.GetUserId();
-            var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == id).ToList();
-
-            if (foodIngredients.Count == 0)
-                return HttpNotFound();
-
-            var order = unitOfWork.OrderRepository.GetByID(id);
-
-            ViewBag.Description = order.Description;
-
-            return View("Details", foodIngredients);
-        }
-
-        //
         // GET: /Auction/Add/
         public ActionResult Add(int? id)
         {
@@ -145,20 +128,21 @@ namespace mono.Areas.Auction.Controllers
 
                 foodIngredient.Ingredients = new List<Ingredient>();
 
-                foreach (string stringId in foodIngredientViewModel.Ingredients)
-                {
-                    int id;
-                    
-                    if (Int32.TryParse(stringId, out id))
+                if (foodIngredientViewModel.Ingredients != null)
+                    foreach (string stringId in foodIngredientViewModel.Ingredients)
                     {
-                        Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
-
-                        if (ingredient != null)
+                        int id;
+                    
+                        if (Int32.TryParse(stringId, out id))
                         {
-                            foodIngredient.Ingredients.Add(ingredient);
+                            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
+
+                            if (ingredient != null)
+                            {
+                                foodIngredient.Ingredients.Add(ingredient);
+                            }
                         }
                     }
-                }
 
                 unitOfWork.FoodIngredientRepository.Insert(foodIngredient);
                 unitOfWork.Save();

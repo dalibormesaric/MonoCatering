@@ -29,7 +29,8 @@ namespace mono.Migrations
                 UserName = "admin", 
                 FirstName = "adminFirst", 
                 LastName = "adminLast", 
-                Email = "u.a@mail.com"
+                Email = "u.a@mail.com",
+                Address = "Addressa 44"
             };
             userManager.Create(adminUser, "admin12345");
             userManager.AddToRole(adminUser.Id, "admin");
@@ -38,7 +39,8 @@ namespace mono.Migrations
                 UserName = "user", 
                 FirstName = "userFirst", 
                 LastName = "userLast", 
-                Email = "u.u@mail.com"
+                Email = "u.u@mail.com",
+                Address = "Addressu 66"
             };
             userManager.Create(userUser, "user12345");
             userManager.AddToRole(userUser.Id, "user");
@@ -80,7 +82,8 @@ namespace mono.Migrations
                 FirstName = "userFirstR1",
                 LastName = "userLastR3",
                 Email = "r.1@mail.com",
-                RestaurantID = restaurant1.ID
+                RestaurantID = restaurant1.ID,
+                Address = "Addressr1 1"
             };
             userManager.Create(restaurant1User, "restaurant1");
             userManager.AddToRole(restaurant1User.Id, "restaurant");
@@ -91,7 +94,8 @@ namespace mono.Migrations
                 FirstName = "userFirstR2",
                 LastName = "userLastR3",
                 Email = "r.2@mail.com",
-                RestaurantID = restaurant1.ID
+                RestaurantID = restaurant1.ID,
+                Address = "Addressr2 2"
             };
             userManager.Create(restaurant2User, "restaurant2");
             userManager.AddToRole(restaurant2User.Id, "restaurant");
@@ -102,7 +106,8 @@ namespace mono.Migrations
                 FirstName = "userFirstR3",
                 LastName = "userLastR3",
                 Email = "r.3@mail.com",
-                RestaurantID = restaurant2.ID
+                RestaurantID = restaurant2.ID,
+                Address = "Addressr3 3"
             };
             userManager.Create(restaurant3User, "restaurant3");
             userManager.AddToRole(restaurant3User.Id, "restaurant");

@@ -312,12 +312,19 @@
     <Content Include="Areas\Auction\Views\Item\Delete.cshtml" />
     <Content Include="Areas\Auction\Views\Order\Create.cshtml" />
     <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
-    <Content Include="Areas\Auction\Views\Item\Details.cshtml" />
     <Content Include="Content\bootstrap-chosen.scss" />
     <Content Include="Content\bootstrap-chosen.less" />
     <Content Include="Scripts\chosen.jquery.js" />
     <Content Include="Scripts\chosen.jquery.min.js" />
     <Content Include="Areas\Auction\Views\Item\_Category.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Orders.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Details.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Details.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Index.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\MakeOffer.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Delete.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Offers.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Accept.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
@@ -395,7 +402,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Models\" />
-    <Folder Include="Areas\Auction\Views\Offer\" />
     <Folder Include="Areas\Auction\Views\Shared\" />
     <Folder Include="Views\Auction\" />
   </ItemGroup>

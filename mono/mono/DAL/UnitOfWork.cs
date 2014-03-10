@@ -18,6 +18,7 @@ namespace mono.DAL
 
         private GenericRepository<FoodIngredient> foodIngredientRepository;
         private GenericRepository<Order> orderRepository;
+        private GenericRepository<Offer> offerRepository;
 
         public virtual GenericRepository<MyUser> UserRepository
         {
@@ -112,6 +113,18 @@ namespace mono.DAL
                     orderRepository = new GenericRepository<Order>(context);
                 }
                 return orderRepository;
+            }
+        }
+
+        public virtual GenericRepository<Offer> OfferRepository
+        {
+            get
+            {
+                if (offerRepository == null)
+                {
+                    offerRepository = new GenericRepository<Offer>(context);
+                }
+                return offerRepository;
             }
         }
 

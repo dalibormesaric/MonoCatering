@@ -1,0 +1,76 @@
+﻿@model IEnumerable<mono.Models.Offer>
+
+@{
+    ViewBag.Title = "Offers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Offers</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Orders")
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateTime)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Restaurant.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DeliveryTime)
+        </th>
+        <th>
+            Items
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateTime)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Restaurant.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Price)
+            €
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DeliveryTime)
+            min
+        </td>
+        <td>
+            @Html.ActionLink("See items", "Details", "Offer", new { id = item.OrderID }, null)
+        </td>
+        <td>
+            @if (item.Order.Status == mono.Models.Status.Expired)
+            {
+                <span class="alert-warning">Expired</span>
+            }
+            else if (item.AcceptedOrderID != null)
+            {
+                <span class="alert-success">Accepted(@item.AcceptedDateTime)</span>
+            }
+            else
+            {
+                @Html.ActionLink("Delete", "Delete", new { id=item.ID })
+            }
+        </td>
+    </tr>
+}
+
+</table>
