@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using mono.Models;
 using mono.DAL;
 using PagedList;
+using System.Linq.Expressions;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -44,29 +45,31 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var restaurants = unitOfWork.RestaurantRepository.Get();
+            Expression<Func<Restaurant, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                restaurants = restaurants.Where(r =>
+                filter = (r =>
                     r.Name.ToUpper().Contains(searchString.ToUpper())
                 );
             }
 
+            Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>> orderBy = null;
+
             switch (sortOrder)
             {
                 case "Name_desc":
-                    restaurants = restaurants.OrderByDescending(r => r.Name);
+                    orderBy = (q => q.OrderByDescending(r => r.Name));
                     break;
                 default:
-                    restaurants = restaurants.OrderBy(r => r.Name);
+                    orderBy = (q => q.OrderBy(r => r.Name));
                     break;
             }
 
-            int pageSize = 3;
+            var restaurants = unitOfWork.RestaurantRepository.Get(filter: filter, orderBy: orderBy);
             int pageNumber = (page ?? 1);
             
-            return View("Index", restaurants.ToPagedList(pageNumber, pageSize));
+            return View("Index", restaurants.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /AdminCategory/Employers/5

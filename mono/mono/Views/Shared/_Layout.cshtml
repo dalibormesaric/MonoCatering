@@ -32,7 +32,8 @@
                     }
                     @if (User.IsInRole("restaurant"))
                     {
-                        <li>@Html.ActionLink("Offers", "Offers", "Auction")</li>
+                        <li>@Html.ActionLink("Orders", "Orders", "Offer", new { area = "Auction" }, null)</li>
+                        <li>@Html.ActionLink("Offers", "Index", "Offer", new { area = "Auction" }, null)</li>
                     }
                     <li>@Html.ActionLink("Restaurants", "Restaurants", "Home", new { area = "" }, null)</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, null)</li>

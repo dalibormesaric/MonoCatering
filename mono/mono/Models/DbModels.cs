@@ -20,7 +20,8 @@ namespace mono.Models
         [Required]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
-        
+
+        [Required]
         [Display(Name = "Address")]
         public string Address { get; set; }
 
@@ -149,6 +150,8 @@ namespace mono.Models
         
         [Required]
         public Status Status { get; set; }
+
+        public int? AcceptedOfferID { get; set; }
         
         [Required]
         public string UserID { get; set; }
@@ -194,14 +197,23 @@ namespace mono.Models
     {
         public int ID { get; set; }
 
+        public string Description { get; set; } //if they don't have something
+
         [Required]
+        public DateTime DateTime { get; set; }
+
+        [Required]
+        [Range(0, int.MaxValue)]
         public decimal Price { get; set; }
         
         [Required]
-        public DateTime DeliveryTime { get; set; }
+        [Range(0, int.MaxValue)]
+        public int DeliveryTime { get; set; } //minutes
         
-        public string Description { get; set; } //if they don't have something
+        public int? AcceptedOrderID { get; set; }
 
+        public DateTime? AcceptedDateTime { get; set; }
+        
         [Required]
         public int RestaurantID { get; set; }
         

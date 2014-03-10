@@ -7,12 +7,14 @@
 
 <h2>Orders</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Basket", "Item")
-</p>
-
 <table class="table">
     <tr>
+        <th>
+            User
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.User.Address)
+        </th>
         <th>
             @Html.DisplayNameFor(model => model.Description)
         </th>
@@ -25,14 +27,19 @@
         <th>
             @Html.DisplayNameFor(model => model.Offers)
         </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FoodIngredients)
-        </th>
         <th></th>
     </tr>
 
 @foreach (var item in Model) {
     <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.User.LastName)
+            @Html.DisplayFor(modelItem => item.User.FirstName)
+            (@Html.DisplayFor(modelItem => item.User.UserName))
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.User.Address)
+        </td>
         <td>
             @Html.DisplayFor(modelItem => item.Description)
         </td>
@@ -43,25 +50,10 @@
             @Html.DisplayFor(modelItem => item.Status)
         </td>
         <td>
-            @if(@item.Offers.Count == 0)
-            {
-                @:-
-            }
-            else
-            {
-                @Html.ActionLink(@item.Offers.Count.ToString(), "Offers", "Order", new { id = item.ID }, null)
-            }
+            @Html.DisplayFor(modelItem => item.Offers.Count)
         </td>
         <td>
-            @Html.ActionLink("See items", "Details", "Order", new { id=item.ID }, null)
-        </td>
-        <td>
-            @if(item.Status == mono.Models.Status.Active)
-            {
-                @Html.ActionLink("Deactivate", "Deactivate", new { id=item.ID }) @:|
-            }
-                
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID })
+            @Html.ActionLink("Make offer (See items)", "Details", "Offer", new { id = item.ID }, null)
         </td>
     </tr>
 }

@@ -7,6 +7,7 @@ using mono.Areas.Admin.Controllers;
 using System.Web.Mvc;
 using System.Net;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace mono.Tests.Controllers.Admin
 {
@@ -21,8 +22,8 @@ namespace mono.Tests.Controllers.Admin
             category = new Models.Category { Name = "category", SizeType = 0 };
 
             category1 = new Models.Category { Name = "category1", SizeType = 0  };
-            category2 = new Models.Category { Name = "cdfgegry2", SizeType = 0, ParentCategory = category1 };
-            category3 = new Models.Category { Name = "casdfgry3", SizeType = 0 };
+            category2 = new Models.Category { Name = "category2", SizeType = 0, ParentCategory = category1 };
+            category3 = new Models.Category { Name = "caadfgry3", SizeType = 0 };
             category4 = new Models.Category { Name = "category4", SizeType = 0, ParentCategory = category1 };
             category5 = new Models.Category { Name = "category5", SizeType = 0 };
             category6 = new Models.Category { Name = "category6", SizeType = 0 };
@@ -100,38 +101,44 @@ namespace mono.Tests.Controllers.Admin
             CategoryNull(id, action);
         }
 
+        private static string searchString = "category";
+        private Expression<Func<Models.Category, bool>> filter = (c =>
+            c.Name.ToUpper().Contains(searchString.ToUpper()) ||
+            (c.ParentCategory != null && c.ParentCategory.Name.ToUpper().Contains(searchString.ToUpper()))
+        );
+        private Func<IQueryable<Models.Category>, IOrderedQueryable<Models.Category>> orderBy = (q => q.OrderBy(c => c.Name));
+        private Func<IQueryable<Models.Category>, IOrderedQueryable<Models.Category>> orderByDescending = (q => q.OrderByDescending(c => c.Name));
+
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, null, "")).Returns(categories);
+            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Models.Category, bool>>>(), It.IsAny<Func<IQueryable<Models.Category>, IOrderedQueryable<Models.Category>>>(), It.IsAny<String>())).Returns(orderBy(categories.Where(filter)));
 
             var CategoryController = new CategoryController(mockUnitOfWork.Object);
 
-            var result = CategoryController.Index(null, "category", null, 2) as ViewResult;
+            var result = CategoryController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Category>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(category6.Name, model.ElementAt(0).Name);
+            Assert.Equal(category1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, null, "")).Returns(categories);
+            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Models.Category, bool>>>(), It.IsAny<Func<IQueryable<Models.Category>, IOrderedQueryable<Models.Category>>>(), It.IsAny<String>())).Returns(orderByDescending(categories.Where(filter)));
 
             var CategoryController = new CategoryController(mockUnitOfWork.Object);
 
-            var result = CategoryController.Index("Name_desc", "category", null, 2) as ViewResult;
+            var result = CategoryController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Category>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(category1.Name, model.ElementAt(0).Name);
+            Assert.Equal(category6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]

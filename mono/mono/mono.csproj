@@ -178,8 +178,10 @@
     <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
     <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
     <Compile Include="Areas\Auction\Controllers\ItemController.cs" />
+    <Compile Include="Areas\Auction\Controllers\OfferController.cs" />
     <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
     <Compile Include="Areas\Auction\Models\ItemViewModels.cs" />
+    <Compile Include="Global.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\CategoryController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
@@ -310,12 +312,19 @@
     <Content Include="Areas\Auction\Views\Item\Delete.cshtml" />
     <Content Include="Areas\Auction\Views\Order\Create.cshtml" />
     <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
-    <Content Include="Areas\Auction\Views\Item\Details.cshtml" />
     <Content Include="Content\bootstrap-chosen.scss" />
     <Content Include="Content\bootstrap-chosen.less" />
     <Content Include="Scripts\chosen.jquery.js" />
     <Content Include="Scripts\chosen.jquery.min.js" />
     <Content Include="Areas\Auction\Views\Item\_Category.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Orders.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Details.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Details.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Index.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\MakeOffer.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\Delete.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Offers.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\Accept.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
@@ -333,7 +342,9 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -380,13 +391,13 @@
     <Content Include="Areas\Admin\Views\Category\Details.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Index.cshtml" />
-    <Content Include="Views\Home\Restaurants.cshtml" />
     <Content Include="Areas\Admin\Views\Food\Ingredients.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Ingredients.cshtml" />
     <Content Include="Areas\Admin\Views\Food\Category.cshtml" />
     <Content Include="Areas\Admin\Views\Restaurant\Employers.cshtml" />
     <Content Include="Areas\Admin\Views\User\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\User\Index.cshtml" />
+    <Content Include="Views\Home\Restaurants.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

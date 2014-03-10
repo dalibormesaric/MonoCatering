@@ -7,6 +7,7 @@ using mono.Areas.Admin.Controllers;
 using System.Web.Mvc;
 using System.Net;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace mono.Tests.Controllers.Admin
 {
@@ -119,39 +120,45 @@ namespace mono.Tests.Controllers.Admin
             IDNull(action);
             FoodNull(id, action);
         }
+        
+        private static string searchString = "food";
+        private Expression<Func<Models.Food, bool>> filter = (f =>
+            f.Name.ToUpper().Contains(searchString.ToUpper()) ||
+            f.Category.Name.ToUpper().Contains(searchString.ToUpper())
+        );
+        private Func<IQueryable<Models.Food>, IOrderedQueryable<Models.Food>> orderBy = (q => q.OrderBy(f => f.Name));
+        private Func<IQueryable<Models.Food>, IOrderedQueryable<Models.Food>> orderByDescending = (q => q.OrderByDescending(f => f.Name));
 
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodRepository.Get(null, null, "")).Returns(foods);
+            mockUnitOfWork.Setup(m => m.FoodRepository.Get(It.IsAny<Expression<Func<Models.Food, bool>>>(), It.IsAny<Func<IQueryable<Models.Food>, IOrderedQueryable<Models.Food>>>(), It.IsAny<String>())).Returns(orderBy(foods.Where(filter)));
 
             var FoodController = new FoodController(mockUnitOfWork.Object);
 
-            var result = FoodController.Index(null, "food", null, 2) as ViewResult;
+            var result = FoodController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Food>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(food6.Name, model.ElementAt(0).Name);
+            Assert.Equal(food1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodRepository.Get(null, null, "")).Returns(foods);
+            mockUnitOfWork.Setup(m => m.FoodRepository.Get(It.IsAny<Expression<Func<Models.Food, bool>>>(), It.IsAny<Func<IQueryable<Models.Food>, IOrderedQueryable<Models.Food>>>(), It.IsAny<String>())).Returns(orderByDescending(foods.Where(filter)));
 
             var FoodController = new FoodController(mockUnitOfWork.Object);
 
-            var result = FoodController.Index("Name_desc", "food", null, 2) as ViewResult;
+            var result = FoodController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Food>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(food1.Name, model.ElementAt(0).Name);
+            Assert.Equal(food6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]

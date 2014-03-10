@@ -9,6 +9,8 @@ using System.Web.Mvc;
 using mono.Models;
 using mono.DAL;
 using PagedList;
+using System.Linq.Expressions;
+using System.Data.Entity.SqlServer;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -45,36 +47,38 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var categorySizes = unitOfWork.CategorySizeRepository.Get();
+            Expression<Func<CategorySize, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                categorySizes = categorySizes.Where(s =>
-                    s.Type.ToString().Contains(searchString.ToUpper()) ||
+                filter = (s =>
+                    SqlFunctions.StringConvert((double)s.Type).Contains(searchString.ToUpper()) ||
                     s.Value.ToUpper().Contains(searchString.ToUpper())
                 );
             }
 
+            Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>> orderBy = null;
+
             switch (sortOrder)
             {
                 case "Value_desc":
-                    categorySizes = categorySizes.OrderByDescending(s => s.Value);
+                    orderBy = (q => q.OrderByDescending(s => s.Value));
                     break;
                 case "Type":
-                    categorySizes = categorySizes.OrderBy(s => s.Type);
+                    orderBy = (q => q.OrderBy(s => s.Type));
                     break;
                 case "Type_desc":
-                    categorySizes = categorySizes.OrderByDescending(s => s.Type);
+                    orderBy = (q => q.OrderByDescending(s => s.Type));
                     break;
                 default:
-                    categorySizes = categorySizes.OrderBy(s => s.Value);
+                    orderBy = (q => q.OrderBy(s => s.Value));
                     break;
             }
 
-            int pageSize = 3;
+            var categorySizes = unitOfWork.CategorySizeRepository.Get(filter: filter, orderBy: orderBy);
             int pageNumber = (page ?? 1);
 
-            return View("Index", categorySizes.ToPagedList(pageNumber, pageSize));
+            return View("Index", categorySizes.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /Admin/CategorySize/Details/5

@@ -7,6 +7,7 @@ using mono.Areas.Admin.Controllers;
 using System.Web.Mvc;
 using System.Net;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace mono.Tests.Controllers.Admin
 {
@@ -61,44 +62,51 @@ namespace mono.Tests.Controllers.Admin
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
         }
 
-       public void ID(string id)
+        public void ID(string id)
         {
             IDNull();
             UserNull(id);
         }
 
+        private static string searchString = "user";
+        private Expression<Func<Models.MyUser, bool>> filter = (u =>
+            u.UserName.ToUpper().Contains(searchString.ToUpper()) ||
+            u.FirstName.ToUpper().Contains(searchString.ToUpper()) ||
+            u.LastName.ToUpper().Contains(searchString.ToUpper())
+        );
+        private Func<IQueryable<Models.MyUser>, IOrderedQueryable<Models.MyUser>> orderBy = (q => q.OrderBy(r => r.UserName));
+        private Func<IQueryable<Models.MyUser>, IOrderedQueryable<Models.MyUser>> orderByDescending = (q => q.OrderByDescending(r => r.UserName));
+
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.UserRepository.Get(null, null, "")).Returns(users);
+            mockUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<Models.MyUser, bool>>>(), It.IsAny<Func<IQueryable<Models.MyUser>, IOrderedQueryable<Models.MyUser>>>(), It.IsAny<String>())).Returns(orderBy(users.Where(filter)));
 
             var UserController = new UserController(mockUnitOfWork.Object);
 
-            var result = UserController.Index(null, "user", null, 2) as ViewResult;
+            var result = UserController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.AdminUserViewModel>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(user6.UserName, model.ElementAt(0).UserName);
+            Assert.Equal(user1.UserName, model.ElementAt(0).UserName);
         }
 
         [Fact]
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.UserRepository.Get(null, null, "")).Returns(users);
+            mockUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<Models.MyUser, bool>>>(), It.IsAny<Func<IQueryable<Models.MyUser>, IOrderedQueryable<Models.MyUser>>>(), It.IsAny<String>())).Returns(orderByDescending(users.Where(filter)));
 
             var UserController = new UserController(mockUnitOfWork.Object);
 
-            var result = UserController.Index("Name_desc", "user", null, 2) as ViewResult;
+            var result = UserController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.AdminUserViewModel>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(user1.UserName, model.ElementAt(0).UserName);
+            Assert.Equal(user6.UserName, model.ElementAt(0).UserName);
         }
 
         [Fact]

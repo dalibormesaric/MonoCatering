@@ -33,5 +33,9 @@ namespace mono.DAL
         public System.Data.Entity.DbSet<mono.Models.Order> Orders { get; set; }
 
         public System.Data.Entity.DbSet<mono.Models.FoodIngredient> FoodIngredients { get; set; }
+
+        public System.Data.Entity.DbSet<mono.Models.Offer> Offers { get; set; }
+
+        //public System.Data.Entity.DbSet<mono.Models.MyUser> IdentityUsers { get; set; }
     }
 }

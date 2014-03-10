@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using mono.Models;
 using mono.DAL;
 using PagedList;
+using System.Linq.Expressions;
 
 namespace mono.Areas.Admin.Controllers
 {
@@ -45,36 +46,38 @@ namespace mono.Areas.Admin.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var food = unitOfWork.FoodRepository.Get();
+            Expression<Func<Food, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                food = food.Where(f =>
+                filter = (f =>
                     f.Name.ToUpper().Contains(searchString.ToUpper()) ||
-                    f.Category.Name.ToUpper().Contains(searchString.ToUpper())
+                    (f.Category != null && f.Category.Name.ToUpper().Contains(searchString.ToUpper()))
                 );
             }
+
+            Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
 
             switch (sortOrder)
             {
                 case "Name_desc":
-                    food = food.OrderByDescending(f => f.Name);
+                    orderBy = (q => q.OrderByDescending(f => f.Name));
                     break;
                 case "Category":
-                    food = food.OrderBy(f => f.Category.Name);
+                    orderBy = (q => q.OrderBy(f => f.Category.Name));
                     break;
                 case "Category_desc":
-                    food = food.OrderByDescending(f => f.Category.Name);
+                    orderBy = (q => q.OrderByDescending(f => f.Category.Name));
                     break;
                 default:
-                    food = food.OrderBy(f => f.Name);
+                    orderBy = (q => q.OrderBy(f => f.Name));
                     break;
             }
 
-            int pageSize = 3;
+            var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
             int pageNumber = (page ?? 1);
 
-            return View("Index", food.ToPagedList(pageNumber, pageSize));
+            return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
         }
       
         // GET: /AdminCategory/Category/5

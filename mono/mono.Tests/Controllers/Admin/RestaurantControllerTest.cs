@@ -105,38 +105,44 @@ namespace mono.Tests.Controllers.Admin
             RestaurantNull(id, action);
         }
 
+        private static string searchString = "restoran";
+        private Expression<Func<Models.Restaurant, bool>> filter = (r =>
+            r.Name.ToUpper().Contains(searchString.ToUpper())
+        );
+        private Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>> orderBy = (q => q.OrderBy(r => r.Name));
+        private Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>> orderByDescending = (q => q.OrderByDescending(r => r.Name));
+
+
         [Fact]
        public void Index_SortingAsc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(null, null, "")).Returns(restaurants);
+            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Models.Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>>>(), It.IsAny<String>())).Returns(orderBy(restaurants.Where(filter)));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
-            var result = restaurantController.Index(null, "restoran", null, 2) as ViewResult;
+            var result = restaurantController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(restaurant6.Name, model.ElementAt(0).Name);
+            Assert.Equal(restaurant1.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
        public void Index_SortingDesc_Filter_PerPage_Page()
         {
             var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(null, null, "")).Returns(restaurants);
+            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Models.Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>>>(), It.IsAny<String>())).Returns(orderByDescending(restaurants.Where(filter)));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
-            var result = restaurantController.Index("Name_desc", "restoran", null, 2) as ViewResult;
+            var result = restaurantController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
-            Assert.Equal(1, model.Count());
-            Assert.Equal(restaurant1.Name, model.ElementAt(0).Name);
+            Assert.Equal(restaurant6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
