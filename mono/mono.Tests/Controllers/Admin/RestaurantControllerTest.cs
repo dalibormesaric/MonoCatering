@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Xunit;
-using mono;
-using mono.Controllers;
-using mono.Areas.Admin.Controllers;
+using Mono;
+using Mono.Controllers;
+using Mono.Areas.Admin.Controllers;
 using Moq;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Data.Entity;
@@ -15,31 +15,34 @@ using System.Data;
 using System.Net;
 using System.Linq.Expressions;
 
-namespace mono.Tests.Controllers.Admin
+using Mono.Data;
+using Mono.Model;
+
+namespace Mono.Tests.Controllers.Admin
 {
     public class RestaurantControllerTest
     {
-        private Models.Restaurant restaurant;
-        private Models.Restaurant restaurant1, restaurant2, restaurant3, restaurant4, restaurant5, restaurant6;
-        private IQueryable<Models.Restaurant> restaurants;
+        private Restaurant restaurant;
+        private Restaurant restaurant1, restaurant2, restaurant3, restaurant4, restaurant5, restaurant6;
+        private IQueryable<Restaurant> restaurants;
 
         public RestaurantControllerTest()
         {
-            restaurant = new Models.Restaurant();
+            restaurant = new Restaurant();
 
-            restaurant1 = new Models.Restaurant { Name = "restoran1", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
-            restaurant2 = new Models.Restaurant { Name = "resafsds2", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
-            restaurant3 = new Models.Restaurant { Name = "resafsds3", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
-            restaurant4 = new Models.Restaurant { Name = "restoran4", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
-            restaurant5 = new Models.Restaurant { Name = "restoran5", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
-            restaurant6 = new Models.Restaurant { Name = "restoran6", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant1 = new Restaurant { Name = "restoran1", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant2 = new Restaurant { Name = "resafsds2", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant3 = new Restaurant { Name = "resafsds3", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant4 = new Restaurant { Name = "restoran4", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant5 = new Restaurant { Name = "restoran5", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
+            restaurant6 = new Restaurant { Name = "restoran6", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
 
-            restaurants = new List<Models.Restaurant> { restaurant1, restaurant2, restaurant3, restaurant4, restaurant5, restaurant6 }.AsQueryable();
+            restaurants = new List<Restaurant> { restaurant1, restaurant2, restaurant3, restaurant4, restaurant5, restaurant6 }.AsQueryable();
         }
 
         public void IDNull(string action)
         {
-            var restaurantController = new RestaurantController(new Mock<mono.DAL.UnitOfWork>().Object);
+            var restaurantController = new RestaurantController(new Mock<UnitOfWork>().Object);
 
             HttpStatusCodeResult result;
 
@@ -68,9 +71,9 @@ namespace mono.Tests.Controllers.Admin
 
         public void RestaurantNull(int id, string action)
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
 
-            Models.Restaurant restaurant = null;
+            Restaurant restaurant = null;
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(id)).Returns(restaurant);
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
@@ -106,23 +109,23 @@ namespace mono.Tests.Controllers.Admin
         }
 
         private static string searchString = "restoran";
-        private Expression<Func<Models.Restaurant, bool>> filter = (r =>
+        private Expression<Func<Restaurant, bool>> filter = (r =>
             r.Name.ToUpper().Contains(searchString.ToUpper())
         );
-        private Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>> orderBy = (q => q.OrderBy(r => r.Name));
-        private Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>> orderByDescending = (q => q.OrderByDescending(r => r.Name));
+        private Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>> orderBy = (q => q.OrderBy(r => r.Name));
+        private Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>> orderByDescending = (q => q.OrderByDescending(r => r.Name));
 
 
         [Fact]
        public void Index_SortingAsc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Models.Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>>>(), It.IsAny<String>())).Returns(orderBy(restaurants.Where(filter)));
+            var mockUnitOfWork = new Mock<UnitOfWork>();
+            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>>>(), It.IsAny<String>())).Returns(orderBy(restaurants.Where(filter)));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Index(null, searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
+            var model = result.ViewData.Model as IEnumerable<Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
@@ -132,13 +135,13 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Index_SortingDesc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Models.Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Models.Restaurant>, IOrderedQueryable<Models.Restaurant>>>(), It.IsAny<String>())).Returns(orderByDescending(restaurants.Where(filter)));
+            var mockUnitOfWork = new Mock<UnitOfWork>();
+            mockUnitOfWork.Setup(m => m.RestaurantRepository.Get(It.IsAny<Expression<Func<Restaurant, bool>>>(), It.IsAny<Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>>>(), It.IsAny<String>())).Returns(orderByDescending(restaurants.Where(filter)));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Index("Name_desc", searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<Models.Restaurant>;
+            var model = result.ViewData.Model as IEnumerable<Restaurant>;
 
             Assert.Equal("Index", result.ViewName);
 
@@ -150,20 +153,20 @@ namespace mono.Tests.Controllers.Admin
         {
             ID(6, "Employers");
 
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
 
-            var restaurant = new Models.Restaurant(){Name = "restaurant"};
+            var restaurant = new Restaurant(){Name = "restaurant"};
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(6)).Returns(restaurant);
 
-            var user1 = new Models.MyUser { FirstName = "zzzz", LastName = "z" };
-            var user2 = new Models.MyUser { FirstName = "aaaa", LastName = "a" };
-            var users = new List<Models.MyUser>() { user1, user2 }.AsQueryable();
-            mockUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<Models.MyUser, bool>>>(), It.IsAny<Func<IQueryable<Models.MyUser>, IOrderedQueryable<Models.MyUser>>>(), "")).Returns(users.OrderBy(u => u.LastName + " " + u.FirstName));
+            var user1 = new MyUser { FirstName = "zzzz", LastName = "z" };
+            var user2 = new MyUser { FirstName = "aaaa", LastName = "a" };
+            var users = new List<MyUser>() { user1, user2 }.AsQueryable();
+            mockUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<MyUser, bool>>>(), It.IsAny<Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>>>(), "")).Returns(users.OrderBy(u => u.LastName + " " + u.FirstName));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Employers(6) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<Models.MyUser>;
+            var model = result.ViewData.Model as IEnumerable<MyUser>;
 
             Assert.Equal("Employers", result.ViewName);
 
@@ -179,12 +182,12 @@ namespace mono.Tests.Controllers.Admin
         {
             ID(6, "Details");
 
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(6)).Returns(restaurant);
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
             var result = restaurantController.Details(6) as ViewResult;
-            var model = result.ViewData.Model as Models.Restaurant;
+            var model = result.ViewData.Model as Restaurant;
 
             Assert.Equal("Details", result.ViewName);
             Assert.Equal(restaurant, model);
@@ -193,7 +196,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
         public void Create_Get()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
             var result = restaurantController.Create() as ViewResult;
 
@@ -203,7 +206,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Create_DataException()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();    
+            var mockUnitOfWork = new Mock<UnitOfWork>();    
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Insert(restaurant));
             mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
@@ -217,7 +220,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Create_InvalidModel()
         {          
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
             restaurantController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
@@ -230,7 +233,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Create_Valid()
         {           
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Insert(restaurant));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
@@ -245,13 +248,13 @@ namespace mono.Tests.Controllers.Admin
         {
             ID(6, "Edit");
 
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(6)).Returns(restaurant);
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Edit(6) as ViewResult;
-            var model = result.ViewData.Model as Models.Restaurant;
+            var model = result.ViewData.Model as Restaurant;
 
             Assert.Equal("Edit", result.ViewName);           
             Assert.Equal(restaurant, model);
@@ -260,7 +263,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Edit_DataException()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Update(restaurant));
             mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
@@ -274,7 +277,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Edit_InvalidModel()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
             restaurantController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
@@ -287,7 +290,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void Edit_Valid()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Update(restaurant));         
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
@@ -302,13 +305,13 @@ namespace mono.Tests.Controllers.Admin
         {
             ID(6, "DeleteFalse");
 
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(6)).Returns(restaurant);
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Delete(6) as ViewResult;
-            var model = result.ViewData.Model as Models.Restaurant;
+            var model = result.ViewData.Model as Restaurant;
 
             Assert.Equal("Delete", result.ViewName);
             Assert.Equal(restaurant, model);
@@ -319,13 +322,13 @@ namespace mono.Tests.Controllers.Admin
         {
             ID(6, "DeleteTrue");
 
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.GetByID(6)).Returns(restaurant);
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);
 
             var result = restaurantController.Delete(6, true) as ViewResult;
-            var model = result.ViewData.Model as Models.Restaurant;
+            var model = result.ViewData.Model as Restaurant;
 
             Assert.Equal("Delete", result.ViewName);
             Assert.Equal(restaurant, model);
@@ -335,7 +338,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void DeleteConfirmed_DataException()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Delete(6));
             mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
@@ -350,7 +353,7 @@ namespace mono.Tests.Controllers.Admin
         [Fact]
        public void DeleteConfirmed_Valid()
         {
-            var mockUnitOfWork = new Mock<mono.DAL.UnitOfWork>();
+            var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.RestaurantRepository.Delete(6));
 
             var restaurantController = new RestaurantController(mockUnitOfWork.Object);

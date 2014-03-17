@@ -6,13 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using mono.Models;
-using mono.DAL;
+using Mono.Model;
+using Mono.Models;
+using Mono.Data;
 using PagedList;
 using AutoMapper;
 using System.Linq.Expressions;
 
-namespace mono.Areas.Admin.Controllers
+namespace Mono.Areas.Admin.Controllers
 {
     [Authorize(Roles = "admin")]
     public class UserController : Controller

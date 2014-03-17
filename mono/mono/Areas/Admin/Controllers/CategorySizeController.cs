@@ -6,13 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using mono.Models;
-using mono.DAL;
+using Mono.Model;
+using Mono.Data;
 using PagedList;
 using System.Linq.Expressions;
 using System.Data.Entity.SqlServer;
 
-namespace mono.Areas.Admin.Controllers
+namespace Mono.Areas.Admin.Controllers
 {
     [Authorize(Roles = "admin")]
     public class CategorySizeController : Controller

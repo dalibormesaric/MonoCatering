@@ -8,15 +8,16 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
-using mono.Models;
-using mono.DAL;
+using Mono.Model;
+using Mono.Models;
+using Mono.Data;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography;
 using System.Data.Entity;
 
-namespace mono.Controllers
+namespace Mono.Controllers
 {
     [Authorize]
     public class AccountController : Controller

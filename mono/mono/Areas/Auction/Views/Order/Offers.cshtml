@@ -1,4 +1,4 @@
-﻿@model IEnumerable<mono.Models.Offer>
+﻿@model IEnumerable<Mono.Model.Offer>
 
 @{
     ViewBag.Title = "Offers";
@@ -47,11 +47,11 @@
             min
         </td>
         <td>
-            @if (item.Order.Status == mono.Models.Status.Active) 
+            @if (item.Order.Status == Mono.Model.Status.Active) 
             { 
                 @Html.ActionLink("Accept", "Accept", new { id=item.ID })
             }
-            else if (item.Order.Status == mono.Models.Status.Accepted)
+            else if (item.Order.Status == Mono.Model.Status.Accepted)
             {
                 <span class="alert-success">Accepted</span>
             }

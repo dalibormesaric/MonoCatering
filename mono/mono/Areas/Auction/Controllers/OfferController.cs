@@ -1,15 +1,15 @@
-﻿using mono.DAL;
+﻿using Mono.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
-using mono.Models;
+using Mono.Model;
 using System.Data;
 using System.Net;
 
-namespace mono.Areas.Auction.Controllers
+namespace Mono.Areas.Auction.Controllers
 {
     [Authorize(Roles = "restaurant")]
     public class OfferController : Controller
@@ -38,7 +38,7 @@ namespace mono.Areas.Auction.Controllers
         // GET: /Auction/Offer/orders
         public ActionResult Orders()
         {
-            var orders = unitOfWork.OrderRepository.Get(o => o.Status == mono.Models.Status.Active, q => q.OrderByDescending(o => o.DateTime)).ToList();
+            var orders = unitOfWork.OrderRepository.Get(o => o.Status == Mono.Model.Status.Active, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Orders", orders);
         }
 

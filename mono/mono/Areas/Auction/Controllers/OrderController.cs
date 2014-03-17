@@ -6,12 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using mono.Models;
-using mono.Areas.Auction.Models;
-using mono.DAL;
+using Mono.Model;
+using Mono.Areas.Auction.Models;
+using Mono.Data;
 using Microsoft.AspNet.Identity;
 
-namespace mono.Areas.Auction.Controllers
+namespace Mono.Areas.Auction.Controllers
 {
     [Authorize(Roles = "user")]
     public class OrderController : Controller

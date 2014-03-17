@@ -2,9 +2,9 @@
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using mono.DAL;
+using Mono.Data;
 
-namespace mono.Models
+namespace Mono.Models
 {
     public class ForgotPasswordModel
     {

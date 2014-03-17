@@ -1,4 +1,4 @@
-﻿@model IEnumerable<mono.Models.Order>
+﻿@model IEnumerable<Mono.Model.Order>
 
 @{
     ViewBag.Title = "Orders";
@@ -56,7 +56,7 @@
             @Html.ActionLink("See items", "Details", "Order", new { id=item.ID }, null)
         </td>
         <td>
-            @if(item.Status == mono.Models.Status.Active)
+            @if(item.Status == Mono.Model.Status.Active)
             {
                 @Html.ActionLink("Deactivate", "Deactivate", new { id=item.ID }) @:|
             }

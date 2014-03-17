@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace mono
+namespace Mono
 {
     public static class Global
     {

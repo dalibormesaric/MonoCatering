@@ -2,8 +2,8 @@
 using Owin;
 using System.Globalization;
 
-[assembly: OwinStartupAttribute(typeof(mono.Startup))]
-namespace mono
+[assembly: OwinStartupAttribute(typeof(Mono.Startup))]
+namespace Mono
 {
     public partial class Startup
     {

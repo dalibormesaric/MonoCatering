@@ -1,11 +1,11 @@
-﻿@model mono.Areas.Auction.Models.ItemViewModel
+﻿@model Mono.Areas.Auction.Models.ItemViewModel
 
 <table class="table">
     @foreach (var item in Model.ListCategoryFood)
     {
         <tr>
             <td>
-                @if (item.Type == mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
+                @if (item.Type == Mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
                 {
                     using (Ajax.BeginForm("Index",new { id = item.ItemID }, 
                         new AjaxOptions

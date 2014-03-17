@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using mono.Models;
+using Mono.Model;
 
-namespace mono.DAL
+namespace Mono.Data
 {
     public class UnitOfWork : IDisposable
     {

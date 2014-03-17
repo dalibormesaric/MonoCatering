@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
-using mono.Models;
-using mono.DAL;
+using Mono.Model;
+using Mono.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Web.Mvc;
 using PagedList;
 using System.Linq.Expressions;
 
-namespace mono.Controllers
+namespace Mono.Controllers
 {
     public class HomeController : Controller
     {

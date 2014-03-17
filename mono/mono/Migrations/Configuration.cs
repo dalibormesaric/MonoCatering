@@ -1,22 +1,22 @@
-namespace mono.Migrations
+namespace Mono.Migrations
 {
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Identity.EntityFramework;
-    using mono.Models;
-    using mono.DAL;
+    using Mono.Model;
+    using Mono.Data;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<mono.DAL.MonoDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<Mono.Data.MonoDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(mono.DAL.MonoDbContext context)
+        protected override void Seed(Mono.Data.MonoDbContext context)
         {
             var userManager = new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext()));
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new MonoDbContext()));
