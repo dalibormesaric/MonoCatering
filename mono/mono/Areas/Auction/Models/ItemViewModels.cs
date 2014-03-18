@@ -1,10 +1,10 @@
-﻿using mono.Models;
+﻿using Mono.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace mono.Areas.Auction.Models
+namespace Mono.Areas.Auction.Models
 {
     public enum ListCategoryFoodItemType
     {

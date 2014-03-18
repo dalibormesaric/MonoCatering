@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace mono.Areas.Admin
+namespace Mono.Areas.Admin
 {
     public class AdminAreaRegistration : AreaRegistration 
     {

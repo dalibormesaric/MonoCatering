@@ -4,7 +4,7 @@ using System.Linq;
 using System.Data.Entity;
 using System.Linq.Expressions;
 
-namespace mono.DAL
+namespace Mono.Data
 {
     public class GenericRepository<TEntity> where TEntity : class
     {

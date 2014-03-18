@@ -1,9 +1,9 @@
-﻿using mono.Areas.Admin.Controllers;
+﻿using Mono.Areas.Admin.Controllers;
 using System;
 using System.Web.Mvc;
 using Xunit;
 
-namespace mono.Tests.Controllers.Admin
+namespace Mono.Tests.Controllers.Admin
 {
     public class AdminControllerTest
     {

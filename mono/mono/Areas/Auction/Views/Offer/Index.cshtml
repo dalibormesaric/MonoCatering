@@ -1,4 +1,4 @@
-﻿@model IEnumerable<mono.Models.Offer>
+﻿@model IEnumerable<Mono.Model.Offer>
 
 @{
     ViewBag.Title = "Offers";
@@ -57,7 +57,7 @@
             @Html.ActionLink("See items", "Details", "Offer", new { id = item.OrderID }, null)
         </td>
         <td>
-            @if (item.Order.Status == mono.Models.Status.Expired)
+            @if (item.Order.Status == Mono.Model.Status.Expired)
             {
                 <span class="alert-warning">Expired</span>
             }

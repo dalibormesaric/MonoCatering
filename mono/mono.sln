@@ -1,16 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Web
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mono", "mono\mono.csproj", "{89EC6D4A-A543-48F5-9FCC-61A3F2774C25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono", "mono\Mono.csproj", "{89EC6D4A-A543-48F5-9FCC-61A3F2774C25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mono.Tests", "mono.Tests\mono.Tests.csproj", "{B10123DF-8CF4-47E4-A522-E8DB0AF4E503}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Tests", "mono.Tests\Mono.Tests.csproj", "{B10123DF-8CF4-47E4-A522-E8DB0AF4E503}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{AB559430-4922-486E-B845-349BF74EDD5B}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Model", "Mono.Model\Mono.Model.csproj", "{E0800B07-1213-4ACC-BECC-E093BF72396C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Data", "Mono.Data\Mono.Data.csproj", "{6D2B6ED1-E80B-4A18-A11A-BA717363D17D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +27,14 @@ Global
 		{B10123DF-8CF4-47E4-A522-E8DB0AF4E503}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B10123DF-8CF4-47E4-A522-E8DB0AF4E503}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B10123DF-8CF4-47E4-A522-E8DB0AF4E503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0800B07-1213-4ACC-BECC-E093BF72396C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0800B07-1213-4ACC-BECC-E093BF72396C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0800B07-1213-4ACC-BECC-E093BF72396C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0800B07-1213-4ACC-BECC-E093BF72396C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D2B6ED1-E80B-4A18-A11A-BA717363D17D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D2B6ED1-E80B-4A18-A11A-BA717363D17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D2B6ED1-E80B-4A18-A11A-BA717363D17D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D2B6ED1-E80B-4A18-A11A-BA717363D17D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

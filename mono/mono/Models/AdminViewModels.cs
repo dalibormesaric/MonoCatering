@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace mono.Models
+namespace Mono.Models
 {
     public class AdminUserViewModel
     {

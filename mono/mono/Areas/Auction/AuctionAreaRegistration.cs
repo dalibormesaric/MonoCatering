@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace mono.Areas.Auction
+namespace Mono.Areas.Auction
 {
     public class AuctionAreaRegistration : AreaRegistration 
     {

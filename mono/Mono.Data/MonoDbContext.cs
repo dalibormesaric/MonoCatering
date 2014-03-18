@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
-using mono.Models;
+using Mono.Model;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
-namespace mono.DAL
+namespace Mono.Data
 {
     public class MonoDbContext : IdentityDbContext<MyUser>
     {
@@ -30,11 +30,11 @@ namespace mono.DAL
         public virtual DbSet<Food> Foods { get; set; }
         public virtual DbSet<Ingredient> Ingredients { get; set; }
 
-        public System.Data.Entity.DbSet<mono.Models.Order> Orders { get; set; }
+        public System.Data.Entity.DbSet<Mono.Model.Order> Orders { get; set; }
 
-        public System.Data.Entity.DbSet<mono.Models.FoodIngredient> FoodIngredients { get; set; }
+        public System.Data.Entity.DbSet<Mono.Model.FoodIngredient> FoodIngredients { get; set; }
 
-        public System.Data.Entity.DbSet<mono.Models.Offer> Offers { get; set; }
+        public System.Data.Entity.DbSet<Mono.Model.Offer> Offers { get; set; }
 
         //public System.Data.Entity.DbSet<mono.Models.MyUser> IdentityUsers { get; set; }
     }

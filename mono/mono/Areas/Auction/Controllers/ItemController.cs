@@ -1,6 +1,7 @@
-﻿using mono.Areas.Auction.Models;
-using mono.DAL;
-using mono.Models;
+﻿using Mono.Areas.Auction.Models;
+using Mono.Data;
+using Mono.Model;
+using Mono.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using System.Data;
 
-namespace mono.Areas.Auction.Controllers
+namespace Mono.Areas.Auction.Controllers
 {
     [Authorize(Roles = "user")]
     public class ItemController : Controller
