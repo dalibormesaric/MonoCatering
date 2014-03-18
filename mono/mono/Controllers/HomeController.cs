@@ -81,6 +81,17 @@ namespace Mono.Controllers
             return View();
         }
 
-        
+        [Authorize(Roles = "user")]
+        public ActionResult ChatUser()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "restaurant")]
+        public ActionResult ChatRestaurant()
+        {
+            return View();
+        }
+
     }
 }
