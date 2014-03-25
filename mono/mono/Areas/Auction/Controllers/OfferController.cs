@@ -15,22 +15,25 @@ namespace Mono.Areas.Auction.Controllers
     public class OfferController : Controller
     {
         private UnitOfWork unitOfWork;
+        private Helper helper;
 
         public OfferController()
         {
             unitOfWork = new UnitOfWork();
+            helper = new Helper();
         }
 
-        public OfferController(UnitOfWork unitOfWork)
+        public OfferController(UnitOfWork unitOfWork, Helper helper)
         {
             this.unitOfWork = unitOfWork;
+            this.helper = helper;
         }
 
         //
         // GET: /Auction/Offer/
         public ActionResult Index()
         {
-            var restaurantID = unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID;
+            var restaurantID = unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID;
             var offers = unitOfWork.OfferRepository.Get(o => o.RestaurantID == restaurantID, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Index", offers);
         }
@@ -44,27 +47,39 @@ namespace Mono.Areas.Auction.Controllers
 
         //
         // GET: /Auction/Offer/Details
-        public ActionResult Details(int id)
+        public ActionResult Details(int? id)
         {
-            var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.OrderID == id).ToList();
-
-            if (foodIngredients.Count == 0)
-                return HttpNotFound();
-
+            if(id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest); 
+            }
             var order = unitOfWork.OrderRepository.GetByID(id);
+            if (order == null)
+            {
+                return HttpNotFound();
+            }
 
-            ViewBag.Description = order.Description;
-            ViewBag.Address = order.User.Address;
-            ViewBag.OrderID = order.ID;
-
-            return View("Details", foodIngredients);
+            return View("Details", order);
         }
 
         // GET: /Auction/Offer/MakeOffer/3
-        public ActionResult MakeOffer(int id)
+        public ActionResult MakeOffer(int? id)
         {
-            ViewBag.OrderID = id;
+            if(id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest); 
+            }
+            var order = unitOfWork.OrderRepository.GetByID(id);
+            if (order == null)
+            {
+                return HttpNotFound();
+            }
+            if (order.Status != Status.Active)
+            {
+                return RedirectToAction("Orders");
+            }
 
+            ViewBag.OrderID = id;
             return View("MakeOffer");
         }
 
@@ -75,26 +90,23 @@ namespace Mono.Areas.Auction.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult MakeOffer([Bind(Include = "ID,Description,Price,DeliveryTime,OrderID")] Offer offer)
         {
-            ViewBag.OrderID = offer.OrderID;
-
             try
             {
                 if (ModelState.IsValid)
                 {
-                    offer.DateTime = System.DateTime.Now;
-                    offer.RestaurantID = (int)unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID;
-
-                    var order = unitOfWork.OrderRepository.GetByID(offer.OrderID);
-
-                    if (order == null || order.Status != Status.Active)
+                    if (unitOfWork.OrderRepository.GetByID(offer.OrderID).Status != Status.Active)
                     {
                         ModelState.AddModelError(string.Empty, "Order no longer active.");
-                        return View("MakeOffer", offer);
                     }
+                    else
+                    {
+                        offer.DateTime = System.DateTime.Now;
+                        offer.RestaurantID = (int)unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID;
 
-                    unitOfWork.OfferRepository.Insert(offer);
-                    unitOfWork.Save();
-                    return RedirectToAction("Index");
+                        unitOfWork.OfferRepository.Insert(offer);
+                        unitOfWork.Save();
+                        return RedirectToAction("Index");
+                    }
                 }
             }
             catch (DataException /* dex */)
@@ -103,6 +115,7 @@ namespace Mono.Areas.Auction.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
+            ViewBag.OrderID = offer.OrderID;
             return View("MakeOffer", offer);
         }
 
@@ -118,9 +131,13 @@ namespace Mono.Areas.Auction.Controllers
                 ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
             Offer offer = unitOfWork.OfferRepository.GetByID((int)id);
-            if (offer == null || offer.AcceptedOrderID != null)
+            if (offer == null)
             {
                 return HttpNotFound();
+            }
+            if (offer.RestaurantID != unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID || offer.AcceptedOrderID != null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             return View("Delete", offer);
         }
@@ -133,19 +150,19 @@ namespace Mono.Areas.Auction.Controllers
             try
             {
                 Offer offer = unitOfWork.OfferRepository.GetByID(id);
-                if (offer.AcceptedOrderID != null)
+                if (offer.RestaurantID == unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID && offer.AcceptedOrderID == null)
                 {
-                    return HttpNotFound();
+                    unitOfWork.OfferRepository.Delete(id);
+                    unitOfWork.Save();
+
+                    return RedirectToAction("Index");
                 }
-                unitOfWork.OfferRepository.Delete(id);
-                unitOfWork.Save();
             }
             catch (DataException /* dex */)
             {
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
-                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Delete", new { id = id, saveChangesError = true });
         }
 	}
 }

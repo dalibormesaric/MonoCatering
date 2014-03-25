@@ -113,6 +113,10 @@
     <Compile Include="Controllers\Admin\RestaurantControllerTest.cs" />
     <Compile Include="Controllers\Admin\IngredientControllerTest.cs" />
     <Compile Include="Controllers\Admin\UserControllerTest.cs" />
+    <Compile Include="Controllers\Auction\BasketControllerTest.cs" />
+    <Compile Include="Controllers\Auction\OfferControllerTest.cs" />
+    <Compile Include="Controllers\Auction\OrderControllerTest.cs" />
+    <Compile Include="Controllers\Auction\ItemControllerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

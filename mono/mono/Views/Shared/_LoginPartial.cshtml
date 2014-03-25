@@ -8,7 +8,7 @@
     <ul class="nav navbar-nav navbar-right">
         @if (User.IsInRole("user"))
         { 
-            <li>@Html.ActionLink("Basket", "Basket", "Item", new { area = "Auction" }, null)</li>
+            <li>@Html.ActionLink("Basket", "Index", "Basket", new { area = "Auction" }, null)</li>
         }
         <li>
             @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Manage", "Account", new { area = "" }, htmlAttributes: new { title = "Manage" })

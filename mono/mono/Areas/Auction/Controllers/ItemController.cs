@@ -15,44 +15,33 @@ namespace Mono.Areas.Auction.Controllers
 {
     [Authorize(Roles = "user")]
     public class ItemController : Controller
-    {
-        private MonoDbContext db = new MonoDbContext();
-        
+    {       
         private UnitOfWork unitOfWork;
+        private Helper helper;
 
         public ItemController()
         {
             unitOfWork = new UnitOfWork();
+            helper = new Helper();
         }
 
-        public ItemController(UnitOfWork unitOfWork)
+        public ItemController(UnitOfWork unitOfWork, Helper helper)
         {
             this.unitOfWork = unitOfWork;
+            this.helper = helper;
         }
 
         //
         // GET: /Auction/Item/
         public ActionResult Index(int? id)
         {
-            ItemViewModel itemViewModel = new ItemViewModel();
-            itemViewModel.ListCategoryFood = new List<ListCategoryFoodItem>();
+            ItemViewModel itemViewModel;
 
             if (id == null)
             {
-                itemViewModel.Name = "All";
-                
-                var categories = unitOfWork.CategoryRepository.Get(c => c.ParentCategoryID == null).OrderBy(c => c.Name);
+                var subCategories = unitOfWork.CategoryRepository.Get(filter: c => c.ParentCategoryID == null, orderBy: q => q.OrderBy(c => c.Name), includeProperties: "Food");
 
-                foreach (var category in categories)
-                {
-                    ListCategoryFoodItem listCategoryFoodItem = new ListCategoryFoodItem
-                    {
-                        Name = category.Name,
-                        ItemID = category.ID,
-                        Type = ListCategoryFoodItemType.Category
-                    };
-                    itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);
-                }
+                itemViewModel = AddCategoryFood("All", null, subCategories, new List<Food>());
             }
             else
             {
@@ -61,12 +50,14 @@ namespace Mono.Areas.Auction.Controllers
                 if (category == null)
                     return HttpNotFound();
 
-                itemViewModel.Name = category.Name;
-                itemViewModel.ParentCategoryID = category.ParentCategoryID;
-                AddCategoryFood(itemViewModel, category);
+                var subCategories = category.ChildCategory.OrderBy(c => c.Name).ToList();
+                var foods = category.Food.OrderBy(f => f.Name).ToList();
+
+                itemViewModel = AddCategoryFood(category.Name, category.ParentCategoryID, subCategories, foods);
             }
             
-            if(Request.IsAjaxRequest())
+            //if(Request.IsAjaxRequest())
+            if (helper.isAjaxRequest())
             {
                 return PartialView("_Category", itemViewModel);
             }
@@ -112,55 +103,53 @@ namespace Mono.Areas.Auction.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            if (unitOfWork.FoodRepository.GetByID(foodIngredientViewModel.FoodID) == null)
-            {
-                return HttpNotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                FoodIngredient foodIngredient = new FoodIngredient();
-
-                foodIngredient.UserID = User.Identity.GetUserId();
-                foodIngredient.FoodID = (int)foodIngredientViewModel.FoodID;
-                foodIngredient.Description = foodIngredientViewModel.Description;
-                foodIngredient.CategorySizeID = foodIngredientViewModel.CategorySizeID;
-                foodIngredient.Pieces = foodIngredientViewModel.Pieces;
-
-                foodIngredient.Ingredients = new List<Ingredient>();
-
-                if (foodIngredientViewModel.Ingredients != null)
-                    foreach (string stringId in foodIngredientViewModel.Ingredients)
-                    {
-                        int id;
-                    
-                        if (Int32.TryParse(stringId, out id))
-                        {
-                            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
-
-                            if (ingredient != null)
-                            {
-                                foodIngredient.Ingredients.Add(ingredient);
-                            }
-                        }
-                    }
-
-                unitOfWork.FoodIngredientRepository.Insert(foodIngredient);
-                unitOfWork.Save();
-
-                return RedirectToAction("Index");
-            }
-
-            if (foodIngredientViewModel.FoodID == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            Food food = unitOfWork.FoodRepository.GetByID(foodIngredientViewModel.FoodID);
+            var food = unitOfWork.FoodRepository.GetByID(foodIngredientViewModel.FoodID);
 
             if (food == null)
             {
                 return HttpNotFound();
+            }
+
+            try 
+            { 
+                if (ModelState.IsValid)
+                {
+                    FoodIngredient foodIngredient = new FoodIngredient();
+
+                    foodIngredient.UserID = helper.getCurrentUserID();
+                    foodIngredient.FoodID = (int)foodIngredientViewModel.FoodID;
+                    foodIngredient.Description = foodIngredientViewModel.Description;
+                    foodIngredient.CategorySizeID = foodIngredientViewModel.CategorySizeID;
+                    foodIngredient.Pieces = foodIngredientViewModel.Pieces;
+
+                    foodIngredient.Ingredients = new List<Ingredient>();
+
+                    if (foodIngredientViewModel.Ingredients != null)
+                        foreach (string stringId in foodIngredientViewModel.Ingredients)
+                        {
+                            int id;
+                    
+                            if (Int32.TryParse(stringId, out id))
+                            {
+                                Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
+
+                                if (ingredient != null)
+                                {
+                                    foodIngredient.Ingredients.Add(ingredient);
+                                }
+                            }
+                        }
+
+                    unitOfWork.FoodIngredientRepository.Insert(foodIngredient);
+                    unitOfWork.Save();
+
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (DataException /* dex */)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
             Category category = unitOfWork.CategoryRepository.GetByID(food.CategoryID);
@@ -168,56 +157,7 @@ namespace Mono.Areas.Auction.Controllers
             ViewBag.CategorySizeID = new SelectList(unitOfWork.SizeValues(category.SizeType), "ID", "Value");
             ViewBag.IngredientsList = new MultiSelectList(unitOfWork.IngredientsForFood(food), "ID", "Name");
 
-            return View(foodIngredientViewModel);
-        }
-
-
-        //
-        // GET: /Auction/Order/Basket
-        public ActionResult Basket()
-        {
-            var userID = User.Identity.GetUserId();
-            var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
-
-            return View("Basket", foodIngredients);
-        }
-
-        // GET: /Auction/Order/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
-            FoodIngredient foodIngredient = unitOfWork.FoodIngredientRepository.GetByID((int)id);
-            if (foodIngredient == null)
-            {
-                return HttpNotFound();
-            }
-            return View("Delete", foodIngredient);
-        }
-
-        // POST: /Auction/Order/Delete/5
-        [HttpPost, ActionName("Delete")] 
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            try
-            {
-                FoodIngredient foodIngredient = unitOfWork.FoodIngredientRepository.GetByID(id);
-                unitOfWork.FoodIngredientRepository.Delete(id);
-                unitOfWork.Save();
-            }
-            catch (DataException /* dex */)
-            {
-                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
-                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
-            }
-            return RedirectToAction("Basket");
+            return View("Add", foodIngredientViewModel);
         }
 
         protected override void Dispose(bool disposing)
@@ -231,9 +171,14 @@ namespace Mono.Areas.Auction.Controllers
 
         #region HelperFunctions
 
-        private void AddCategoryFood(ItemViewModel itemViewModel, Category category)
+        private ItemViewModel AddCategoryFood(String name, int? parentCategoryID, IEnumerable<Category> subCategories, IEnumerable<Food> foods)
         {
-            var subCategories = category.ChildCategory.OrderBy(c => c.Name).ToList();
+            ItemViewModel itemViewModel = new ItemViewModel
+            {
+                Name = name,
+                ParentCategoryID = parentCategoryID,
+                ListCategoryFood = new List<ListCategoryFoodItem>()
+            };
 
             foreach (var subcategory in subCategories)
             {
@@ -246,8 +191,6 @@ namespace Mono.Areas.Auction.Controllers
                 itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);
             }
 
-            var foods = category.Food.OrderBy(f => f.Name).ToList();
-
             foreach (var food in foods)
             {
                 ListCategoryFoodItem listCategoryFoodItem = new ListCategoryFoodItem
@@ -258,6 +201,8 @@ namespace Mono.Areas.Auction.Controllers
                 };
                 itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);
             }
+
+            return itemViewModel;
         }
 
         #endregion

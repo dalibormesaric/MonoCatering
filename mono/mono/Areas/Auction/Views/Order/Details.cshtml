@@ -16,7 +16,14 @@
         </dt>
 
         <dd>
-            @ViewBag.Description
+            @if (string.IsNullOrEmpty(ViewBag.Description))
+            {
+                @: -
+            }
+            else
+            {
+                @ViewBag.Description
+            }
         </dd>
 
         <dt>
@@ -69,4 +76,4 @@
     </dl>
 </div>
 
-@Html.ActionLink("Orders", "Index", "Order")
+@Html.ActionLink("Back to List", "Index", "Order")
