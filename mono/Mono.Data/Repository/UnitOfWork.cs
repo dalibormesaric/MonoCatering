@@ -155,9 +155,9 @@ namespace Mono.Data
 
         #region HelperFunctions
 
-        public IEnumerable<CategorySize> SizeValues(int sizeType)
+        public virtual List<CategorySize> SizeValues(int sizeType)
         {
-            return CategorySizeRepository.Get(s => s.Type == sizeType, q => q.OrderBy(s => s.Order), "");
+            return CategorySizeRepository.Get(s => s.Type == sizeType, q => q.OrderBy(s => s.Order), "").ToList();
         }
 
         public virtual String SizeValuesString(int sizeType)

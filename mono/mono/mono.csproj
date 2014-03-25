@@ -193,6 +193,8 @@
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
     <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
+    <Compile Include="Areas\Auction\Controllers\BasketController.cs" />
+    <Compile Include="Areas\Auction\Helper.cs" />
     <Compile Include="Areas\Auction\Controllers\ItemController.cs" />
     <Compile Include="Areas\Auction\Controllers\OfferController.cs" />
     <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
@@ -325,12 +327,11 @@
     <Content Include="Areas\Admin\Views\CategorySize\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\CategorySize\Index.cshtml" />
     <Content Include="Areas\Admin\Views\CategorySize\Type.cshtml" />
-    <Content Include="Areas\Auction\Views\Item\Basket.cshtml" />
+    <Content Include="Areas\Auction\Views\Basket\Index.cshtml" />
     <Content Include="Areas\Auction\Views\Item\Index.cshtml" />
     <Content Include="Areas\Auction\Views\Item\Add.cshtml" />
-    <Content Include="Areas\Auction\Views\Item\Delete.cshtml" />
+    <Content Include="Areas\Auction\Views\Basket\Delete.cshtml" />
     <Content Include="Areas\Auction\Views\Order\Create.cshtml" />
-    <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
     <Content Include="Content\bootstrap-chosen.scss" />
     <Content Include="Content\bootstrap-chosen.less" />
     <Content Include="Scripts\chosen.jquery.js" />
@@ -349,6 +350,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />

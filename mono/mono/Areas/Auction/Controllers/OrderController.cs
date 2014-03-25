@@ -17,41 +17,65 @@ namespace Mono.Areas.Auction.Controllers
     public class OrderController : Controller
     {
         private UnitOfWork unitOfWork;
+        private Helper helper;
 
         public OrderController()
         {
             unitOfWork = new UnitOfWork();
+            helper = new Helper();
         }
 
-        public OrderController(UnitOfWork unitOfWork)
+        public OrderController(UnitOfWork unitOfWork, Helper helper)
         {
             this.unitOfWork = unitOfWork;
+            this.helper = helper;
         }
 
         // GET: /Auction/Order/
         public ActionResult Index()
         {
-            var userID = User.Identity.GetUserId();
+            var userID = helper.getCurrentUserID();
             var orders = unitOfWork.OrderRepository.Get(o => o.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Index", orders);
         }
 
         // GET: /Auction/Order/Deactivate/5
-        public ActionResult Deactivate(int? id)
+        public ActionResult Deactivate(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Unable to deactivate order. Try again, and if the problem persists contact your system administrator.";
+            }
             Order order = unitOfWork.OrderRepository.GetByID(id);
             if (order == null)
             {
                 return HttpNotFound();
             }
 
-            var userID = User.Identity.GetUserId();
-            if (order.UserID != userID || order.Status != Status.Active)
+            if (order.UserID != helper.getCurrentUserID() || order.Status != Status.Active)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+          
+            return View("Deactivate", order);
+        }
+
+        // POST: /Auction/Order/Deactivate/5
+        [HttpPost, ActionName("Deactivate")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeactivateConfirmed(int id)
+        {
+            Order order = unitOfWork.OrderRepository.GetByID(id);
+            if (order == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (order.UserID != helper.getCurrentUserID() || order.Status != Status.Active)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -62,16 +86,14 @@ namespace Mono.Areas.Auction.Controllers
 
                 unitOfWork.OrderRepository.Update(order);
                 unitOfWork.Save();
-                
-                return RedirectToAction("Index");
             }
             catch (DataException /* dex */)
             {
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                return RedirectToAction("Deactivate", new { id = id, saveChangesError = true });
             }
 
-            ViewBag.Message = "Unable to deactivate order. Try again, and if the problem persists contact your system administrator.";
-            return View("Deactivate");
+            return RedirectToAction("Index");
         }
 
         // GET: /Auction/Order/Edit/5
@@ -86,7 +108,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            return View(order);
+            return View("Edit", order);
         }
 
         // POST: /Auction/Order/Edit/5
@@ -101,7 +123,7 @@ namespace Mono.Areas.Auction.Controllers
                 if (ModelState.IsValid)
                 {
                     Order order = unitOfWork.OrderRepository.GetByID(orderUpdate.ID);
-                    if (order != null && order.UserID == User.Identity.GetUserId())
+                    if (order != null && order.UserID == helper.getCurrentUserID())
                     {
                         order.Description = orderUpdate.Description;
 
@@ -118,12 +140,20 @@ namespace Mono.Areas.Auction.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            return View(orderUpdate);
+            return View("Edit", orderUpdate);
         }
 
         // GET: /Auction/Order/Create
         public ActionResult Create()
         {
+            var userID = helper.getCurrentUserID();
+            var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
+
+            if (foodIngredients.Count == 0)
+            {
+                return RedirectToAction("Index", "Basket");
+            }
+
             return View("Create");
         }
 
@@ -136,13 +166,12 @@ namespace Mono.Areas.Auction.Controllers
         {
             try
             {
-                var userID = User.Identity.GetUserId();
+                var userID = helper.getCurrentUserID();
                 var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
 
                 if (foodIngredients.Count == 0)
                 {
-                    ModelState.AddModelError(string.Empty, "No items in basket.");
-                    return View("Create");
+                    return RedirectToAction("Index", "Basket");
                 }
 
                 Order order = new Order
@@ -163,7 +192,6 @@ namespace Mono.Areas.Auction.Controllers
                 unitOfWork.OrderRepository.Insert(order);
                 unitOfWork.Save();
                 return RedirectToAction("Index");
-            
             }
             catch (DataException /* dex */)
             {
@@ -171,36 +199,37 @@ namespace Mono.Areas.Auction.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
             
-
             return View("Create");
         }
 
         //
         // GET: /Auction/Order/Details
-        public ActionResult Details(int id)
+        public ActionResult Details(int? id)
         {
-            var userID = User.Identity.GetUserId();
-            var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == id).ToList();
-
-            if (foodIngredients.Count == 0)
-                return HttpNotFound();
-
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
             var order = unitOfWork.OrderRepository.GetByID(id);
+            if (order == null)
+            {
+                return HttpNotFound();
+            }
+            if (order.UserID != helper.getCurrentUserID())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
             ViewBag.Description = order.Description;
-
-            return View("Details", foodIngredients);
+            return View("Details", order.FoodIngredients.ToList());
         }
 
         //
         // GET: /Auction/Order/Offers
-        public ActionResult Offers(int id)
+        public ActionResult Offers(int? id)
         {
-            var userID = User.Identity.GetUserId();
+            var userID = helper.getCurrentUserID();
             var offers = unitOfWork.OfferRepository.Get(o => o.OrderID == id && o.Order.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
-
-            if (offers.Count == 0)
-                return HttpNotFound();
 
             return View("Offers", offers);
         }
@@ -217,9 +246,13 @@ namespace Mono.Areas.Auction.Controllers
                 ViewBag.ErrorMessage = "Accept failed. Try again, and if the problem persists see your system administrator.";
             }
             Offer offer = unitOfWork.OfferRepository.GetByID((int)id);
-            if (offer == null || offer.Order.Status != Status.Active || offer.Order.UserID != User.Identity.GetUserId())
+            if (offer == null) 
             {
                 return HttpNotFound();
+            }
+            if (offer.Order.UserID != helper.getCurrentUserID() || offer.Order.Status != Status.Active)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
             return View("Accept", offer);
@@ -230,15 +263,18 @@ namespace Mono.Areas.Auction.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult AcceptConfirmed(int id)
         {
+            Offer offer = unitOfWork.OfferRepository.GetByID(id);
+            if (offer == null)
+            {
+                return HttpNotFound();
+            }
+            if (offer.Order.UserID != helper.getCurrentUserID() || offer.Order.Status != Status.Active)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             try
             {
-                Offer offer = unitOfWork.OfferRepository.GetByID(id);
-
-                if (offer == null || offer.Order.Status != Status.Active || offer.Order.UserID != User.Identity.GetUserId())
-                {
-                    return HttpNotFound();
-                }
-
                 offer.Order.Status = Status.Accepted;
                 offer.Order.AcceptedOfferID = id;
                 offer.AcceptedOrderID = offer.Order.ID;

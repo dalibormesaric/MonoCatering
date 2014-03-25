@@ -53,7 +53,14 @@
             }
             else if (item.Order.Status == Mono.Model.Status.Accepted)
             {
-                <span class="alert-success">Accepted</span>
+                if(item.AcceptedOrderID != null)
+                { 
+                    <span class="alert-success">Accepted</span>
+                }
+                else
+                {
+                    <span class="alert-warning">Not-Accepted</span>
+                }
             }
         </td>
     </tr>

@@ -65,6 +65,10 @@
             {
                 <span class="alert-success">Accepted(@item.AcceptedDateTime)</span>
             }
+            else if (item.Order.AcceptedOfferID != null)
+            {
+                <span class="alert-warning">Not-Accepted</span>
+            }
             else
             {
                 @Html.ActionLink("Delete", "Delete", new { id=item.ID })
