@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using Mono.Data;
 using Mono.Model;
 
-namespace Mono.Tests.Controllers.Admin
+namespace Mono.Tests.Admin.Controllers
 {
     public class FoodControllerTest
     {

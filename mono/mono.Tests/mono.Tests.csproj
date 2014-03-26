@@ -106,17 +106,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\Admin\AdminControllerTest.cs" />
-    <Compile Include="Controllers\Admin\CategorySizeControllerTest.cs" />
-    <Compile Include="Controllers\Admin\CategoryControllerTest.cs" />
-    <Compile Include="Controllers\Admin\FoodControllerTest.cs" />
-    <Compile Include="Controllers\Admin\RestaurantControllerTest.cs" />
-    <Compile Include="Controllers\Admin\IngredientControllerTest.cs" />
-    <Compile Include="Controllers\Admin\UserControllerTest.cs" />
-    <Compile Include="Controllers\Auction\BasketControllerTest.cs" />
-    <Compile Include="Controllers\Auction\OfferControllerTest.cs" />
-    <Compile Include="Controllers\Auction\OrderControllerTest.cs" />
-    <Compile Include="Controllers\Auction\ItemControllerTest.cs" />
+    <Compile Include="Admin\Controllers\AdminControllerTest.cs" />
+    <Compile Include="Admin\Controllers\CategorySizeControllerTest.cs" />
+    <Compile Include="Admin\Controllers\CategoryControllerTest.cs" />
+    <Compile Include="Admin\Controllers\FoodControllerTest.cs" />
+    <Compile Include="Admin\Controllers\RestaurantControllerTest.cs" />
+    <Compile Include="Admin\Controllers\IngredientControllerTest.cs" />
+    <Compile Include="Admin\Controllers\UserControllerTest.cs" />
+    <Compile Include="Auction\Controllers\BasketControllerTest.cs" />
+    <Compile Include="Auction\MockObject.cs" />
+    <Compile Include="Auction\Controllers\OfferControllerTest.cs" />
+    <Compile Include="Auction\Controllers\OrderControllerTest.cs" />
+    <Compile Include="Auction\Controllers\ItemControllerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

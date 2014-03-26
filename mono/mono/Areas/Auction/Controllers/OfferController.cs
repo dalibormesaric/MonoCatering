@@ -15,25 +15,22 @@ namespace Mono.Areas.Auction.Controllers
     public class OfferController : Controller
     {
         private UnitOfWork unitOfWork;
-        private Helper helper;
 
         public OfferController()
         {
             unitOfWork = new UnitOfWork();
-            helper = new Helper();
         }
 
-        public OfferController(UnitOfWork unitOfWork, Helper helper)
+        public OfferController(UnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            this.helper = helper;
         }
 
         //
         // GET: /Auction/Offer/
         public ActionResult Index()
         {
-            var restaurantID = unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID;
+            var restaurantID = unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID;
             var offers = unitOfWork.OfferRepository.Get(o => o.RestaurantID == restaurantID, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Index", offers);
         }
@@ -101,7 +98,7 @@ namespace Mono.Areas.Auction.Controllers
                     else
                     {
                         offer.DateTime = System.DateTime.Now;
-                        offer.RestaurantID = (int)unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID;
+                        offer.RestaurantID = (int)unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID;
 
                         unitOfWork.OfferRepository.Insert(offer);
                         unitOfWork.Save();
@@ -135,7 +132,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            if (offer.RestaurantID != unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID || offer.AcceptedOrderID != null)
+            if (offer.RestaurantID != unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID || offer.AcceptedOrderID != null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -150,7 +147,7 @@ namespace Mono.Areas.Auction.Controllers
             try
             {
                 Offer offer = unitOfWork.OfferRepository.GetByID(id);
-                if (offer.RestaurantID == unitOfWork.UserRepository.GetByID(helper.getCurrentUserID()).RestaurantID && offer.AcceptedOrderID == null)
+                if (offer.RestaurantID == unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID && offer.AcceptedOrderID == null)
                 {
                     unitOfWork.OfferRepository.Delete(id);
                     unitOfWork.Save();

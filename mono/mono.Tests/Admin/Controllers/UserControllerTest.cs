@@ -12,7 +12,7 @@ using Mono.Data;
 using Mono.Model;
 using Mono.Models;
 
-namespace Mono.Tests.Controllers.Admin
+namespace Mono.Tests.Admin.Controllers
 {
     public class UserControllerTest
     {

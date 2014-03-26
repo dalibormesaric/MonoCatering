@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using Mono.Model;
 using Mono.Data;
 
-namespace Mono.Tests.Controllers.Admin
+namespace Mono.Tests.Admin.Controllers
 {
     public class CategoryControllerTest
     {

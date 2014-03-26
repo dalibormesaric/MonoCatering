@@ -17,24 +17,21 @@ namespace Mono.Areas.Auction.Controllers
     public class OrderController : Controller
     {
         private UnitOfWork unitOfWork;
-        private Helper helper;
 
         public OrderController()
         {
             unitOfWork = new UnitOfWork();
-            helper = new Helper();
         }
 
-        public OrderController(UnitOfWork unitOfWork, Helper helper)
+        public OrderController(UnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            this.helper = helper;
         }
 
         // GET: /Auction/Order/
         public ActionResult Index()
         {
-            var userID = helper.getCurrentUserID();
+            var userID = User.Identity.GetUserId();
             var orders = unitOfWork.OrderRepository.Get(o => o.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Index", orders);
         }
@@ -56,7 +53,7 @@ namespace Mono.Areas.Auction.Controllers
                 return HttpNotFound();
             }
 
-            if (order.UserID != helper.getCurrentUserID() || order.Status != Status.Active)
+            if (order.UserID != User.Identity.GetUserId() || order.Status != Status.Active)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -75,7 +72,7 @@ namespace Mono.Areas.Auction.Controllers
                 return HttpNotFound();
             }
 
-            if (order.UserID != helper.getCurrentUserID() || order.Status != Status.Active)
+            if (order.UserID != User.Identity.GetUserId() || order.Status != Status.Active)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -123,7 +120,7 @@ namespace Mono.Areas.Auction.Controllers
                 if (ModelState.IsValid)
                 {
                     Order order = unitOfWork.OrderRepository.GetByID(orderUpdate.ID);
-                    if (order != null && order.UserID == helper.getCurrentUserID())
+                    if (order != null && order.UserID == User.Identity.GetUserId())
                     {
                         order.Description = orderUpdate.Description;
 
@@ -146,7 +143,7 @@ namespace Mono.Areas.Auction.Controllers
         // GET: /Auction/Order/Create
         public ActionResult Create()
         {
-            var userID = helper.getCurrentUserID();
+            var userID = User.Identity.GetUserId();
             var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
 
             if (foodIngredients.Count == 0)
@@ -166,7 +163,7 @@ namespace Mono.Areas.Auction.Controllers
         {
             try
             {
-                var userID = helper.getCurrentUserID();
+                var userID = User.Identity.GetUserId();
                 var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
 
                 if (foodIngredients.Count == 0)
@@ -215,7 +212,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            if (order.UserID != helper.getCurrentUserID())
+            if (order.UserID != User.Identity.GetUserId())
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -228,7 +225,7 @@ namespace Mono.Areas.Auction.Controllers
         // GET: /Auction/Order/Offers
         public ActionResult Offers(int? id)
         {
-            var userID = helper.getCurrentUserID();
+            var userID = User.Identity.GetUserId();
             var offers = unitOfWork.OfferRepository.Get(o => o.OrderID == id && o.Order.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
 
             return View("Offers", offers);
@@ -250,7 +247,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            if (offer.Order.UserID != helper.getCurrentUserID() || offer.Order.Status != Status.Active)
+            if (offer.Order.UserID != User.Identity.GetUserId() || offer.Order.Status != Status.Active)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -268,7 +265,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            if (offer.Order.UserID != helper.getCurrentUserID() || offer.Order.Status != Status.Active)
+            if (offer.Order.UserID != User.Identity.GetUserId() || offer.Order.Status != Status.Active)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }

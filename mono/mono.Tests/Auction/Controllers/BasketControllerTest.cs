@@ -14,7 +14,7 @@ using Mono.Data;
 using System.Web;
 using System.Web.Routing;
 
-namespace Mono.Tests.Controllers.Auction
+namespace Mono.Tests.Auction.Controllers
 {
     public class BasketControllerTest
     {
@@ -25,9 +25,11 @@ namespace Mono.Tests.Controllers.Auction
             foodIngredient = new FoodIngredient { ID = 2 };
         }
 
+        private MockObject mockObject = new MockObject();
+
         public void IDNull(string action)
         {
-            var basketController = new BasketController(new Mock<UnitOfWork>().Object, null);
+            var basketController = new BasketController(new Mock<UnitOfWork>().Object);
 
             HttpStatusCodeResult result;
 
@@ -51,7 +53,7 @@ namespace Mono.Tests.Controllers.Auction
             FoodIngredient foodIngredient = null;
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.GetByID(id)).Returns(foodIngredient);
 
-            var basketController = new BasketController(mockUnitOfWork.Object, null);
+            var basketController = new BasketController(mockUnitOfWork.Object);
 
             HttpStatusCodeResult result;
 
@@ -80,10 +82,8 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, null)).Returns(new List<FoodIngredient>());
             
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.getCurrentUserID()).Returns("currentUserID");
-
-            var basketController = new BasketController(mockUnitOfWork.Object, mockHelper.Object);
+            var basketController = new BasketController(mockUnitOfWork.Object);
+            basketController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), basketController);
 
             var result = basketController.Index() as ViewResult;
 
@@ -98,7 +98,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.GetByID(6)).Returns(foodIngredient);
 
-            var basketController = new BasketController(mockUnitOfWork.Object, null);
+            var basketController = new BasketController(mockUnitOfWork.Object);
 
             var result = basketController.Delete(6) as ViewResult;
             var model = result.ViewData.Model as FoodIngredient;
@@ -115,7 +115,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.GetByID(6)).Returns(foodIngredient);
 
-            var basketController = new BasketController(mockUnitOfWork.Object, null);
+            var basketController = new BasketController(mockUnitOfWork.Object);
 
             var result = basketController.Delete(6, true) as ViewResult;
             var model = result.ViewData.Model as FoodIngredient;
@@ -132,7 +132,7 @@ namespace Mono.Tests.Controllers.Auction
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Delete(6));
             mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var basketController = new BasketController(mockUnitOfWork.Object, null);
+            var basketController = new BasketController(mockUnitOfWork.Object);
             var result = basketController.DeleteConfirmed(6) as RedirectToRouteResult;
 
             Assert.Equal("Delete", result.RouteValues["action"]);
@@ -146,7 +146,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Delete(6));
 
-            var basketController = new BasketController(mockUnitOfWork.Object, null);
+            var basketController = new BasketController(mockUnitOfWork.Object);
 
             var result = basketController.DeleteConfirmed(6) as RedirectToRouteResult;
 

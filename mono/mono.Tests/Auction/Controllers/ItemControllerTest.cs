@@ -14,7 +14,7 @@ using Mono.Data;
 using System.Web;
 using System.Web.Routing;
 
-namespace Mono.Tests.Controllers.Auction
+namespace Mono.Tests.Auction.Controllers
 {
     public class ItemControllerTest
     {
@@ -38,30 +38,16 @@ namespace Mono.Tests.Controllers.Auction
             categories = new List<Category> { category1, category2, category3, category4 }.AsQueryable();
         }
 
+        private MockObject mockObject = new MockObject();
+
         [Fact]
         public void Index_IDNull()
         {
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(categories.Where(c => c.ParentCategoryID == null));
 
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.isAjaxRequest()).Returns(false);
-
-            // IsAjaxRequest() is static extension method and cannot be mocked
-            /*
-            var request = new Mock<HttpRequestBase>();
-            request.SetupGet(x => x.Headers).Returns(
-                new System.Net.WebHeaderCollection {
-                    {"X-Requested-With", "HttpRequest"}
-                }
-            );
-
-            var context = new Mock<HttpContextBase>();
-            context.SetupGet(x => x.Request).Returns(request.Object);
-            */
-
-            var itemController = new ItemController(mockUnitOfWork.Object, mockHelper.Object);
-            //itemController.ControllerContext = new ControllerContext(context.Object, new RouteData(), itemController);
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.isAjaxFalse(), new RouteData(), itemController);
 
             var result = itemController.Index(null) as ViewResult;
             var model = result.ViewData.Model as ItemViewModel;
@@ -73,15 +59,31 @@ namespace Mono.Tests.Controllers.Auction
         }
 
         [Fact]
+        public void Index_IDNullAjax()
+        {
+            var mockUnitOfWork = new Mock<UnitOfWork>();
+            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(categories.Where(c => c.ParentCategoryID == null));
+
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.isAjaxTrue(), new RouteData(), itemController);
+
+            var result = itemController.Index(null) as PartialViewResult;
+            var model = result.ViewData.Model as ItemViewModel;
+
+            Assert.Equal("_Category", result.ViewName);
+
+            Assert.Equal(category1.Name, model.ListCategoryFood.ElementAt(0).Name);
+            Assert.Equal(category2.Name, model.ListCategoryFood.ElementAt(1).Name);
+        }
+
+        [Fact]
         public void Index_Ajax()
         {
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<object>())).Returns(category1);
 
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.isAjaxRequest()).Returns(true);
-
-            var itemController = new ItemController(mockUnitOfWork.Object, mockHelper.Object);
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.isAjaxTrue(), new RouteData(), itemController);
 
             var result = itemController.Index(1) as PartialViewResult;
             var model = result.ViewData.Model as ItemViewModel;
@@ -102,7 +104,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<object>())).Returns(category);
 
-            var itemController = new ItemController(mockUnitOfWork.Object, null);
+            var itemController = new ItemController(mockUnitOfWork.Object);
 
             var result = itemController.Index(1) as HttpStatusCodeResult;
 
@@ -115,10 +117,8 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<object>())).Returns(category1);
 
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.isAjaxRequest()).Returns(false);
-
-            var itemController = new ItemController(mockUnitOfWork.Object, mockHelper.Object);
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.isAjaxFalse(), new RouteData(), itemController);
 
             var result = itemController.Index(1) as ViewResult;
             var model = result.ViewData.Model as ItemViewModel;
@@ -149,7 +149,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodRepository.GetByID(It.IsAny<object>())).Returns(food);
 
-            var itemController = new ItemController(mockUnitOfWork.Object, null);
+            var itemController = new ItemController(mockUnitOfWork.Object);
 
             var result = itemController.Add(3) as HttpStatusCodeResult;
 
@@ -165,7 +165,7 @@ namespace Mono.Tests.Controllers.Auction
             mockUnitOfWork.Setup(m => m.SizeValues(It.IsAny<int>())).Returns(new List<CategorySize>());
             mockUnitOfWork.Setup(m => m.IngredientsForFood(It.IsAny<Food>())).Returns(new List<Ingredient>());
 
-            var itemController = new ItemController(mockUnitOfWork.Object, null);
+            var itemController = new ItemController(mockUnitOfWork.Object);
 
             var result = itemController.Add(1) as ViewResult;
 
@@ -196,7 +196,7 @@ namespace Mono.Tests.Controllers.Auction
             var mockUnitOfWork = new Mock<UnitOfWork>();
             mockUnitOfWork.Setup(m => m.FoodRepository.GetByID(It.IsAny<object>())).Returns(food);
 
-            var itemController = new ItemController(mockUnitOfWork.Object, null);
+            var itemController = new ItemController(mockUnitOfWork.Object);
 
             var result = itemController.Add(foodIngredientViewModel) as HttpStatusCodeResult;
 
@@ -217,7 +217,7 @@ namespace Mono.Tests.Controllers.Auction
             mockUnitOfWork.Setup(m => m.SizeValues(It.IsAny<int>())).Returns(new List<CategorySize>());
             mockUnitOfWork.Setup(m => m.IngredientsForFood(It.IsAny<Food>())).Returns(new List<Ingredient>());
 
-            var itemController = new ItemController(mockUnitOfWork.Object, null);
+            var itemController = new ItemController(mockUnitOfWork.Object);
             itemController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
 
             var result = itemController.Add(foodIngredientViewModel) as ViewResult;
@@ -241,10 +241,8 @@ namespace Mono.Tests.Controllers.Auction
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Insert(It.IsAny<FoodIngredient>()));
             mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.getCurrentUserID()).Returns("currentUserID");
-
-            var itemController = new ItemController(mockUnitOfWork.Object, mockHelper.Object);
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), itemController);
  
             var result = itemController.Add(foodIngredientViewModel) as ViewResult;
 
@@ -268,10 +266,8 @@ namespace Mono.Tests.Controllers.Auction
             mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Insert(It.IsAny<FoodIngredient>()));
             mockUnitOfWork.Setup(m => m.Save());
 
-            var mockHelper = new Mock<Helper>();
-            mockHelper.Setup(m => m.getCurrentUserID()).Returns("currentUserID");
-
-            var itemController = new ItemController(mockUnitOfWork.Object, mockHelper.Object);
+            var itemController = new ItemController(mockUnitOfWork.Object);
+            itemController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), itemController);
 
             var result = itemController.Add(foodIngredientViewModel) as RedirectToRouteResult;
 

@@ -194,7 +194,6 @@
     <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
     <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
     <Compile Include="Areas\Auction\Controllers\BasketController.cs" />
-    <Compile Include="Areas\Auction\Helper.cs" />
     <Compile Include="Areas\Auction\Controllers\ItemController.cs" />
     <Compile Include="Areas\Auction\Controllers\OfferController.cs" />
     <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
@@ -352,6 +351,7 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
+    <Content Include="Scripts\javaScript.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
     <Content Include="Scripts\jquery-2.1.0.min.map" />
