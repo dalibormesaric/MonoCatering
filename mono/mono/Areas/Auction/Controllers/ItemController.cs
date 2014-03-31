@@ -16,19 +16,11 @@ namespace Mono.Areas.Auction.Controllers
     [Authorize(Roles = "user")]
     public class ItemController : Controller
     {       
-        private UnitOfWork unitOfWork;
-        private Helper helper;
+        private IUnitOfWork unitOfWork;
 
-        public ItemController()
-        {
-            unitOfWork = new UnitOfWork();
-            helper = new Helper();
-        }
-
-        public ItemController(UnitOfWork unitOfWork, Helper helper)
+        public ItemController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            this.helper = helper;
         }
 
         //
@@ -56,8 +48,7 @@ namespace Mono.Areas.Auction.Controllers
                 itemViewModel = AddCategoryFood(category.Name, category.ParentCategoryID, subCategories, foods);
             }
             
-            //if(Request.IsAjaxRequest())
-            if (helper.isAjaxRequest())
+            if(Request.IsAjaxRequest())
             {
                 return PartialView("_Category", itemViewModel);
             }
@@ -116,7 +107,7 @@ namespace Mono.Areas.Auction.Controllers
                 {
                     FoodIngredient foodIngredient = new FoodIngredient();
 
-                    foodIngredient.UserID = helper.getCurrentUserID();
+                    foodIngredient.UserID = User.Identity.GetUserId();
                     foodIngredient.FoodID = (int)foodIngredientViewModel.FoodID;
                     foodIngredient.Description = foodIngredientViewModel.Description;
                     foodIngredient.CategorySizeID = foodIngredientViewModel.CategorySizeID;

@@ -5,7 +5,7 @@ using Mono.Model;
 
 namespace Mono.Data
 {
-    public class UnitOfWork : IDisposable
+    public class UnitOfWork : IDisposable, Mono.Data.IUnitOfWork
     {
         private MonoDbContext context = new MonoDbContext();
 

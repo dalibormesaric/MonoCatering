@@ -14,29 +14,27 @@ namespace Mono.Areas.Auction.Controllers
     [Authorize(Roles = "user")]
     public class BasketController : Controller
     {      
-        private UnitOfWork unitOfWork;
-        private Helper helper;
+        private IUnitOfWork unitOfWork;
 
-        public BasketController()
-        {
-            unitOfWork = new UnitOfWork();
-            helper = new Helper();
-        }
-
-        public BasketController(UnitOfWork unitOfWork, Helper helper)
+        public BasketController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            this.helper = helper;
         }
 
         //
         // GET: /Auction/Basket/
         public ActionResult Index()
         {
-            var userID = helper.getCurrentUserID();
+            var userID = User.Identity.GetUserId();
             var foodIngredients = unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).ToList();
 
             return View("Index", foodIngredients);
+        }
+
+        public int ItemsInBasket()
+        {
+            var userID = User.Identity.GetUserId();
+            return unitOfWork.FoodIngredientRepository.Get(fi => fi.UserID == userID && fi.OrderID == null).Count();
         }
 
         // GET: /Auction/Basket/Delete/5

@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using Mono.Data;
 using Mono.Model;
 
-namespace Mono.Tests.Controllers.Admin
+namespace Mono.Tests.Admin.Controllers
 {
     public class CategorySizeSizeControllerTest
     {
@@ -37,7 +37,7 @@ namespace Mono.Tests.Controllers.Admin
 
         public void IDNull(string action)
         {
-            var categorySizeController = new CategorySizeController(new Mock<UnitOfWork>().Object);
+            var categorySizeController = new CategorySizeController(new Mock<IUnitOfWork>().Object);
 
             HttpStatusCodeResult result;
 
@@ -63,12 +63,12 @@ namespace Mono.Tests.Controllers.Admin
 
         public void CategorySizeNull(int id, string action)
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
             CategorySize categorySize = null;
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(id)).Returns(categorySize);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(id)).Returns(categorySize);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             HttpStatusCodeResult result;
 
@@ -108,10 +108,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), It.IsAny<Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>>>(), It.IsAny<String>())).Returns(orderBy(categorySizes.Where(filter)));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), It.IsAny<Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>>>(), It.IsAny<String>())).Returns(orderBy(categorySizes.Where(filter)));
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<CategorySize>;
@@ -124,10 +124,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), It.IsAny<Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>>>(), It.IsAny<String>())).Returns(orderByDescending(categorySizes.Where(filter)));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), It.IsAny<Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>>>(), It.IsAny<String>())).Returns(orderByDescending(categorySizes.Where(filter)));
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Index("Value_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<CategorySize>;
@@ -142,10 +142,10 @@ namespace Mono.Tests.Controllers.Admin
         {
             ID(6, "Details");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.Details(6) as ViewResult;
             var model = result.ViewData.Model as CategorySize;
 
@@ -156,9 +156,9 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Create_Get()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.Create() as ViewResult;
 
             Assert.Equal("Create", result.ViewName);
@@ -167,11 +167,11 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Create_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();    
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Insert(categorySize));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();    
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Insert(categorySize));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.Create(categorySize) as ViewResult;
             
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
@@ -181,9 +181,9 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Create_InvalidModel()
         {          
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             categorySizeController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
 
             var result = categorySizeController.Create(categorySize) as ViewResult;
@@ -194,10 +194,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Create_Valid()
         {           
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Insert(categorySize));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Insert(categorySize));
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Create(categorySize) as RedirectToRouteResult;
 
@@ -209,10 +209,10 @@ namespace Mono.Tests.Controllers.Admin
         {
             ID(6, "Edit");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Edit(6) as ViewResult;
             var model = result.ViewData.Model as CategorySize;
@@ -224,11 +224,11 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Edit_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Update(categorySize));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Update(categorySize));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.Edit(categorySize) as ViewResult;
 
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
@@ -238,10 +238,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Edit_InvalidModel()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(null, null, "")).Returns(categorySizes);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(null, null, "")).Returns(categorySizes);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             categorySizeController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
 
             var result = categorySizeController.Edit(categorySize) as ViewResult;
@@ -252,10 +252,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void Edit_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Update(categorySize));         
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Update(categorySize));         
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Edit(categorySize) as RedirectToRouteResult;
 
@@ -267,10 +267,10 @@ namespace Mono.Tests.Controllers.Admin
         {
             ID(6, "DeleteFalse");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Delete(6) as ViewResult;
             var model = result.ViewData.Model as CategorySize;
@@ -284,10 +284,10 @@ namespace Mono.Tests.Controllers.Admin
         {
             ID(6, "DeleteTrue");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.GetByID(6)).Returns(categorySize);
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.Delete(6, true) as ViewResult;
             var model = result.ViewData.Model as CategorySize;
@@ -300,11 +300,11 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void DeleteConfirmed_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Delete(6));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Delete(6));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.DeleteConfirmed(6) as RedirectToRouteResult;
 
             Assert.Equal("Delete", result.RouteValues["action"]);
@@ -315,10 +315,10 @@ namespace Mono.Tests.Controllers.Admin
         [Fact]
         public void DeleteConfirmed_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Delete(6));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Delete(6));
 
-            var categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
 
             var result = categorySizeController.DeleteConfirmed(6) as RedirectToRouteResult;
 
@@ -329,30 +329,30 @@ namespace Mono.Tests.Controllers.Admin
         public void Type()
         {
             CategorySizeController categorySizeController;
-            Mock<UnitOfWork> mockUnitOfWork;
+            Mock<IUnitOfWork> mockIUnitOfWork;
             HttpStatusCodeResult result;
 
             //IDNull
-            categorySizeController = new CategorySizeController(new Mock<UnitOfWork>().Object);
+            categorySizeController = new CategorySizeController(new Mock<IUnitOfWork>().Object);
             result = categorySizeController.Type(null) as HttpStatusCodeResult;
             Assert.Equal((int)HttpStatusCode.BadRequest, (int)result.StatusCode);
 
             //CategorySizeNull
-            mockUnitOfWork = new Mock<UnitOfWork>();
+            mockIUnitOfWork = new Mock<IUnitOfWork>();
             List<CategorySize> categorySizeList = new List<CategorySize>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), null, "")).Returns(categorySizeList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), null, "")).Returns(categorySizeList);
             
 
-            categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             result = categorySizeController.Type(6) as HttpStatusCodeResult;
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
 
             //CategorySize
-            mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), null, "")).Returns(new List<CategorySize> { categorySize } );
-            mockUnitOfWork.Setup(m => m.SizeValuesString(It.IsAny<int>()));
+            mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), null, "")).Returns(new List<CategorySize> { categorySize } );
+            mockIUnitOfWork.Setup(m => m.SizeValuesString(It.IsAny<int>()));
 
-            categorySizeController = new CategorySizeController(mockUnitOfWork.Object);
+            categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result2 = categorySizeController.Type(6) as ViewResult;
             Assert.Equal("Type", result2.ViewName); 
         }

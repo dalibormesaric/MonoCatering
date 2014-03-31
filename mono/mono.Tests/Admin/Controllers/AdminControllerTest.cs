@@ -3,7 +3,7 @@ using System;
 using System.Web.Mvc;
 using Xunit;
 
-namespace Mono.Tests.Controllers.Admin
+namespace Mono.Tests.Admin.Controllers
 {
     public class AdminControllerTest
     {

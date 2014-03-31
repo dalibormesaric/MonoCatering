@@ -14,17 +14,13 @@ namespace Mono.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
+        private readonly IUnitOfWork unitOfWork;
 
-        public HomeController(UnitOfWork unitOfWork)
+        public HomeController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
-
-        private UnitOfWork unitOfWork;
+        
 
         public ActionResult Index()
         {

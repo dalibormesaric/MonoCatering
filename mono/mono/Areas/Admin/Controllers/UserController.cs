@@ -18,14 +18,9 @@ namespace Mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class UserController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public UserController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public UserController(UnitOfWork unitOfWork)
+        public UserController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
