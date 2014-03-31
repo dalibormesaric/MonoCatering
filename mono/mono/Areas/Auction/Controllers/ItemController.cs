@@ -16,14 +16,9 @@ namespace Mono.Areas.Auction.Controllers
     [Authorize(Roles = "user")]
     public class ItemController : Controller
     {       
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public ItemController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public ItemController(UnitOfWork unitOfWork)
+        public ItemController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }

@@ -16,14 +16,9 @@ namespace Mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class FoodController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public FoodController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public FoodController(UnitOfWork unitOfWork)
+        public FoodController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }

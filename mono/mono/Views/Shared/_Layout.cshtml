@@ -28,11 +28,11 @@
                     @if (User.IsInRole("user"))
                     {
                         <li>@Html.ActionLink("Items",  "Index", "Item",  new { area = "Auction" }, null)</li>
-                        <li>@Html.ActionLink("Orders", "Index", "Order", new { area = "Auction" }, null)</li>
+                        <li><a href="@Url.Action("Index", "Order", new { area = "Auction" })">Orders <span id="offersCount" class="badge"></span></a></li>
                     }
                     @if (User.IsInRole("restaurant"))
-                    {
-                        <li>@Html.ActionLink("Orders", "Orders", "Offer", new { area = "Auction" }, null)</li>
+                    {                       
+                        <li><a href="@Url.Action("Orders", "Offer", new { area = "Auction" })">Orders <span id="ordersCount" class="badge"></span></a></li>
                         <li>@Html.ActionLink("Offers", "Index", "Offer", new { area = "Auction" }, null)</li>
                     }
                     <li>@Html.ActionLink("Restaurants", "Restaurants", "Home", new { area = "" }, null)</li>
@@ -61,5 +61,26 @@
             $('.chosen-select-deselect').chosen({ allow_single_deselect: true });
         });
     </script>
+
+    @if (User.IsInRole("user"))
+    {
+        <script src="~/signalr/hubs"></script>
+        <script>
+            $(function () {
+                signalRFunctions.userClient();
+            });
+        </script>
+    }
+
+    @if (User.IsInRole("restaurant"))
+    {
+        <script src="~/signalr/hubs"></script>
+        <script>
+            $(function () {
+                signalRFunctions.restaurantClient();
+            });
+        </script>
+    }
+
 </body>
 </html>

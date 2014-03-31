@@ -37,7 +37,7 @@ namespace Mono.Tests.Admin.Controllers
 
         public void IDNull(string action)
         {
-            var categoryController = new CategoryController(new Mock<UnitOfWork>().Object);
+            var categoryController = new CategoryController(new Mock<IUnitOfWork>().Object);
 
             HttpStatusCodeResult result;
 
@@ -66,12 +66,12 @@ namespace Mono.Tests.Admin.Controllers
 
         public void CategoryNull(int id, string action)
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
             Category category = null;
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(id)).Returns(category);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(id)).Returns(category);
 
-            var categoryController = new CategoryController(mockUnitOfWork.Object);
+            var categoryController = new CategoryController(mockIUnitOfWork.Object);
 
             HttpStatusCodeResult result;
 
@@ -114,10 +114,10 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Index_SortingAsc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(orderBy(categories.Where(filter)));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(orderBy(categories.Where(filter)));
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Index(null, searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Category>;
@@ -130,10 +130,10 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Index_SortingDesc_Filter_PerPage_Page()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(orderByDescending(categories.Where(filter)));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(It.IsAny<Expression<Func<Category, bool>>>(), It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), It.IsAny<String>())).Returns(orderByDescending(categories.Where(filter)));
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Index("Name_desc", searchString, null, 1) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Category>;
@@ -148,10 +148,10 @@ namespace Mono.Tests.Admin.Controllers
         {
             ID(6, "Details");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = CategoryController.Details(6) as ViewResult;
             var model = result.ViewData.Model as Category;
 
@@ -162,11 +162,11 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Create_Get()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = CategoryController.Create() as ViewResult;
 
             Assert.Equal(categoriesOrdered, (result.ViewBag.ParentCategoryID as SelectList).Items);
@@ -176,13 +176,13 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Create_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();    
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Insert(category));
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();    
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Insert(category));
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = CategoryController.Create(category) as ViewResult;
             
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
@@ -193,11 +193,11 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Create_InvalidModel()
         {          
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             CategoryController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
 
             var result = CategoryController.Create(category) as ViewResult;
@@ -209,10 +209,10 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Create_Valid()
         {           
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Insert(category));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Insert(category));
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Create(category) as RedirectToRouteResult;
 
@@ -224,12 +224,12 @@ namespace Mono.Tests.Admin.Controllers
         {
             ID(6, "Edit");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Edit(6) as ViewResult;
             var model = result.ViewData.Model as Category;
@@ -242,13 +242,13 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Edit_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Update(category));
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Update(category));
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = CategoryController.Edit(category) as ViewResult;
 
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
@@ -259,12 +259,12 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Edit_InvalidModel()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, null, "")).Returns(categories);
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, null, "")).Returns(categories);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(new List<UnitOfWork.TypeSelectList>());
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             CategoryController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
 
             var result = CategoryController.Edit(category) as ViewResult;
@@ -276,10 +276,10 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Edit_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Update(category));         
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Update(category));         
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Edit(category) as RedirectToRouteResult;
 
@@ -291,10 +291,10 @@ namespace Mono.Tests.Admin.Controllers
         {
             ID(6, "DeleteFalse");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Delete(6) as ViewResult;
             var model = result.ViewData.Model as Category;
@@ -308,10 +308,10 @@ namespace Mono.Tests.Admin.Controllers
         {
             ID(6, "DeleteTrue");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(category);
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Delete(6, true) as ViewResult;
             var model = result.ViewData.Model as Category;
@@ -324,11 +324,11 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void DeleteConfirmed_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Delete(6));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Delete(6));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = CategoryController.DeleteConfirmed(6) as RedirectToRouteResult;
 
             Assert.Equal("Delete", result.RouteValues["action"]);
@@ -339,10 +339,10 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void DeleteConfirmed_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.Delete(6));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Delete(6));
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.DeleteConfirmed(6) as RedirectToRouteResult;
 
@@ -365,11 +365,11 @@ namespace Mono.Tests.Admin.Controllers
 
             var allIngreients = new List<Ingredient> { childIngredient2, childIngredient1, parentIngredient1, parentIngredient2 };
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(childCategory);
-            mockUnitOfWork.Setup(m => m.CategoryRepository.GetByID(3)).Returns(parentCategory);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(childCategory);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(3)).Returns(parentCategory);
 
-            var CategoryController = new CategoryController(mockUnitOfWork.Object);
+            var CategoryController = new CategoryController(mockIUnitOfWork.Object);
 
             var result = CategoryController.Ingredients(6) as ViewResult;
             var model = result.ViewData.Model as List<Ingredient>;

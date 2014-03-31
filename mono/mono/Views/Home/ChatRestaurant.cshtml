@@ -13,16 +13,3 @@
     <br />
     <input type="button" id="sendToUser" class="btn" value="Send to specified userId" />
 </div>
-<div>
-    <h4>Received Messages</h4>
-    <ul id="messages"></ul>
-</div>
-
-@section Scripts {
-    <script src="~/signalr/hubs"></script>
-    <script>
-        $(function () {
-            signalRFunctions.restaurantClient();
-        });
-    </script>
-}

@@ -1,36 +1,72 @@
 ﻿(function (signalRFunctions, $, undefined) {
+    var messagesDiv = '<div id="messages" style="width:300px;position:fixed;top:80px;right:30px;"></div>';
+
     //Private Method
     function writeError(line) {
-        var messages = $("#messages");
-        messages.append("<li style='color:red;'>" + getTimeString() + ' ' + line + "</li>");
+        write(line, "alert-danger")
     }
 
     //Private Method
-    function writeLine(line) {
-        var messages = $("#messages");
-        messages.append("<li style='color:black;'>" + getTimeString() + ' ' + line + "</li>");
+    function writeNotification(line) {
+        write(line, "alert-info")
+    }
+
+    //Private Method
+    function writeMessage(line) {
+        write(line, "alert-success")
     }
 
     //Private Method
     function getTimeString() {
         var currentTime = new Date();
-        return currentTime.toTimeString();
+        return currentTime.toLocaleTimeString();
+    }
+
+    //Private Method
+    function write(line, type) {
+        var messages = $("#messages");
+
+        var mes = $('<div class="alert ' + type + '"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + getTimeString() + ': ' + line + '</div>');
+        messages.append(mes);
+
+        var delayTime = 3000;
+        var fadeoutTime = 400;
+
+        mes.delay(delayTime).fadeOut(fadeoutTime);
+
+        setTimeout(function () {
+            mes.remove();
+        }, delayTime + fadeoutTime);
     }
 
     //Public Method
-    signalRFunctions.userClient = function() {
-        var connection = $.connection.hub,
-            hub = $.connection.chatHub;
+    signalRFunctions.userClient = function () {
+        $.ajax({
+            url: "/Auction/Basket/ItemsInBasket"
+        }).done(function (data) {
+            $("#itemsInBasket").html(data);
+        });
+
+        $.ajax({
+            url: "/Auction/Order/offersCount"
+        }).done(function (data) {
+            $("#offersCount").html("offers(" + data + ")");
+        });
+
+        $("body").append(messagesDiv);
+
+        var connection = $.connection.hub;
+        var hub = $.connection.chatHub;
 
         connection.logging = true;
 
         hub.client.message = function (value) {
-            writeLine(value);
+            writeMessage(value);
         }
 
         connection.start()
             .done(function () {
-                writeLine("connected");
+                writeNotification("connected");
             })
             .fail(function (error) {
                 writeError(value);
@@ -42,19 +78,31 @@
     }
 
     //Public Method
-    signalRFunctions.restaurantClient = function() {
-        var connection = $.connection.hub,
-        hub = $.connection.chatHub;
+    signalRFunctions.restaurantClient = function () {
+        $.ajax({
+            url: "/Auction/Offer/ordersCount"
+        }).done(function (data) {
+            $("#ordersCount").html(data);
+        });
 
-        connection.logging = true;
+        $("body").append(messagesDiv);
+
+        var connection = $.connection.hub;
+        var hub = $.connection.chatHub;
+
+        connection.logging = false;
 
         hub.client.hubMessage = function (data) {
-            writeLine("hubMessage: " + data);
+            writeMessage(data);
+        }
+
+        hub.client.hubNotification = function (data) {
+            writeNotification(data);
         }
 
         connection.start()
             .done(function () {
-                writeLine("connected");
+                writeNotification("connected");
                 hub.server.joinGroupRestaurant();
             })
             .fail(function (error) {

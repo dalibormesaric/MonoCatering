@@ -32,7 +32,8 @@ namespace Mono
         public void JoinGroupRestaurant()
         {
             Groups.Add(Context.ConnectionId, "restaurant");
-            Clients.All.hubMessage(Context.ConnectionId + " joined group restaurant");
+            //Clients.All.hubMessage(Context.ConnectionId + " joined group restaurant");
+            Clients.All.hubNotification("joined group restaurant");
         }
 
     }

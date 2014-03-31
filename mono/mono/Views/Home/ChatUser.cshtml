@@ -12,16 +12,3 @@
     <br />
     <input type="button" id="sendToRestaurants" class="btn" value="Send to restaurants" />
 </div>
-<div>
-    <h4>Messages</h4>
-    <ul id="messages"></ul>
-</div>
-
-@section Scripts { 
-    <script src="~/signalr/hubs"></script>
-    <script>
-        $(function () {
-            signalRFunctions.userClient();
-        });
-    </script>
-}

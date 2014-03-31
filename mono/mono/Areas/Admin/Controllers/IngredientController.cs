@@ -16,14 +16,9 @@ namespace Mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class IngredientController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public IngredientController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public IngredientController(UnitOfWork unitOfWork)
+        public IngredientController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }

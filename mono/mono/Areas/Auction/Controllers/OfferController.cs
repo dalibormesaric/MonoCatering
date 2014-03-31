@@ -14,14 +14,9 @@ namespace Mono.Areas.Auction.Controllers
     [Authorize(Roles = "restaurant")]
     public class OfferController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public OfferController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public OfferController(UnitOfWork unitOfWork)
+        public OfferController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
@@ -40,6 +35,11 @@ namespace Mono.Areas.Auction.Controllers
         {
             var orders = unitOfWork.OrderRepository.Get(o => o.Status == Mono.Model.Status.Active, q => q.OrderByDescending(o => o.DateTime)).ToList();
             return View("Orders", orders);
+        }
+
+        public int OrdersCount()
+        {
+            return unitOfWork.OrderRepository.Get(o => o.Status == Mono.Model.Status.Active, q => q.OrderByDescending(o => o.DateTime)).Count();
         }
 
         //

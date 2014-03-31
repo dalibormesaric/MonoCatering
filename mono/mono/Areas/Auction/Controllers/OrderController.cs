@@ -16,14 +16,9 @@ namespace Mono.Areas.Auction.Controllers
     [Authorize(Roles = "user")]
     public class OrderController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public OrderController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public OrderController(UnitOfWork unitOfWork)
+        public OrderController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
@@ -32,8 +27,14 @@ namespace Mono.Areas.Auction.Controllers
         public ActionResult Index()
         {
             var userID = User.Identity.GetUserId();
-            var orders = unitOfWork.OrderRepository.Get(o => o.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
+            var orders = unitOfWork.OrderRepository.Get(o => o.UserID == userID, q => q.OrderByDescending(o => o.DateTime), "Offers").ToList();
             return View("Index", orders);
+        }
+
+        public int offersCount()
+        {
+            var userID = User.Identity.GetUserId();
+            return unitOfWork.OrderRepository.Get(o => o.UserID == userID && o.Status == Status.Active, q => q.OrderByDescending(o => o.DateTime), "Offers").Select(o => o.Offers.Count).Sum();
         }
 
         // GET: /Auction/Order/Deactivate/5

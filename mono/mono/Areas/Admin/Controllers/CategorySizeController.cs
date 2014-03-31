@@ -17,14 +17,9 @@ namespace Mono.Areas.Admin.Controllers
     [Authorize(Roles = "admin")]
     public class CategorySizeController : Controller
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
 
-        public CategorySizeController()
-        {
-            unitOfWork = new UnitOfWork();
-        }
-
-        public CategorySizeController(UnitOfWork unitOfWork)
+        public CategorySizeController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }

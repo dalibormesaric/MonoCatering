@@ -79,12 +79,12 @@ namespace Mono.Tests.Auction.Controllers
 
         public void OrderNull(int id, string action)
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
             Order order = null;
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(order);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             Assert.Equal((int)HttpStatusCode.NotFound, Result(orderController, id, action).StatusCode);
@@ -92,12 +92,12 @@ namespace Mono.Tests.Auction.Controllers
 
         public void WrongUserID(int id, string action)
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
             Order orderWrong = new Order { ID = 6, DateTime = System.DateTime.Now, Status = Status.Active, UserID = "wrongUserID" };
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(orderWrong);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(orderWrong);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             Assert.Equal((int)HttpStatusCode.BadRequest, (int)Result(orderController, id, action).StatusCode);
@@ -105,12 +105,12 @@ namespace Mono.Tests.Auction.Controllers
 
         public void WrongStatus(int id, string action)
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
 
             Order orderWrong = new Order { ID = 6, DateTime = System.DateTime.Now, Status = Status.Accepted, UserID = "currentUserID" };
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(orderWrong);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(id)).Returns(orderWrong);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             Assert.Equal((int)HttpStatusCode.BadRequest, (int)Result(orderController, id, action).StatusCode);
@@ -125,10 +125,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Index()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.Get(It.IsAny<Expression<Func<Order, bool>>>(), It.IsAny<Func<IQueryable<Order>, IOrderedQueryable<Order>>>(), "")).Returns(new List<Order>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Get(It.IsAny<Expression<Func<Order, bool>>>(), It.IsAny<Func<IQueryable<Order>, IOrderedQueryable<Order>>>(), "")).Returns(new List<Order>());
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Index() as ViewResult;
@@ -143,10 +143,10 @@ namespace Mono.Tests.Auction.Controllers
             WrongUserID(6, "DeactivateFalse");
             WrongStatus(6, "DeactivateFalse");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Deactivate(6) as ViewResult;
@@ -161,10 +161,10 @@ namespace Mono.Tests.Auction.Controllers
             WrongUserID(6, "DeactivateTrue");
             WrongStatus(6, "DeactivateTrue");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Deactivate(6, true) as ViewResult;
@@ -180,12 +180,12 @@ namespace Mono.Tests.Auction.Controllers
             WrongUserID(6, "DeactivateConfirmed");
             WrongStatus(6, "DeactivateConfirmed");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.DeactivateConfirmed(6) as RedirectToRouteResult;
@@ -198,11 +198,11 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void DeactivateConfirmed()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.DeactivateConfirmed(6) as RedirectToRouteResult;
@@ -215,10 +215,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             ID(6, "Edit");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Edit(6) as ViewResult;
@@ -231,12 +231,12 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Edit_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Edit(order) as ViewResult;
@@ -250,11 +250,11 @@ namespace Mono.Tests.Auction.Controllers
         {
             Order order = null;
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Edit(this.order) as ViewResult;
@@ -267,11 +267,11 @@ namespace Mono.Tests.Auction.Controllers
         {
             Order orderWrong = new Order { ID = 6, DateTime = System.DateTime.Now, Status = Status.Active, UserID = "wrongUserID" };
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(orderWrong);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(orderWrong);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Edit(order) as ViewResult;
@@ -293,12 +293,12 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Edit_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
-            mockUnitOfWork.Setup(m => m.OrderRepository.Update(order));
-            mockUnitOfWork.Setup(m => m.Save());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(6)).Returns(order);
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Update(order));
+            mockIUnitOfWork.Setup(m => m.Save());
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Edit(order) as RedirectToRouteResult;
@@ -309,10 +309,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Create_Get()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Create() as ViewResult;
@@ -323,10 +323,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Create_GetBasketEmpty()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> ());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> ());
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Create() as RedirectToRouteResult;
@@ -337,10 +337,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Create_BasketEmpty()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient>());
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Create("description") as RedirectToRouteResult;
@@ -351,12 +351,12 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Create_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
-            mockUnitOfWork.Setup(m => m.OrderRepository.Insert(It.IsAny<Order>()));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Insert(It.IsAny<Order>()));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Create("description") as ViewResult;
@@ -368,11 +368,11 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Create_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
-            mockUnitOfWork.Setup(m => m.OrderRepository.Insert(It.IsAny<Order>()));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.FoodIngredientRepository.Get(It.IsAny<Expression<Func<FoodIngredient, bool>>>(), null, "")).Returns(new List<FoodIngredient> { new FoodIngredient() });
+            mockIUnitOfWork.Setup(m => m.OrderRepository.Insert(It.IsAny<Order>()));
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Create("description") as RedirectToRouteResult;
@@ -386,10 +386,10 @@ namespace Mono.Tests.Auction.Controllers
             ID(6, "Details");
             WrongUserID(6, "Details");
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OrderRepository.GetByID(It.IsAny<object>())).Returns(order);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OrderRepository.GetByID(It.IsAny<object>())).Returns(order);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Details(6) as ViewResult;
@@ -403,10 +403,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Offers()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.Get(null, null, "")).Returns(new List<Offer>());
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.Get(null, null, "")).Returns(new List<Offer>());
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Offers(6) as ViewResult;
@@ -421,10 +421,10 @@ namespace Mono.Tests.Auction.Controllers
 
             Offer offer = null;
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
 
             var result = orderController.Accept(6) as HttpStatusCodeResult;;
 
@@ -434,10 +434,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void Accept_WrongUserID()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = "wrongUserID" } });
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = "wrongUserID" } });
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Accept(6) as HttpStatusCodeResult;
@@ -450,10 +450,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             string currentUserID = "currentUserID";
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = currentUserID, Status = Status.Expired } });
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = currentUserID, Status = Status.Expired } });
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Accept(6) as HttpStatusCodeResult;
@@ -466,10 +466,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             Offer offer = new Offer { Order = new Order { Status = Status.Active } };
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Accept(6, true) as ViewResult;
@@ -485,10 +485,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             Offer offer = new Offer { Order = new Order { Status = Status.Active } };
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.Accept(6) as ViewResult;
@@ -503,10 +503,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             Offer offer = null;
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(offer);
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             var result = orderController.AcceptConfirmed(6) as HttpStatusCodeResult; ;
 
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
@@ -515,10 +515,10 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void AcceptConfirmed_WrongUserID()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = "wrongUserID" } });
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = "wrongUserID" } });
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.AcceptConfirmed(6) as HttpStatusCodeResult;
@@ -531,10 +531,10 @@ namespace Mono.Tests.Auction.Controllers
         {
             string currentUserID = "currentUserID";
 
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = currentUserID, Status = Status.Expired } });
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { UserID = currentUserID, Status = Status.Expired } });
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.AcceptConfirmed(6) as HttpStatusCodeResult;
@@ -545,12 +545,12 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void AcceptConfirmed_DataException()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { Status = Status.Active } });
-            mockUnitOfWork.Setup(m => m.OfferRepository.Update(It.IsAny<Offer>()));
-            mockUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { Status = Status.Active } });
+            mockIUnitOfWork.Setup(m => m.OfferRepository.Update(It.IsAny<Offer>()));
+            mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.AcceptConfirmed(6) as RedirectToRouteResult;
@@ -563,11 +563,11 @@ namespace Mono.Tests.Auction.Controllers
         [Fact]
         public void AcceptConfirmed_Valid()
         {
-            var mockUnitOfWork = new Mock<UnitOfWork>();
-            mockUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { Status = Status.Active } });
-            mockUnitOfWork.Setup(m => m.OfferRepository.Update(It.IsAny<Offer>()));
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.OfferRepository.GetByID(6)).Returns(new Offer { Order = new Order { Status = Status.Active } });
+            mockIUnitOfWork.Setup(m => m.OfferRepository.Update(It.IsAny<Offer>()));
 
-            var orderController = new OrderController(mockUnitOfWork.Object);
+            var orderController = new OrderController(mockIUnitOfWork.Object);
             orderController.ControllerContext = new ControllerContext(mockObject.currentUser(), new RouteData(), orderController);
 
             var result = orderController.AcceptConfirmed(6) as RedirectToRouteResult;
