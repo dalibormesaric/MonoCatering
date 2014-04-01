@@ -1,4 +1,5 @@
 ﻿(function (signalRFunctions, $, undefined) {
+    //Private Property
     var messagesDiv = '<div id="messages" style="width:300px;position:fixed;top:80px;right:30px;"></div>';
 
     //Private Method
@@ -6,23 +7,19 @@
         write(line, "alert-danger")
     }
 
-    //Private Method
     function writeNotification(line) {
         write(line, "alert-info")
     }
 
-    //Private Method
     function writeMessage(line) {
         write(line, "alert-success")
     }
 
-    //Private Method
     function getTimeString() {
         var currentTime = new Date();
         return currentTime.toLocaleTimeString();
     }
 
-    //Private Method
     function write(line, type) {
         var messages = $("#messages");
 
@@ -47,71 +44,126 @@
             $("#itemsInBasket").html(data);
         });
 
-        $.ajax({
-            url: "/Auction/Order/offersCount"
-        }).done(function (data) {
-            $("#offersCount").html("offers(" + data + ")");
-        });
+        function updateOffersCount() {
+            $.ajax({
+                url: "/Auction/Order/OffersCount"
+            }).done(function (data) {
+                $("#offersCount").html("offers(" + data + ")");
+            });
+        }
+
+        updateOffersCount();
 
         $("body").append(messagesDiv);
 
         var connection = $.connection.hub;
         var hub = $.connection.chatHub;
 
-        connection.logging = true;
+        //connection.logging = true;
 
-        hub.client.message = function (value) {
-            writeMessage(value);
+        function offersCountForOrder(orderId) {
+            updateOffersCount();
+
+            var order = $("#offersCountForOrder" + orderId);
+
+            if (order.length > 0) {
+                $.ajax({
+                    url: "/Auction/Order/OffersCountForOrder/" + orderId
+                }).done(function (data) {
+                    order.html(data);
+                });
+            }
+        }
+
+        hub.client.offersCountForOrderNew = function (orderId, offerID) {
+            writeMessage("New offer");
+            offersCountForOrder(orderId);
+
+            var offers = $("#offers");
+
+            if (offers.length > 0) {
+                $.ajax({
+                    url: "/Auction/Order/offer/" + offerID
+                }).done(function (data) {
+                    offers.prepend(data);
+                });
+            }
+        }
+
+        hub.client.offersCountForOrderDeleted = function (orderId, offerID, message) {
+            writeError("Offer deleted");
+            offersCountForOrder(orderId);
+
+            var offer = $("#offer" + offerID);
+
+            if (offer.length > 0) {
+                offer.remove();
+            }
         }
 
         connection.start()
             .done(function () {
-                writeNotification("connected");
+                //writeNotification("connected");
             })
             .fail(function (error) {
                 writeError(value);
             });
-
-        $("#sendToRestaurants").click(function () {
-            hub.server.sendToGroupRestaurant($("#message").val());
-        });
     }
 
-    //Public Method
     signalRFunctions.restaurantClient = function () {
-        $.ajax({
-            url: "/Auction/Offer/ordersCount"
-        }).done(function (data) {
-            $("#ordersCount").html(data);
-        });
+
+        function updateOrdersCount() {
+            $.ajax({
+                url: "/Auction/Offer/ordersCount"
+            }).done(function (data) {
+                $("#ordersCount").html(data);
+            });
+        }
+
+        updateOrdersCount();
 
         $("body").append(messagesDiv);
 
         var connection = $.connection.hub;
         var hub = $.connection.chatHub;
 
-        connection.logging = false;
+        //connection.logging = true;
 
-        hub.client.hubMessage = function (data) {
-            writeMessage(data);
+        hub.client.removeOrder = function (orderId) {
+            updateOrdersCount();
+            writeError("Order removed");
+
+            var order =  $("#order" + orderId);
+
+            if (order.length > 0) {
+                order.remove();
+            }
         }
 
-        hub.client.hubNotification = function (data) {
-            writeNotification(data);
+        hub.client.addOrder = function (orderId) {
+            updateOrdersCount();
+            writeMessage("New order")
+
+            var orders = $("#orders");
+
+            if (orders.length > 0)
+            {
+                $.ajax({
+                    url: "/Auction/Offer/order/" + orderId
+                }).done(function (data) {
+                    orders.prepend(data);
+                });
+            }
         }
 
         connection.start()
             .done(function () {
-                writeNotification("connected");
+                //writeNotification("connected");
                 hub.server.joinGroupRestaurant();
             })
             .fail(function (error) {
                 writeError(value);
             });
-
-        $("#sendToUser").click(function () {
-            hub.server.sendToUser($("#userId").val(), $("#message").val());
-        });
     }
 
 }(window.signalRFunctions = window.signalRFunctions || {}, jQuery));

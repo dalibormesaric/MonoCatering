@@ -8,54 +8,57 @@
 <h2>Orders</h2>
 
 <table class="table">
-    <tr>
-        <th>
-            User
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.User.Address)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateTime)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Offers)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.User.LastName)
-            @Html.DisplayFor(modelItem => item.User.FirstName)
-            (@Html.DisplayFor(modelItem => item.User.UserName))
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.User.Address)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateTime)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Status)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Offers.Count)
-        </td>
-        <td>
-            @Html.ActionLink("Make offer (See items)", "Details", "Offer", new { id = item.ID }, null)
-        </td>
-    </tr>
-}
-
+    <thead>
+        <tr>
+            <th>
+                User
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.User.Address)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Offers)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="orders">
+        @foreach (var item in Model)
+        {
+            <tr id="order@{@item.ID}">
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.LastName)
+                    @Html.DisplayFor(modelItem => item.User.FirstName)
+                    (@Html.DisplayFor(modelItem => item.User.UserName))
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Offers.Count)
+                </td>
+                <td>
+                    @Html.ActionLink("Make offer (See items)", "Details", "Offer", new { id = item.ID }, null)
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
