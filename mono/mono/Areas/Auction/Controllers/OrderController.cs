@@ -31,10 +31,24 @@ namespace Mono.Areas.Auction.Controllers
             return View("Index", orders);
         }
 
-        public int offersCount()
+        public int OffersCount()
         {
             var userID = User.Identity.GetUserId();
             return unitOfWork.OrderRepository.Get(o => o.UserID == userID && o.Status == Status.Active, q => q.OrderByDescending(o => o.DateTime), "Offers").Select(o => o.Offers.Count).Sum();
+        }
+
+        public ActionResult OffersCountForOrder(int id)
+        {
+            if(Request.IsAjaxRequest())
+            {
+                var userID = User.Identity.GetUserId();
+                var order = unitOfWork.OrderRepository.GetByID(id);
+
+                if (order.UserID == userID)
+                    return PartialView("_OffersCountForOrder", new Tuple<int, int>(order.Offers.Count, order.ID));
+            }
+            
+            return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
         }
 
         // GET: /Auction/Order/Deactivate/5
@@ -90,6 +104,9 @@ namespace Mono.Areas.Auction.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Deactivate", new { id = id, saveChangesError = true });
             }
+
+            var hubContext = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
+            hubContext.Clients.Group("restaurant").removeOrder(order.ID);
 
             return RedirectToAction("Index");
         }
@@ -189,6 +206,10 @@ namespace Mono.Areas.Auction.Controllers
 
                 unitOfWork.OrderRepository.Insert(order);
                 unitOfWork.Save();
+
+                var hubContext = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
+                hubContext.Clients.Group("restaurant").addOrder(order.ID);
+
                 return RedirectToAction("Index");
             }
             catch (DataException /* dex */)
@@ -230,6 +251,21 @@ namespace Mono.Areas.Auction.Controllers
             var offers = unitOfWork.OfferRepository.Get(o => o.OrderID == id && o.Order.UserID == userID, q => q.OrderByDescending(o => o.DateTime)).ToList();
 
             return View("Offers", offers);
+        }
+
+        //
+        // GET: /Auction/Order/Offer
+        public ActionResult Offer(int id)
+        {
+            if (Request.IsAjaxRequest())
+            {
+                var userID = User.Identity.GetUserId();
+                var offer = unitOfWork.OfferRepository.GetByID(id);
+
+                return PartialView("_Offer", offer);
+            }
+
+            return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
         }
 
         // GET: /Auction/Order/Accept/5
@@ -275,8 +311,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 offer.Order.Status = Status.Accepted;
                 offer.Order.AcceptedOfferID = id;
-                offer.AcceptedOrderID = offer.Order.ID;
-                offer.AcceptedDateTime = System.DateTime.Now;
+                offer.Order.AcceptedDateTime = System.DateTime.Now;
 
                 unitOfWork.OfferRepository.Update(offer);
                 unitOfWork.Save();
@@ -286,6 +321,10 @@ namespace Mono.Areas.Auction.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Accept", new { id = id, saveChangesError = true });
             }
+            
+            var hubContext = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
+            hubContext.Clients.Group("restaurant").removeOrder(offer.OrderID);
+
             return RedirectToAction("Index");
         }
 

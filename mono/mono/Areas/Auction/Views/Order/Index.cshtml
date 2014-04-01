@@ -42,15 +42,8 @@
         <td>
             @Html.DisplayFor(modelItem => item.Status)
         </td>
-        <td>
-            @if(@item.Offers.Count == 0)
-            {
-                @:-
-            }
-            else
-            {
-                @Html.ActionLink(@item.Offers.Count.ToString(), "Offers", "Order", new { id = item.ID }, null)
-            }
+        <td id="offersCountForOrder@{@item.ID}">
+            @Html.Partial("_OffersCountForOrder", new Tuple<int, int>(item.Offers.Count, item.ID))
         </td>
         <td>
             @Html.ActionLink("See items", "Details", "Order", new { id=item.ID }, null)

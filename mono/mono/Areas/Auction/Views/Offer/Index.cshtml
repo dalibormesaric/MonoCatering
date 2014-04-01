@@ -61,9 +61,9 @@
             {
                 <span class="alert-warning">Expired</span>
             }
-            else if (item.AcceptedOrderID != null)
+            else if (item.ID == item.Order.AcceptedOfferID)
             {
-                <span class="alert-success">Accepted(@item.AcceptedDateTime)</span>
+                <span class="alert-success">Accepted(@item.Order.AcceptedDateTime)</span>
             }
             else if (item.Order.AcceptedOfferID != null)
             {

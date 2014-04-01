@@ -1,0 +1,11 @@
+﻿@model Tuple<int, int>  
+@*offersCount, orderID*@
+
+@if (Model.Item1 == 0)
+{
+    @:-
+}
+else
+{
+    @Html.ActionLink(Model.Item1.ToString(), "Offers", "Order", new { id = Model.Item2 }, null)
+}

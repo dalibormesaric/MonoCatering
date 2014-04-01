@@ -37,6 +37,17 @@ namespace Mono.Areas.Auction.Controllers
             return View("Orders", orders);
         }
 
+        public ActionResult Order(int id)
+        {
+            if (Request.IsAjaxRequest())
+            {
+                var order = unitOfWork.OrderRepository.GetByID(id);
+                return PartialView("_Order", order);
+            }
+            else
+                return RedirectToAction("Orders"); 
+        }
+
         public int OrdersCount()
         {
             return unitOfWork.OrderRepository.Get(o => o.Status == Mono.Model.Status.Active, q => q.OrderByDescending(o => o.DateTime)).Count();
@@ -102,6 +113,10 @@ namespace Mono.Areas.Auction.Controllers
 
                         unitOfWork.OfferRepository.Insert(offer);
                         unitOfWork.Save();
+
+                        var hubContext = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
+                        hubContext.Clients.User(offer.Order.User.UserName).offersCountForOrderNew(offer.OrderID, offer.ID);
+
                         return RedirectToAction("Index");
                     }
                 }
@@ -132,7 +147,7 @@ namespace Mono.Areas.Auction.Controllers
             {
                 return HttpNotFound();
             }
-            if (offer.RestaurantID != unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID || offer.AcceptedOrderID != null)
+            if (offer.RestaurantID != unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID || offer.ID == offer.Order.AcceptedOfferID)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -147,10 +162,16 @@ namespace Mono.Areas.Auction.Controllers
             try
             {
                 Offer offer = unitOfWork.OfferRepository.GetByID(id);
-                if (offer.RestaurantID == unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID && offer.AcceptedOrderID == null)
+                if (offer.RestaurantID == unitOfWork.UserRepository.GetByID(User.Identity.GetUserId()).RestaurantID && offer.ID != offer.Order.AcceptedOfferID)
                 {
+                    var userName = offer.Order.User.UserName;
+                    var orderID = offer.OrderID;
+
                     unitOfWork.OfferRepository.Delete(id);
                     unitOfWork.Save();
+
+                    var hubContext = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
+                    hubContext.Clients.User(userName).offersCountForOrderDeleted(orderID, offer.ID);
 
                     return RedirectToAction("Index");
                 }

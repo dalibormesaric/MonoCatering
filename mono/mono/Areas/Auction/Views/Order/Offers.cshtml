@@ -8,64 +8,69 @@
 <h2>Offers</h2>
 
 <table class="table">
-    <tr>
-        <th>
-            Restaurant
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateTime)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Price)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DeliveryTime)
-        </th>
-        <th></th>
-    </tr>
+    <thead>
+        <tr>
+            <th>
+                Restaurant
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeliveryTime)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="offers">
+        @foreach (var item in Model)
+        {
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Restaurant.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateTime)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Price)
-            €
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DeliveryTime)
-            min
-        </td>
-        <td>
-            @if (item.Order.Status == Mono.Model.Status.Active) 
-            { 
-                @Html.ActionLink("Accept", "Accept", new { id=item.ID })
-            }
-            else if (item.Order.Status == Mono.Model.Status.Accepted)
-            {
-                if(item.AcceptedOrderID != null)
-                { 
-                    <span class="alert-success">Accepted</span>
-                }
-                else
-                {
-                    <span class="alert-warning">Not-Accepted</span>
-                }
-            }
-        </td>
-    </tr>
-}
+            <tr id="offer@{@item.ID}">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Restaurant.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                    €
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DeliveryTime)
+                    min
+                </td>
+                <td>
+                    @if (item.Order.Status == Mono.Model.Status.Active)
+                    {
+                        @Html.ActionLink("Accept", "Accept", new { id = item.ID })
+                    }
+                    else if (item.Order.Status == Mono.Model.Status.Accepted)
+                    {
+                        if (item.ID == item.Order.AcceptedOfferID)
+                        {
+                            <span class="alert-success">Accepted</span>
+                        }
+                        else
+                        {
+                            <span class="alert-warning">Not-Accepted</span>
+                        }
+                    }
+                </td>
+            </tr>
 
+        }
+    </tbody>
 </table>
 
 @Html.ActionLink("Orders", "Index", "Order")

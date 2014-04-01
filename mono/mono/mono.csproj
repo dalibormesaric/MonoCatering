@@ -363,6 +363,9 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Areas\Auction\Views\Order\Deactivate.cshtml" />
+    <Content Include="Areas\Auction\Views\Offer\_Order.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\_OffersCountForOrder.cshtml" />
+    <Content Include="Areas\Auction\Views\Order\_Offer.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\javaScript.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
@@ -442,8 +445,6 @@
     <Content Include="Areas\Admin\Views\User\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\User\Index.cshtml" />
     <Content Include="Views\Home\Restaurants.cshtml" />
-    <Content Include="Views\Home\ChatUser.cshtml" />
-    <Content Include="Views\Home\ChatRestaurant.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

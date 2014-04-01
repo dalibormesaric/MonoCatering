@@ -1,0 +1,38 @@
+﻿@model Mono.Model.Offer
+
+<tr id="offer@{@Model.ID}">
+    <td>
+        @Html.DisplayFor(modelModel => Model.Restaurant.Name)
+    </td>
+    <td>
+        @Html.DisplayFor(modelModel => Model.Description)
+    </td>
+    <td>
+        @Html.DisplayFor(modelModel => Model.DateTime)
+    </td>
+    <td>
+        @Html.DisplayFor(modelModel => Model.Price)
+        €
+    </td>
+    <td>
+        @Html.DisplayFor(modelModel => Model.DeliveryTime)
+        min
+    </td>
+    <td>
+        @if (Model.Order.Status == Mono.Model.Status.Active)
+        {
+            @Html.ActionLink("Accept", "Accept", new { id = Model.ID })
+        }
+        else if (Model.Order.Status == Mono.Model.Status.Accepted)
+        {
+            if (Model.ID == Model.Order.AcceptedOfferID)
+            {
+                <span class="alert-success">Accepted</span>
+            }
+            else
+            {
+                <span class="alert-warning">Not-Accepted</span>
+            }
+        }
+    </td>
+</tr>

@@ -152,6 +152,8 @@ namespace Mono.Model
         public Status Status { get; set; }
 
         public int? AcceptedOfferID { get; set; }
+
+        public DateTime? AcceptedDateTime { get; set; }
         
         [Required]
         public string UserID { get; set; }
@@ -209,11 +211,7 @@ namespace Mono.Model
         [Required]
         [Range(0, int.MaxValue)]
         public int DeliveryTime { get; set; } //minutes
-        
-        public int? AcceptedOrderID { get; set; }
-
-        public DateTime? AcceptedDateTime { get; set; }
-        
+               
         [Required]
         public int RestaurantID { get; set; }
         
