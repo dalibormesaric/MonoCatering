@@ -1,0 +1,58 @@
+﻿@model PagedList.IPagedList<Mono.Model.Photo>
+@using PagedList.Mvc;
+@using Mono.Models;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
+}
+
+<h2>Photos</h2>
+
+<p>
+    @Html.ActionLink("Upload new photo", "PhotoUpload")
+</p>
+
+@using (Html.BeginForm("Index", "Photo", FormMethod.Get))
+{
+    <p>
+        Find by file name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+        <input type="submit" value="Search" />
+    </p>
+}
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.ActionLink("File Name", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th>
+            Image
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.FileName)
+        </td>
+        <td>
+            @Html.Image(item.FileName, null)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.FileName }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.FileName })
+        </td>
+    </tr>
+}
+
+</table>
+
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

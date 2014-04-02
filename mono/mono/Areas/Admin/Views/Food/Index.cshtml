@@ -1,10 +1,12 @@
 ﻿@model PagedList.IPagedList<Mono.Model.Food>
 @using PagedList.Mvc;
+@using Mono.Models
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 
 @{
     ViewBag.Title = "Index";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Food</h2>
@@ -30,6 +32,9 @@
             @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.CategorySortParm, currentFilter = ViewBag.CurrentFilter })
         </th>
         <th>
+            Image
+        </th>
+        <th>
             Ingredients
         </th>
         <th></th>
@@ -42,6 +47,9 @@
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Category.Name)
+        </td>
+        <td>
+            @Html.Image(item.PhotoID, null)
         </td>
         <td>
             @Html.ActionLink("View", "Ingredients", new { id = item.ID })

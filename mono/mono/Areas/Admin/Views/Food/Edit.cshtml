@@ -1,8 +1,10 @@
 ﻿@model Mono.Model.Food
+@using Mono.Models
 
 @{
     ViewBag.Title = "Edit";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Edit</h2>
@@ -34,6 +36,14 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label col-md-2">Images</label>
+            <div class="col-md-10">
+                @Html.DropDownList("PhotoID", ViewBag.Photos as IEnumerable<SelectListItem>, String.Empty)
+                @Html.Image(Model.PhotoID, new { id = "selectedImage" })
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
@@ -44,3 +54,9 @@
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>
+
+@section scripts{
+    <script>
+        imageFunctions.changeImageEvent();
+    </script>
+}

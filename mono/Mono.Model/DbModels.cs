@@ -88,6 +88,9 @@ namespace Mono.Model
         [Display(Name = "Parent category")]
         public virtual Category ParentCategory { get; set; }
 
+        [Display(Name = "Photo")]
+        public string PhotoID { get; set; }
+
         public virtual ICollection<Food> Food { get; set; }
 
         public virtual ICollection<Ingredient> Ingredients { get; set; }
@@ -108,6 +111,9 @@ namespace Mono.Model
 
         [Display(Name = "Category")]
         public virtual Category Category { get; set; }
+
+        [Display(Name = "Photo")]
+        public string PhotoID { get; set; }
 
         public virtual ICollection<Ingredient> Ingredients { get; set; }
     }
@@ -223,6 +229,13 @@ namespace Mono.Model
         public virtual Order Order { get; set; }
     }
 
+    public class Photo
+    {
+        [Key]
+        [Required]
+        [RegularExpression("^[a-zA-Z0-9_.-]{3,15}$", ErrorMessage = "FileName is not valid")]
+        public string FileName { get; set; } //if they don't have something
+    }
 
 
 }

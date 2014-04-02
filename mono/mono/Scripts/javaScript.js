@@ -167,3 +167,18 @@
     }
 
 }(window.signalRFunctions = window.signalRFunctions || {}, jQuery));
+
+(function (imageFunctions, $, undefined) {
+    imageFunctions.changeImageEvent = function () {
+        $("#PhotoID").change(function () {
+            var fileName = $("#PhotoID option:selected").text();
+            var sImage = $("#selectedImage");
+
+            if (fileName === "")
+                sImage.attr("src", "/Content/Images/_.png");
+            else
+                sImage.attr("src", "/Content/Images/" + fileName + ".png");
+        });
+    }
+
+}(window.imageFunctions = window.imageFunctions || {}, jQuery));

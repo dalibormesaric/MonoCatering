@@ -138,7 +138,7 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /AdminFood/Create
         public ActionResult Create()
         {
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
+            setViewBagsParametres(null);
             return View("Create");
         }
 
@@ -147,7 +147,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
+        public ActionResult Create([Bind(Include="ID,Name,CategoryID,PhotoID")] Food food)
         {
             try 
             { 
@@ -163,8 +163,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Create", food);
         }
 
@@ -180,7 +179,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Edit", food);
         }
 
@@ -189,7 +188,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
+        public ActionResult Edit([Bind(Include="ID,Name,CategoryID,PhotoID")] Food food)
         {
             try
             {
@@ -205,7 +204,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Edit", food);
         }
 
@@ -273,6 +272,12 @@ namespace Mono.Areas.Admin.Controllers
                 unitOfWork.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private void setViewBagsParametres(int? categoryID)
+        {
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", categoryID);
+            ViewBag.Photos = new SelectList(unitOfWork.PhotoRepository.Get().Select(p => p.FileName));
         }
     }
 }

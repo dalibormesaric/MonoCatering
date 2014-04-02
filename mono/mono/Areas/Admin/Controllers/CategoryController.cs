@@ -72,6 +72,8 @@ namespace Mono.Areas.Admin.Controllers
             var categories = unitOfWork.CategoryRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "ParentCategory");
             int pageNumber = (page ?? 1);
 
+            //todo viewModel with unitOfWork.SizeValuesString(category.SizeType);
+
             return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
         }
 
@@ -95,8 +97,7 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /AdminCategory/Create
         public ActionResult Create()
         {
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString");
+            setViewBagsParametres(null, null);
             return View("Create");
         }
 
@@ -105,7 +106,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Name,ParentCategoryID,SizeType")] Category category)
+        public ActionResult Create([Bind(Include = "ID,Name,ParentCategoryID,PhotoID,SizeType")] Category category)
         {
             try 
             { 
@@ -122,8 +123,7 @@ namespace Mono.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
 
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString");
+            setViewBagsParametres(category.ParentCategoryID, category.SizeType);
             return View("Create", category);
         }
 
@@ -139,8 +139,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", category.SizeType);
+            setViewBagsParametres(category.ParentCategoryID, category.SizeType);
             return View("Edit", category);
         }
 
@@ -149,7 +148,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Name,ParentCategoryID,SizeType")] Category category)
+        public ActionResult Edit([Bind(Include = "ID,Name,ParentCategoryID,PhotoID,SizeType")] Category category)
         {
             try
             {
@@ -165,9 +164,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-
-            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", category.ParentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", category.SizeType);
+            setViewBagsParametres(category.ParentCategoryID, category.SizeType);
             return View("Edit", category);
         }
 
@@ -247,6 +244,13 @@ namespace Mono.Areas.Admin.Controllers
                 unitOfWork.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private void setViewBagsParametres(int? parentCategoryID, int? sizeType)
+        {
+            ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", parentCategoryID);
+            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", sizeType);
+            ViewBag.Photos = new SelectList(unitOfWork.PhotoRepository.Get().Select(p => p.FileName));
         }
     }
 }

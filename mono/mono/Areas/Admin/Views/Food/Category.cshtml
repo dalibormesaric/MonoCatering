@@ -1,8 +1,10 @@
 ﻿@model IEnumerable<Mono.Model.Food>
+@using Mono.Models
 
 @{
     ViewBag.Title = "Category";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Food for category <b>@ViewBag.Category</b></h2>
@@ -15,6 +17,9 @@
         <th>
             @Html.DisplayNameFor(model => model.Category)
         </th>
+        <th>
+            Image
+        </th>
         <th></th>
     </tr>
 
@@ -25,6 +30,9 @@
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Category.Name)
+        </td>
+        <td>
+            @Html.Image(item.PhotoID, null)
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |

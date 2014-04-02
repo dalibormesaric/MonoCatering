@@ -2,11 +2,12 @@
 
 @{
     ViewBag.Title = "Delete";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Delete</h2>
-<p class="error">@ViewBag.ErrorMessage</p>
+<p class="alert-danger">@ViewBag.ErrorMessage</p>
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Ingredient</h4>
