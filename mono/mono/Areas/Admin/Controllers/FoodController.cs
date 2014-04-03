@@ -24,7 +24,7 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /AdminFood/
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, IEnumerable<Food> foodsForCategory)
         {
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
@@ -69,14 +69,31 @@ namespace Mono.Areas.Admin.Controllers
                     break;
             }
 
-            var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
             int pageNumber = (page ?? 1);
 
-            return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
+            if (foodsForCategory == null)
+            {
+                var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
+                
+                return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
+            }
+            else
+            {
+                var query = foodsForCategory.AsQueryable();
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
+
+                var foods = orderBy(query);
+                
+                return View("Category", foods.ToPagedList(pageNumber, Global.PageSize));
+            }
         }
       
         // GET: /AdminCategory/Category/5
-        public ActionResult Category(int? id)
+        public ActionResult Category(int? id, string sortOrder, string currentFilter, string searchString, int? page)
         {
             if (id == null)
             {
@@ -91,6 +108,7 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             ViewBag.Category = category.Name;
+            ViewBag.CategoryID = id;
           
             var foods = category.Food.AsEnumerable();
 
@@ -108,16 +126,7 @@ namespace Mono.Areas.Admin.Controllers
 
             } while (childs.Count != 0);
 
-            foods = foods.OrderBy(f => f.Name);
-
-            /*
-            if(Request.IsAjaxRequest())
-            {
-                return Json(foods.ToList());
-            }
-            */
-            
-            return View("Category", foods.ToList());
+            return Index(sortOrder, currentFilter, searchString, page, foods);
         }
 
         // GET: /AdminFood/Details/5
