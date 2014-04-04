@@ -1,10 +1,14 @@
 ﻿@model Mono.Areas.Auction.Models.ItemViewModel
+@using Mono.HtmlHelperExtension
 
 <table class="table" style="border:1px solid #0094ff">
     @foreach (var item in Model.ListCategoryFood)
     {
         <tr>
-            <td>
+            <td style="width:150px;">
+                @Html.Image(item.PhotoID, null)
+            </td>
+            <td style="vertical-align:middle"> 
                 @if (item.Type == Mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
                 {
                     using (Ajax.BeginForm("Index",new { id = item.ItemID }, 

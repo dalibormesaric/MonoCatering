@@ -5,9 +5,9 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace Mono.Models
+namespace Mono.HtmlHelperExtension
 {
-    public static class HtmlHelperExtensions
+    public static class HtmlHelperExtension
     {
         public static MvcHtmlString Image(this HtmlHelper helper, string imageName, object htmlAttributes)
         {
