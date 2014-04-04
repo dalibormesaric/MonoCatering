@@ -23,8 +23,8 @@ namespace Mono.Areas.Admin.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        // GET: /AdminCategory/
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
+        // GET: /Admin/Category/
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, IEnumerable<Category> subCategories)
         {
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
@@ -69,15 +69,70 @@ namespace Mono.Areas.Admin.Controllers
                     break;
             }
 
-            var categories = unitOfWork.CategoryRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "ParentCategory");
             int pageNumber = (page ?? 1);
 
             //todo viewModel with unitOfWork.SizeValuesString(category.SizeType);
 
-            return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
+            if(subCategories == null)
+            {
+                var categories = unitOfWork.CategoryRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "ParentCategory");
+                return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
+            }
+            else
+            {
+                var query = subCategories.AsQueryable();
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
+
+                var categories = orderBy(query);
+
+                return View("SubCategory", categories.ToPagedList(pageNumber, Global.PageSize));
+            }
+
         }
 
-        // GET: /AdminCategory/Details/5
+        // GET: /Admin/Category/SubCategory/5
+        public ActionResult SubCategory(int? id, string sortOrder, string currentFilter, string searchString, int? page)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
+
+            if (category == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.Category = category.Name;
+            ViewBag.CategoryID = id;
+
+            var categories = category.ChildCategory.AsEnumerable();
+
+            Stack<Category> childs = new Stack<Category>();
+            childs.Push(category);
+
+            do
+            {
+                category = childs.Pop();
+
+                foreach (var child in category.ChildCategory)
+                {
+                    categories = categories.Union(child.ChildCategory);
+                    childs.Push(child);
+                }
+
+            } while (childs.Count != 0);
+
+            return Index(sortOrder, currentFilter, searchString, page, categories);
+        }
+
+        // GET: /Admin/Category/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -94,14 +149,14 @@ namespace Mono.Areas.Admin.Controllers
             return View("Details", category);
         }
 
-        // GET: /AdminCategory/Create
+        // GET: /Admin/Category/Create
         public ActionResult Create()
         {
             setViewBagsParametres(null, null);
             return View("Create");
         }
 
-        // POST: /AdminCategory/Create
+        // POST: /Admin/Category/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -127,7 +182,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Create", category);
         }
 
-        // GET: /AdminCategory/Edit/5
+        // GET: /Admin/Category/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -143,7 +198,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Edit", category);
         }
 
-        // POST: /AdminCategory/Edit/5
+        // POST: /Admin/Category/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -168,7 +223,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Edit", category);
         }
 
-        // GET: /AdminCategory/Delete/5
+        // GET: /Admin/Category/Delete/5
         public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
@@ -188,7 +243,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Delete", category);
         }
 
-        // POST: /AdminCategory/Delete/5
+        // POST: /Admin/Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
@@ -207,7 +262,7 @@ namespace Mono.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: /AdminCategory/Ingredients/5
+        // GET: /Admin/Category/Ingredients/5
         public ActionResult Ingredients(int? id)
         {
             if (id == null)

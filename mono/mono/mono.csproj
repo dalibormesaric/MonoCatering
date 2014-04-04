@@ -375,6 +375,8 @@
     <Content Include="Areas\Admin\Views\Photo\Delete.cshtml" />
     <Content Include="Areas\Admin\Views\Food\_Food.cshtml" />
     <Content Include="Areas\Admin\Views\Food\Category.cshtml" />
+    <Content Include="Areas\Admin\Views\Category\_Category.cshtml" />
+    <Content Include="Areas\Admin\Views\Category\SubCategory.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\javaScript.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />

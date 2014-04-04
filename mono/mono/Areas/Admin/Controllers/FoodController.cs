@@ -92,7 +92,7 @@ namespace Mono.Areas.Admin.Controllers
             }
         }
       
-        // GET: /AdminCategory/Category/5
+        // GET: /Admin/Food/Category/5
         public ActionResult Category(int? id, string sortOrder, string currentFilter, string searchString, int? page)
         {
             if (id == null)
