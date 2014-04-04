@@ -2,7 +2,8 @@
 
 @{
     ViewBag.Title = "Employers";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Employers for restaurant <b>@ViewBag.Restaurant</b></h2>

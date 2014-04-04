@@ -1,38 +1,11 @@
-﻿@model IEnumerable<Mono.Model.Food>
+﻿@model PagedList.IPagedList<Mono.Model.Food>
 
 @{
     ViewBag.Title = "Category";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
-<h2>Food for category <b>@ViewBag.Category</b></h2>
+<h2>Food in category @ViewBag.Category</h2>
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Category)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Category.Name)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
-        </td>
-    </tr>
-}
-
-</table>
-@Html.ActionLink("Back to List", "Index", "Category")
+@{ Html.RenderPartial("_Food", Model); }

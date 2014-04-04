@@ -31,7 +31,7 @@ namespace Mono.Tests.Auction.Controllers
         {
             currentUserID = "currentUserID";
 
-            offer = new Offer { OrderID = 3, RestaurantID = 7, Order = new Order () };
+            offer = new Offer { OrderID = 3, RestaurantID = 7, Order = new Order { User = new MyUser { UserName = "userName" } } };
             offerWrongStatus = new Offer { OrderID = 3, Order = new Order { Status = Status.Expired } };
             offerWrongRestaurant = new Offer { RestaurantID = 17 };
             offerAccepted = new Offer { ID = 3, Order = new Order { UserID = currentUserID, AcceptedOfferID = 3 } };

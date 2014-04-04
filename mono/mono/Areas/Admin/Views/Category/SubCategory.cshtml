@@ -4,11 +4,11 @@
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "SubCategory";
     Layout = "~/Views/Shared/_Layout.cshtml";
     Html.RenderPartial("_AdminMenu");
 }
 
-<h2>Categories</h2>
+<h2>Subcategories for category @ViewBag.Category</h2>
 
 @{ Html.RenderPartial("_Category", Model); }

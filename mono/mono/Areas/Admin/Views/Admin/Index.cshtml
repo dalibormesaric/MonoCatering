@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Admin home page";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h3>Admin home page</h3>

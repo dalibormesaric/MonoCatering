@@ -15,10 +15,10 @@ namespace Mono.Data
         private GenericRepository<Category> categoryRepository;
         private GenericRepository<Food> foodRepository;
         private GenericRepository<Ingredient> ingredientRepository;
-
         private GenericRepository<FoodIngredient> foodIngredientRepository;
         private GenericRepository<Order> orderRepository;
         private GenericRepository<Offer> offerRepository;
+        private GenericRepository<Photo> photoRepository;
 
         public virtual GenericRepository<MyUser> UserRepository
         {
@@ -125,6 +125,18 @@ namespace Mono.Data
                     offerRepository = new GenericRepository<Offer>(context);
                 }
                 return offerRepository;
+            }
+        }
+
+        public virtual GenericRepository<Photo> PhotoRepository
+        {
+            get
+            {
+                if (photoRepository == null)
+                {
+                    photoRepository = new GenericRepository<Photo>(context);
+                }
+                return photoRepository;
             }
         }
 

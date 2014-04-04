@@ -204,6 +204,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\PhotoController.cs" />
     <Compile Include="Areas\Admin\Controllers\CategorySizeController.cs" />
     <Compile Include="Areas\Auction\AuctionAreaRegistration.cs" />
     <Compile Include="Areas\Auction\Controllers\BasketController.cs" />
@@ -235,8 +236,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Areas\Admin\Models\PhotoViewModels.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="HtmlHelperExtension\HtmlHelperExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -252,6 +255,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\chosen-sprite%402x.png" />
     <Content Include="Content\chosen-sprite.png" />
+    <Content Include="Content\Images\_.png" />
     <Content Include="Content\PagedList.css" />
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
@@ -366,6 +370,13 @@
     <Content Include="Areas\Auction\Views\Offer\_Order.cshtml" />
     <Content Include="Areas\Auction\Views\Order\_OffersCountForOrder.cshtml" />
     <Content Include="Areas\Auction\Views\Order\_Offer.cshtml" />
+    <Content Include="Areas\Admin\Views\Photo\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Photo\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Photo\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Food\_Food.cshtml" />
+    <Content Include="Areas\Admin\Views\Food\Category.cshtml" />
+    <Content Include="Areas\Admin\Views\Category\_Category.cshtml" />
+    <Content Include="Areas\Admin\Views\Category\SubCategory.cshtml" />
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\javaScript.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
@@ -432,7 +443,7 @@
     <Content Include="Areas\Admin\Views\Ingredient\Details.cshtml" />
     <Content Include="Areas\Admin\Views\Ingredient\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\Ingredient\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_AdminLayout.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_AdminMenu.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Create.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Delete.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Details.cshtml" />
@@ -440,15 +451,14 @@
     <Content Include="Areas\Admin\Views\Category\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Food\Ingredients.cshtml" />
     <Content Include="Areas\Admin\Views\Category\Ingredients.cshtml" />
-    <Content Include="Areas\Admin\Views\Food\Category.cshtml" />
     <Content Include="Areas\Admin\Views\Restaurant\Employers.cshtml" />
     <Content Include="Areas\Admin\Views\User\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\User\Index.cshtml" />
     <Content Include="Views\Home\Restaurants.cshtml" />
+    <Content Include="Areas\Admin\Views\Photo\PhotoUpload.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Auction\Views\Shared\" />
     <Folder Include="Views\Auction\" />
   </ItemGroup>

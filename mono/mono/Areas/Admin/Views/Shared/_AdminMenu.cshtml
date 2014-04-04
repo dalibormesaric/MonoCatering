@@ -1,12 +1,4 @@
-﻿@{
-    ViewBag.Title = "Admin edit page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<div class="jumbotron">
-    <h2>@ViewBag.Title</h2>
-</div>
-
+﻿<h4>Admin Menu</h4>
 <div class="navbar navbar-inverse">
     <div class="container">
         <div class="navbar-header">
@@ -14,6 +6,7 @@
                 <li>@Html.ActionLink("Users", "Index", "User")</li>
                 <li>@Html.ActionLink("Restaurants", "Index", "Restaurant")</li>
                 <li>@Html.ActionLink("Category sizes", "Index", "CategorySize")</li>
+                <li>@Html.ActionLink("Photos", "Index", "Photo")</li>
                 <li>@Html.ActionLink("Food categories", "Index", "Category")</li>
                 <li>@Html.ActionLink("Food", "Index", "Food")</li>
                 <li>@Html.ActionLink("Ingredients", "Index", "Ingredient")</li>
@@ -21,6 +14,3 @@
         </div>
     </div>
 </div>
-
-@RenderBody()
-

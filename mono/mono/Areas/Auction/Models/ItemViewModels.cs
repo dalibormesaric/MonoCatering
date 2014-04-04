@@ -15,6 +15,7 @@ namespace Mono.Areas.Auction.Models
     {
         public string Name { get; set; }
         public int ItemID { get; set; }
+        public string PhotoID { get; set; }
         public ListCategoryFoodItemType Type { get; set; }
 
     }

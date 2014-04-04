@@ -1,0 +1,76 @@
+﻿@model PagedList.IPagedList<Mono.Model.Category>
+@using PagedList.Mvc;
+@using Mono.HtmlHelperExtension
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+@using (Html.BeginForm((string)@ViewBag.Title, "Category", FormMethod.Get))
+{
+    <p>
+        Find by name or parent category: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+        <input type="submit" value="Search" />
+    </p>
+}
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.ActionLink("Name", (string)@ViewBag.Title, new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter, id = ViewBag.CategoryID })
+        </th>
+        <th>
+            @Html.ActionLink("Parent category", (string)@ViewBag.Title, new { sortOrder = ViewBag.ParentCategorySortParm, currentFilter = ViewBag.CurrentFilter, id = ViewBag.CategoryID })
+        </th>
+        <th>
+            Image
+        </th>
+        <th>
+            SubCategory
+        </th>
+        <th>
+            Food
+        </th>
+        <th>
+            Ingredients
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ParentCategory.Name)
+        </td>
+        <td>
+            @Html.Image(item.PhotoID, null)
+        </td>
+        <td>
+            @Html.ActionLink("View", "SubCategory", new { id = item.ID }, null)
+        </td>
+        <td>
+            @Html.ActionLink("View", "Category", "Food", new { id = item.ID }, null)
+        </td>
+        <td>
+            @Html.ActionLink("View", "Ingredients", new { id = item.ID })
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
+        </td>
+    </tr>
+}
+
+</table>
+
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action(ViewBag.Title,
+        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter, id = ViewBag.CategoryID }))

@@ -24,7 +24,7 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /AdminFood/
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, IEnumerable<Food> foodsForCategory)
         {
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
@@ -69,14 +69,31 @@ namespace Mono.Areas.Admin.Controllers
                     break;
             }
 
-            var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
             int pageNumber = (page ?? 1);
 
-            return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
+            if (foodsForCategory == null)
+            {
+                var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
+                
+                return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
+            }
+            else
+            {
+                var query = foodsForCategory.AsQueryable();
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
+
+                var foods = orderBy(query);
+                
+                return View("Category", foods.ToPagedList(pageNumber, Global.PageSize));
+            }
         }
       
-        // GET: /AdminCategory/Category/5
-        public ActionResult Category(int? id)
+        // GET: /Admin/Food/Category/5
+        public ActionResult Category(int? id, string sortOrder, string currentFilter, string searchString, int? page)
         {
             if (id == null)
             {
@@ -91,6 +108,7 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             ViewBag.Category = category.Name;
+            ViewBag.CategoryID = id;
           
             var foods = category.Food.AsEnumerable();
 
@@ -108,16 +126,7 @@ namespace Mono.Areas.Admin.Controllers
 
             } while (childs.Count != 0);
 
-            foods = foods.OrderBy(f => f.Name);
-
-            /*
-            if(Request.IsAjaxRequest())
-            {
-                return Json(foods.ToList());
-            }
-            */
-            
-            return View("Category", foods.ToList());
+            return Index(sortOrder, currentFilter, searchString, page, foods);
         }
 
         // GET: /AdminFood/Details/5
@@ -138,7 +147,7 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /AdminFood/Create
         public ActionResult Create()
         {
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name");
+            setViewBagsParametres(null);
             return View("Create");
         }
 
@@ -147,7 +156,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
+        public ActionResult Create([Bind(Include="ID,Name,CategoryID,PhotoID")] Food food)
         {
             try 
             { 
@@ -163,8 +172,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Create", food);
         }
 
@@ -180,7 +188,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Edit", food);
         }
 
@@ -189,7 +197,7 @@ namespace Mono.Areas.Admin.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="ID,Name,Size,Pieces,CategoryID")] Food food)
+        public ActionResult Edit([Bind(Include="ID,Name,CategoryID,PhotoID")] Food food)
         {
             try
             {
@@ -205,7 +213,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
-            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", food.CategoryID);
+            setViewBagsParametres(food.CategoryID);
             return View("Edit", food);
         }
 
@@ -273,6 +281,12 @@ namespace Mono.Areas.Admin.Controllers
                 unitOfWork.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private void setViewBagsParametres(int? categoryID)
+        {
+            ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", categoryID);
+            ViewBag.Photos = new SelectList(unitOfWork.PhotoRepository.Get().Select(p => p.FileName));
         }
     }
 }

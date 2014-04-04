@@ -177,6 +177,7 @@ namespace Mono.Areas.Auction.Controllers
                 {
                     Name = subcategory.Name,
                     ItemID = subcategory.ID,
+                    PhotoID = subcategory.PhotoID,
                     Type = ListCategoryFoodItemType.Category
                 };
                 itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);
@@ -188,6 +189,7 @@ namespace Mono.Areas.Auction.Controllers
                 {
                     Name = food.Name,
                     ItemID = food.ID,
+                    PhotoID = food.PhotoID,
                     Type = ListCategoryFoodItemType.Food
                 };
                 itemViewModel.ListCategoryFood.Add(listCategoryFoodItem);

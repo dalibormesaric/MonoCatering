@@ -2,7 +2,8 @@
 
 @{
     ViewBag.Title = "View";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Html.RenderPartial("_AdminMenu");
 }
 
 <h2>Ingredients for category <b>@ViewBag.Category</b></h2>

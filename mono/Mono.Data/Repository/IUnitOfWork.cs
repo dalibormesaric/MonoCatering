@@ -13,6 +13,7 @@ namespace Mono.Data
         global::System.Collections.Generic.List<global::Mono.Model.Ingredient> IngredientsForFoodIngredient(global::System.Collections.Generic.List<int> ingredientsID);
         global::Mono.Data.GenericRepository<global::Mono.Model.Offer> OfferRepository { get; }
         global::Mono.Data.GenericRepository<global::Mono.Model.Order> OrderRepository { get; }
+        global::Mono.Data.GenericRepository<global::Mono.Model.Photo> PhotoRepository { get; }
         global::Mono.Data.GenericRepository<global::Mono.Model.Restaurant> RestaurantRepository { get; }
         void Save();
         global::System.Collections.Generic.List<global::Mono.Model.CategorySize> SizeValues(int sizeType);

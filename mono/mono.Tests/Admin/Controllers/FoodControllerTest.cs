@@ -55,9 +55,6 @@ namespace Mono.Tests.Admin.Controllers
 
             switch (action)
             {
-                case "Category":
-                    result = foodController.Category(null) as HttpStatusCodeResult;
-                    break;
                 case "Details":
                     result = foodController.Details(null) as HttpStatusCodeResult;
                     break;
@@ -94,9 +91,6 @@ namespace Mono.Tests.Admin.Controllers
 
             switch (action)
             {
-                case "Category":
-                    result = foodController.Category(id) as HttpStatusCodeResult;
-                    break;
                 case "Details":
                     result = foodController.Details(id) as HttpStatusCodeResult;
                     break;
@@ -139,7 +133,7 @@ namespace Mono.Tests.Admin.Controllers
 
             var FoodController = new FoodController(mockIUnitOfWork.Object);
 
-            var result = FoodController.Index(null, searchString, null, 1) as ViewResult;
+            var result = FoodController.Index(null, searchString, null, 1, null) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Food>;
 
             Assert.Equal("Index", result.ViewName);
@@ -155,7 +149,7 @@ namespace Mono.Tests.Admin.Controllers
 
             var FoodController = new FoodController(mockIUnitOfWork.Object);
 
-            var result = FoodController.Index("Name_desc", searchString, null, 1) as ViewResult;
+            var result = FoodController.Index("Name_desc", searchString, null, 1, null) as ViewResult;
             var model = result.ViewData.Model as IEnumerable<Food>;
 
             Assert.Equal("Index", result.ViewName);
@@ -166,26 +160,7 @@ namespace Mono.Tests.Admin.Controllers
         [Fact]
         public void Category()
         {
-            ID(6, "Category");
 
-            var parentFoods = new List<Food> { food1, food2 };
-            var child1Foods = new List<Food> { food3, food4, food5 };
-            var child2Foods = new List<Food> { food6 };
-
-            Category child1Category = new Category { ID = 3, Name = "child1Category", Food = child1Foods, ChildCategory = new List<Category> () };
-            Category child2Category = new Category { ID = 2, Name = "child2Category", Food = child2Foods, ChildCategory = new List<Category> () };
-            Category parentCategory = new Category { ID = 6, Name = "parentCategory", Food = parentFoods, ChildCategory = new List<Category> { child1Category, child2Category } };
-           
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(parentCategory);
-
-            var FoodController = new FoodController(mockIUnitOfWork.Object);
-            var result = FoodController.Category(6) as ViewResult;
-            var model = result.ViewData.Model as List<Food>;
-
-            Assert.Equal(parentCategory.Name, result.ViewBag.Category);
-            Assert.Equal("Category", result.ViewName);
-            Assert.Equal(foods.OrderBy(f => f.Name).ToList(), model);
         }
 
         [Fact]

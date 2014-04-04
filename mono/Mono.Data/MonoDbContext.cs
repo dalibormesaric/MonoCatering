@@ -24,17 +24,15 @@ namespace Mono.Data
         }
         */
         
-        public virtual DbSet<Restaurant> Restaurants { get; set; }
-        public virtual DbSet<CategorySize> CategorySizes { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
-        public virtual DbSet<Food> Foods { get; set; }
-        public virtual DbSet<Ingredient> Ingredients { get; set; }
-
-        public System.Data.Entity.DbSet<Mono.Model.Order> Orders { get; set; }
-
-        public System.Data.Entity.DbSet<Mono.Model.FoodIngredient> FoodIngredients { get; set; }
-
-        public System.Data.Entity.DbSet<Mono.Model.Offer> Offers { get; set; }
+        public DbSet<Restaurant> Restaurants { get; set; }
+        public DbSet<CategorySize> CategorySizes { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Food> Foods { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<Mono.Model.Order> Orders { get; set; }
+        public DbSet<Mono.Model.FoodIngredient> FoodIngredients { get; set; }
+        public DbSet<Mono.Model.Offer> Offers { get; set; }
+        public DbSet<Mono.Model.Photo> Photos { get; set; }
 
         //public System.Data.Entity.DbSet<mono.Models.MyUser> IdentityUsers { get; set; }
     }
