@@ -225,6 +225,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helper\ControllerHelper.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.Context.cs">
       <AutoGen>True</AutoGen>
@@ -239,7 +240,7 @@
     <Compile Include="Areas\Admin\Models\PhotoViewModels.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="HtmlHelperExtension\HtmlHelperExtension.cs" />
+    <Compile Include="Helper\HtmlHelperExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

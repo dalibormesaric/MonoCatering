@@ -20,5 +20,8 @@ namespace Mono.Data
         global::System.Collections.Generic.List<global::Mono.Data.UnitOfWork.TypeSelectList> SizeValuesSelectList();
         string SizeValuesString(int sizeType);
         global::Mono.Data.GenericRepository<global::Mono.Model.MyUser> UserRepository { get; }
+
+        global::System.Collections.Generic.IEnumerable<global::Mono.Model.Food> FoodInCategory(global::Mono.Model.Category category);
+        global::System.Collections.Generic.IEnumerable<global::Mono.Model.Category> SubCategories(global::Mono.Model.Category category);
     }
 }

@@ -10,198 +10,87 @@ using System.Data;
 using System.Linq.Expressions;
 using Mono.Data;
 using Mono.Model;
+using Mono.Tests.Admin.Fake;
 
 namespace Mono.Tests.Admin.Controllers
 {
 
     public class IngredientControllerTest
     {
-        private Ingredient ingredient;
-        private Ingredient ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6;
-        private IQueryable<Ingredient> ingredients;
-
-        Category category1, category2;
-        IQueryable<Category> categoriesOrdered;
-
-        Food food1, food2;
-        IQueryable<Food> foodsOrdered;
-
-        public IngredientControllerTest()
+        [Fact]
+        public void Index()
         {
-            ingredient = new Ingredient { CategoryID = 6 };
+            //ControllerHelper.newSearchPageNumber
 
-            Category category = new Category { Name = "category" };
-            Food food = new Food { Name = "food" };
-
-            ingredient1 = new Ingredient { Name = "ingredient1", Category = category, Food = food };
-            ingredient2 = new Ingredient { Name = "ingrsfgent2", Category = category, Food = food };
-            ingredient3 = new Ingredient { Name = "afasgdient3", Category = category, Food = food };
-            ingredient4 = new Ingredient { Name = "ingredient4", Category = category, Food = food };
-            ingredient5 = new Ingredient { Name = "ingredient5", Category = category, Food = food };
-            ingredient6 = new Ingredient { Name = "ingredient6", Category = category, Food = food };
-
-            ingredients = new List<Ingredient> { ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6 }.AsQueryable();
-
-            category1 = new Category { ID = 6, Name = "category1" };
-            category2 = new Category { ID = 3, Name = "category2" };
-
-            categoriesOrdered = new List<Category> { category1, category2 }.AsQueryable();
-
-            food1 = new Food { ID = 6, Name = "food1" };
-            food2 = new Food { ID = 3, Name = "food2" };
-
-            foodsOrdered = new List<Food> { food1, food2 }.AsQueryable();
-        }
-
-        public void IDNull(string action)
-        {
-            var ingredientController = new IngredientController(new Mock<IUnitOfWork>().Object);
-
-            HttpStatusCodeResult result;
-
-            switch (action)
-            {
-                case "Details":
-                    result = ingredientController.Details(null) as HttpStatusCodeResult;
-                    break;
-                case "Edit":
-                    int? value = null;
-                    result = ingredientController.Edit(value) as HttpStatusCodeResult;
-                    break;
-                case "DeleteFalse":
-                    result = ingredientController.Delete(null) as HttpStatusCodeResult;
-                    break;
-                default: // "DeleteTrue":
-                    result = ingredientController.Delete(null, true) as HttpStatusCodeResult;
-                    break;
-            }
-
-            Assert.Equal((int)HttpStatusCode.BadRequest, (int)result.StatusCode);
-        }
-
-        public void Ingredient1Null(int id, string action)
-        {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-
-            Ingredient ingredient = null;
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(id)).Returns(ingredient);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Get(It.IsAny<Expression<Func<Ingredient, bool>>>(), It.IsAny<Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>>>(), It.IsAny<String>())).Returns(IngredientFake.ingredients);
 
             var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Index("", "", "", 1) as ViewResult;
+            var model = result.ViewData.Model as IEnumerable<Ingredient>;
 
-            HttpStatusCodeResult result;
+            //ViewBag.
 
-            switch (action)
-            {
-                case "Details":
-                    result = ingredientController.Details(id) as HttpStatusCodeResult;
-                    break;
-                case "Edit":
-                    result = ingredientController.Edit(id) as HttpStatusCodeResult;
-                    break;
-                case "DeleteFalse":
-                    result = ingredientController.Delete(id) as HttpStatusCodeResult;
-                    break;
-                default: // "DeleteTrue":
-                    result = ingredientController.Delete(id, true) as HttpStatusCodeResult;
-                    break;
-            }
+            Assert.Equal("Index", result.ViewName);
+            Assert.Equal(IngredientFake.ingredientsPagedList, model);
+        }
+
+        [Fact]
+        public void Details_NotFound()
+        {
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(It.IsAny<int>())).Returns(IngredientFake.ingredientNull);
+
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Details(6) as HttpStatusCodeResult;
 
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
-        }
-
-        public void ID(int id, string action)
-        {
-            IDNull(action);
-            Ingredient1Null(id, action);
-        }
-
-        private static string searchString = "ingredient";
-        private Expression<Func<Ingredient, bool>> filter = (i =>
-            i.Name.ToUpper().Contains(searchString.ToUpper()) ||
-            (i.Category != null && i.Category.Name.ToUpper().Contains(searchString.ToUpper())) ||
-            (i.Food != null && i.Food.Name.ToUpper().Contains(searchString.ToUpper()))
-        );
-        private Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>> orderBy = (q => q.OrderBy(i => i.Name));
-        private Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>> orderByDescending = (q => q.OrderByDescending(i => i.Name));
-
-        [Fact]
-        public void Index_SortingAsc_Filter_PerPage_Page()
-        {
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Get(It.IsAny<Expression<Func<Ingredient, bool>>>(), It.IsAny<Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>>>(), It.IsAny<String>())).Returns(orderBy(ingredients.Where(filter)));
-
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.Index(null, searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<Ingredient>;
-
-            Assert.Equal("Index", result.ViewName);
-
-            Assert.Equal(ingredient1.Name, model.ElementAt(0).Name);
-        }
-
-        [Fact]
-        public void Index_SortingDesc_Filter_PerPage_Page()
-        {
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Get(It.IsAny<Expression<Func<Ingredient, bool>>>(), It.IsAny<Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>>>(), It.IsAny<String>())).Returns(orderByDescending(ingredients.Where(filter)));
-
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.Index("Name_desc", searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<Ingredient>;
-
-            Assert.Equal("Index", result.ViewName);
-
-            Assert.Equal(ingredient6.Name, model.ElementAt(0).Name);
         }
 
         [Fact]
         public void Details()
         {
-            ID(6, "Details");
-
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(ingredient);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(IngredientFake.ingredient);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            var result = IngredientController.Details(6) as ViewResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Details(6) as ViewResult;
             var model = result.ViewData.Model as Ingredient;
 
             Assert.Equal("Details", result.ViewName);
-            Assert.Equal(ingredient, model);
+            Assert.Equal(IngredientFake.ingredient, model);
         }
 
         [Fact]
         public void Create_Get()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            var result = IngredientController.Create() as ViewResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Create() as ViewResult;
 
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
             Assert.Equal("Create", result.ViewName);
         }
 
         [Fact]
         public void Create_DataException()
         {
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();    
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Insert(ingredient));
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Insert(IngredientFake.ingredient));
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            var result = IngredientController.Create(ingredient) as ViewResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Create(IngredientFake.ingredient) as ViewResult;
             
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
             Assert.Equal("Create", result.ViewName);
         }
 
@@ -209,16 +98,15 @@ namespace Mono.Tests.Admin.Controllers
         public void Create_InvalidModel()
         {          
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            IngredientController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            ingredientController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
+            var result = ingredientController.Create(IngredientFake.ingredient) as ViewResult;
 
-            var result = IngredientController.Create(ingredient) as ViewResult;
-
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
             Assert.Equal("Create", result.ViewName);
         }
 
@@ -226,52 +114,59 @@ namespace Mono.Tests.Admin.Controllers
         public void Create_Valid()
         {           
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Insert(ingredient));
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Insert(IngredientFake.ingredient));
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.Create(ingredient) as RedirectToRouteResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Create(IngredientFake.ingredient) as RedirectToRouteResult;
 
             Assert.Equal("Index", result.RouteValues["action"]);
         }
 
         [Fact]
+        public void Edit_Get_NotFound()
+        {
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(It.IsAny<int>())).Returns(IngredientFake.ingredientNull);
+
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Edit(6) as HttpStatusCodeResult;
+
+            Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
+        }
+
+        [Fact]
         public void Edit_Get()
         {
-            ID(6, "Edit");
-
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(ingredient);
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(IngredientFake.ingredient);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.Edit(6) as ViewResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Edit(6) as ViewResult;
             var model = result.ViewData.Model as Ingredient;
 
-
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
-            Assert.Equal("Edit", result.ViewName);           
-            Assert.Equal(ingredient, model);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal("Edit", result.ViewName);
+            Assert.Equal(IngredientFake.ingredient, model);
         }
 
         [Fact]
         public void Edit_DataException()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Update(ingredient));
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Update(IngredientFake.ingredient));
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            var result = IngredientController.Edit(ingredient) as ViewResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Edit(IngredientFake.ingredient) as ViewResult;
 
             Assert.Equal(false, result.ViewData.ModelState.IsValid);
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
             Assert.Equal("Edit", result.ViewName);
         }
 
@@ -279,17 +174,16 @@ namespace Mono.Tests.Admin.Controllers
         public void Edit_InvalidModel()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Get(null, null, "")).Returns(ingredients);
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(categoriesOrdered);
-            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(foodsOrdered);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Get(null, null, "")).Returns(IngredientFake.ingredients);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(IngredientFake.categoriesOrdered);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.Get(null, It.IsAny<Func<IQueryable<Food>, IOrderedQueryable<Food>>>(), "")).Returns(IngredientFake.foodsOrdered);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            IngredientController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            ingredientController.ModelState.AddModelError(string.Empty, "Invalid model");   //because Model Binding doesn’t work
+            var result = ingredientController.Edit(IngredientFake.ingredient) as ViewResult;
 
-            var result = IngredientController.Edit(ingredient) as ViewResult;
-
-            Assert.Equal(categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
-            Assert.Equal(foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
+            Assert.Equal(IngredientFake.categoriesOrdered, (result.ViewBag.CategoryID as SelectList).Items);
+            Assert.Equal(IngredientFake.foodsOrdered, (result.ViewBag.FoodID as SelectList).Items);
             Assert.Equal("Edit", result.ViewName);
         }
 
@@ -297,48 +191,53 @@ namespace Mono.Tests.Admin.Controllers
         public void Edit_Valid()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.Update(ingredient));         
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.Update(IngredientFake.ingredient));         
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.Edit(ingredient) as RedirectToRouteResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Edit(IngredientFake.ingredient) as RedirectToRouteResult;
 
             Assert.Equal("Index", result.RouteValues["action"]);
         }
 
         [Fact]
-        public void Delete_Get()
+        public void Delete_Get_NotFound()
         {
-            ID(6, "DeleteFalse");
-
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(ingredient);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(It.IsAny<int>())).Returns(IngredientFake.ingredientNull);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Delete(6) as HttpStatusCodeResult;
 
-            var result = IngredientController.Delete(6) as ViewResult;
-            var model = result.ViewData.Model as Ingredient;
-
-            Assert.Equal("Delete", result.ViewName);
-            Assert.Equal(ingredient, model);
+            Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
         }
 
         [Fact]
-        public void Delete_GetError()
+        public void Delete_Get_ErrorMessage()
         {
-            ID(6, "DeleteTrue");
-
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(ingredient);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(IngredientFake.ingredient);
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Delete(6, true) as ViewResult;
+            var model = result.ViewData.Model as Ingredient;
 
-            var result = IngredientController.Delete(6, true) as ViewResult;
+            Assert.Equal("Delete failed. Try again, and if the problem persists see your system administrator.", result.ViewBag.ErrorMessage);
+            Assert.Equal("Delete", result.ViewName);
+            Assert.Equal(IngredientFake.ingredient, model);
+        }
+
+        [Fact]
+        public void Delete_Get()
+        {
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.GetByID(6)).Returns(IngredientFake.ingredient);
+
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.Delete(6) as ViewResult;
             var model = result.ViewData.Model as Ingredient;
 
             Assert.Equal("Delete", result.ViewName);
-            Assert.Equal(ingredient, model);
-            Assert.Equal("Delete failed. Try again, and if the problem persists see your system administrator.", result.ViewBag.ErrorMessage);
+            Assert.Equal(IngredientFake.ingredient, model);
         }
 
         [Fact]
@@ -348,8 +247,8 @@ namespace Mono.Tests.Admin.Controllers
             mockIUnitOfWork.Setup(m => m.IngredientRepository.Delete(6));
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-            var result = IngredientController.DeleteConfirmed(6) as RedirectToRouteResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.DeleteConfirmed(6) as RedirectToRouteResult;
 
             Assert.Equal("Delete", result.RouteValues["action"]);
             Assert.Equal(6, result.RouteValues["id"]);
@@ -362,9 +261,8 @@ namespace Mono.Tests.Admin.Controllers
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.IngredientRepository.Delete(6));
 
-            var IngredientController = new IngredientController(mockIUnitOfWork.Object);
-
-            var result = IngredientController.DeleteConfirmed(6) as RedirectToRouteResult;
+            var ingredientController = new IngredientController(mockIUnitOfWork.Object);
+            var result = ingredientController.DeleteConfirmed(6) as RedirectToRouteResult;
 
             Assert.Equal("Index", result.RouteValues["action"]);
         }

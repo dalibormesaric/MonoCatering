@@ -10,6 +10,7 @@ using Mono.Model;
 using Mono.Data;
 using PagedList;
 using System.Linq.Expressions;
+using Mono.Helper;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -23,27 +24,12 @@ namespace Mono.Areas.Admin.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        // GET: /AdminIngredient/
+        // GET: /Admin/Ingredient/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            ViewBag.CategorySortParm = sortOrder == "Category" ? "Category_desc" : "Category";
-            ViewBag.FoodSortParm = sortOrder == "Food" ? "Food_desc" : "Food";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);   
 
             Expression<Func<Ingredient, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (i =>
@@ -54,7 +40,6 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             Func<IQueryable<Ingredient>, IOrderedQueryable<Ingredient>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Name_desc":
@@ -78,35 +63,38 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             var ingredients = unitOfWork.IngredientRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category, Food");
-            int pageNumber = (page ?? 1);
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+            ViewBag.CategorySortParm = sortOrder == "Category" ? "Category_desc" : "Category";
+            ViewBag.FoodSortParm = sortOrder == "Food" ? "Food_desc" : "Food";
 
             return View("Index", ingredients.ToPagedList(pageNumber, Global.PageSize));
         }
 
-        // GET: /AdminIngredient/Details/5
-        public ActionResult Details(int? id)
+        // GET: /Admin/Ingredient/Details/5
+        public ActionResult Details(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
             Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
             if (ingredient == null)
             {
                 return HttpNotFound();
             }
+
             return View("Details", ingredient);
         }
 
-        // GET: /AdminIngredient/Create
+        // GET: /Admin/Ingredient/Create
         public ActionResult Create()
         {
             ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name");
             ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name");
+
             return View("Create");
         }
 
-        // POST: /AdminIngredient/Create
+        // POST: /Admin/Ingredient/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -132,24 +120,22 @@ namespace Mono.Areas.Admin.Controllers
             return View("Create", ingredient);
         }
 
-        // GET: /AdminIngredient/Edit/5
-        public ActionResult Edit(int? id)
+        // GET: /Admin/Ingredient/Edit/5
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID((int)id);
+            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
             if (ingredient == null)
             {
                 return HttpNotFound();
             }
+
             ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.CategoryID);
             ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", ingredient.FoodID);
+
             return View("Edit", ingredient);
         }
 
-        // POST: /AdminIngredient/Edit/5
+        // POST: /Admin/Ingredient/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -170,31 +156,31 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
             }
+
             ViewBag.CategoryID = new SelectList(unitOfWork.CategoryRepository.Get(), "ID", "Name", ingredient.CategoryID);
             ViewBag.FoodID = new SelectList(unitOfWork.FoodRepository.Get(), "ID", "Name", ingredient.FoodID);
+
             return View("Edit", ingredient);
         }
 
-        // GET: /AdminIngredient/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
+        // GET: /Admin/Ingredient/Delete/5
+        public ActionResult Delete(int id, bool? saveChangesError = false)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
-            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID((int)id);
+            Ingredient ingredient = unitOfWork.IngredientRepository.GetByID(id);
             if (ingredient == null)
             {
                 return HttpNotFound();
             }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+
             return View("Delete", ingredient);
         }
 
-        // POST: /AdminIngredient/Delete/5
+        // POST: /Admin/Ingredient/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
@@ -210,6 +196,7 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
+
             return RedirectToAction("Index");
         }
 

@@ -11,6 +11,7 @@ using Mono.Data;
 using PagedList;
 using System.Linq.Expressions;
 using System.Data.Entity.SqlServer;
+using Mono.Helper;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -18,7 +19,6 @@ namespace Mono.Areas.Admin.Controllers
     public class CategorySizeController : Controller
     {
         private IUnitOfWork unitOfWork;
-
         public CategorySizeController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
@@ -27,23 +27,9 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /Admin/CategorySize/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Value_desc" : "";
-            ViewBag.TypeSortParm = sortOrder == "Type" ? "Type_desc" : "Type";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);
 
             Expression<Func<CategorySize, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (s =>
@@ -53,7 +39,6 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             Func<IQueryable<CategorySize>, IOrderedQueryable<CategorySize>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Value_desc":
@@ -71,19 +56,19 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             var categorySizes = unitOfWork.CategorySizeRepository.Get(filter: filter, orderBy: orderBy);
-            int pageNumber = (page ?? 1);
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Value_desc" : "";
+            ViewBag.TypeSortParm = sortOrder == "Type" ? "Type_desc" : "Type";
 
             return View("Index", categorySizes.ToPagedList(pageNumber, Global.PageSize));
         }
 
         // GET: /Admin/CategorySize/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID(id);
             if (categorySize == null)
             {
                 return HttpNotFound();
@@ -123,13 +108,9 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /Admin/CategorySize/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID(id);
             if (categorySize == null)
             {
                 return HttpNotFound();
@@ -163,21 +144,19 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /Admin/CategorySize/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
+        public ActionResult Delete(int id, bool? saveChangesError = false)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
-            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID((int)id);
+            CategorySize categorySize = unitOfWork.CategorySizeRepository.GetByID(id);
             if (categorySize == null)
             {
                 return HttpNotFound();
             }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+
             return View("Delete", categorySize);
         }
 
@@ -201,14 +180,9 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /Admin/CategorySize/Type/5
-        public ActionResult Type(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            
-            if (unitOfWork.CategorySizeRepository.Get(s => s.Type == (int)id).FirstOrDefault() == null)
+        public ActionResult Type(int id)
+        {          
+            if (unitOfWork.CategorySizeRepository.Get(s => s.Type == id).FirstOrDefault() == null)
             {
                 return HttpNotFound();
             }

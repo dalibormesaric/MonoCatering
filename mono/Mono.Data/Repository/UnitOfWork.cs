@@ -227,6 +227,49 @@ namespace Mono.Data
             return ingredients.OrderBy(i => i.Name).ToList();
         }
 
+        public virtual IEnumerable<Food> FoodInCategory(Category category)
+        {
+            var foods = category.Food.AsEnumerable();
+
+            Stack<Category> childs = new Stack<Category>();
+            childs.Push(category);
+
+            do
+            {
+                category = childs.Pop();
+
+                foods = foods.Union(category.Food);
+
+                foreach (var child in category.ChildCategory)
+                    childs.Push(child);
+
+            } while (childs.Count != 0);
+
+            return foods;
+        }
+
+        public virtual IEnumerable<Category> SubCategories(Category category)
+        {
+            var categories = category.ChildCategory.AsEnumerable();
+
+            Stack<Category> childs = new Stack<Category>();
+            childs.Push(category);
+
+            do
+            {
+                category = childs.Pop();
+
+                foreach (var child in category.ChildCategory)
+                {
+                    categories = categories.Union(child.ChildCategory);
+                    childs.Push(child);
+                }
+
+            } while (childs.Count != 0);
+
+            return categories;
+        }
+
         #endregion
     }
 }

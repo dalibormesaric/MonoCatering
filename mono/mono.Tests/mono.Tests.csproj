@@ -58,6 +58,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PagedList, Version=1.17.0.0, Culture=neutral, PublicKeyToken=abbb863e9397c5e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\PagedList.1.17.0.0\lib\net40\PagedList.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -107,12 +111,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Admin\Controllers\AdminControllerTest.cs" />
+    <Compile Include="Admin\Controllers\PhotoControllerTest.cs" />
     <Compile Include="Admin\Controllers\CategorySizeControllerTest.cs" />
     <Compile Include="Admin\Controllers\CategoryControllerTest.cs" />
     <Compile Include="Admin\Controllers\FoodControllerTest.cs" />
     <Compile Include="Admin\Controllers\RestaurantControllerTest.cs" />
     <Compile Include="Admin\Controllers\IngredientControllerTest.cs" />
     <Compile Include="Admin\Controllers\UserControllerTest.cs" />
+    <Compile Include="Admin\Fakes\Fakes.cs" />
     <Compile Include="Auction\Controllers\BasketControllerTest.cs" />
     <Compile Include="Auction\MockObject.cs" />
     <Compile Include="Auction\Controllers\OfferControllerTest.cs" />

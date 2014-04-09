@@ -10,6 +10,7 @@ using Mono.Model;
 using Mono.Data;
 using PagedList;
 using System.Linq.Expressions;
+using Mono.Helper;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -26,23 +27,9 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /Admin/Category/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, IEnumerable<Category> subCategories)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            ViewBag.ParentCategorySortParm = sortOrder == "ParentCategory" ? "ParentCategory_desc" : "ParentCategory";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
-
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);   
+            
             Expression<Func<Category, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (c =>
@@ -52,7 +39,6 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             Func<IQueryable<Category>, IOrderedQueryable<Category>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Name_desc":
@@ -69,7 +55,10 @@ namespace Mono.Areas.Admin.Controllers
                     break;
             }
 
-            int pageNumber = (page ?? 1);
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+            ViewBag.ParentCategorySortParm = sortOrder == "ParentCategory" ? "ParentCategory_desc" : "ParentCategory"; 
 
             //todo viewModel with unitOfWork.SizeValuesString(category.SizeType);
 
@@ -95,15 +84,9 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /Admin/Category/SubCategory/5
-        public ActionResult SubCategory(int? id, string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult SubCategory(int id, string sortOrder, string currentFilter, string searchString, int? page)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
             Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-
             if (category == null)
             {
                 return HttpNotFound();
@@ -112,40 +95,20 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.Category = category.Name;
             ViewBag.CategoryID = id;
 
-            var categories = category.ChildCategory.AsEnumerable();
-
-            Stack<Category> childs = new Stack<Category>();
-            childs.Push(category);
-
-            do
-            {
-                category = childs.Pop();
-
-                foreach (var child in category.ChildCategory)
-                {
-                    categories = categories.Union(child.ChildCategory);
-                    childs.Push(child);
-                }
-
-            } while (childs.Count != 0);
-
-            return Index(sortOrder, currentFilter, searchString, page, categories);
+            return Index(sortOrder, currentFilter, searchString, page, unitOfWork.SubCategories(category));
         }
 
         // GET: /Admin/Category/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID(id);
             if (category == null)
             {
                 return HttpNotFound();
             }
 
             ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
+
             return View("Details", category);
         }
 
@@ -153,6 +116,7 @@ namespace Mono.Areas.Admin.Controllers
         public ActionResult Create()
         {
             setViewBagsParametres(null, null);
+
             return View("Create");
         }
 
@@ -179,22 +143,21 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             setViewBagsParametres(category.ParentCategoryID, category.SizeType);
+
             return View("Create", category);
         }
 
         // GET: /Admin/Category/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
             Category category = unitOfWork.CategoryRepository.GetByID((int)id);
             if (category == null)
             {
                 return HttpNotFound();
             }
+
             setViewBagsParametres(category.ParentCategoryID, category.SizeType);
+
             return View("Edit", category);
         }
 
@@ -224,22 +187,20 @@ namespace Mono.Areas.Admin.Controllers
         }
 
         // GET: /Admin/Category/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
+        public ActionResult Delete(int id, bool? saveChangesError = false)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
+            Category category = unitOfWork.CategoryRepository.GetByID(id);
             if (category == null)
             {
                 return HttpNotFound();
             }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
             ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
+
             return View("Delete", category);
         }
 
@@ -262,15 +223,16 @@ namespace Mono.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+       
         // GET: /Admin/Category/Ingredients/5
-        public ActionResult Ingredients(int? id)
+        /// <summary>
+        /// List ingredients for category, and all parent categories
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ActionResult Ingredients(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Category category = unitOfWork.CategoryRepository.GetByID((int)id);
-
+            Category category = unitOfWork.CategoryRepository.GetByID(id);
             if (category == null)
             {
                 return HttpNotFound();
