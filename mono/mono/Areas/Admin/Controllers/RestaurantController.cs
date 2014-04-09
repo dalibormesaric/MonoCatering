@@ -10,6 +10,7 @@ using Mono.Model;
 using Mono.Data;
 using PagedList;
 using System.Linq.Expressions;
+using Mono.Helper;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -23,25 +24,12 @@ namespace Mono.Areas.Admin.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        // GET: /AdminRestaurant/
+        // GET: /Admin/Restaurant/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);
 
             Expression<Func<Restaurant, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (r =>
@@ -50,7 +38,6 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Name_desc":
@@ -62,30 +49,22 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             var restaurants = unitOfWork.RestaurantRepository.Get(filter: filter, orderBy: orderBy);
-            int pageNumber = (page ?? 1);
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
             
             return View("Index", restaurants.ToPagedList(pageNumber, Global.PageSize));
         }
 
-        // GET: /AdminCategory/Employers/5
-        public ActionResult Employers(int? id)
+        // GET: /Admin/Category/Employers/5
+        public ActionResult Employers(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
-
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID(id);
             if (restaurant == null)
             {
                 return HttpNotFound();
             }
-
-           /*
-            if (actionResult != null)
-                return actionResult;
-            */
 
             var users = unitOfWork.UserRepository.Get(filter: u => u.RestaurantID == (int)id, orderBy: q => q.OrderBy(r => r.LastName + " " + r.LastName));
 
@@ -94,28 +73,25 @@ namespace Mono.Areas.Admin.Controllers
             return View("Employers", users.ToList());
         }
 
-        // GET: /AdminRestaurant/Details/5
-        public ActionResult Details(int? id)
+        // GET: /Admin/Restaurant/Details/5
+        public ActionResult Details(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID(id);
             if (restaurant == null)
             {
                 return HttpNotFound();
             }
+
             return View("Details", restaurant);
         }
 
-        // GET: /AdminRestaurant/Create
+        // GET: /Admin/Restaurant/Create
         public ActionResult Create()
         {
             return View("Create");
         }
 
-        // POST: /AdminRestaurant/Create
+        // POST: /Admin/Restaurant/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -140,14 +116,10 @@ namespace Mono.Areas.Admin.Controllers
             return View("Create", restaurant);
         }
 
-        // GET: /AdminRestaurant/Edit/5
-        public ActionResult Edit(int? id)
+        // GET: /Admin/Restaurant/Edit/5
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID(id);
             if (restaurant == null)
             {
                 return HttpNotFound();
@@ -156,7 +128,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Edit", restaurant);
         }
 
-        // POST: /AdminRestaurant/Edit/5
+        // POST: /Admin/Restaurant/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -181,33 +153,31 @@ namespace Mono.Areas.Admin.Controllers
             return View("Edit", restaurant);
         }
 
-        // GET: /AdminRestaurant/Delete/5
-        public ActionResult Delete(int? id, bool? saveChangesError = false)
+        // GET: /Admin/Restaurant/Delete/5
+        public ActionResult Delete(int id, bool? saveChangesError = false)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
-            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id);
+            Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID(id);
             if (restaurant == null)
             {
                 return HttpNotFound();
             }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+
             return View("Delete", restaurant);
         }
 
-        // POST: /AdminRestaurant/Delete/5
+        // POST: /Admin/Restaurant/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             try
             {
-                Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID((int)id); ;
+                Restaurant restaurant = unitOfWork.RestaurantRepository.GetByID(id); ;
                 unitOfWork.RestaurantRepository.Delete(id);
                 unitOfWork.Save();
             }

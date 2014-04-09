@@ -212,6 +212,7 @@ namespace Mono.Model
 
         [Required]
         [Range(0, int.MaxValue)]
+        [RegularExpression(@"[0-9]*,?[0-9]{0,2}", ErrorMessage = "Invalid format for {0}.")]
         public decimal Price { get; set; }
         
         [Required]

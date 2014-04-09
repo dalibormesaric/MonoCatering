@@ -12,6 +12,7 @@ using PagedList;
 using System.Linq.Expressions;
 using Mono.Areas.Admin.Models;
 using System.Web.Helpers;
+using Mono.Helper;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -28,29 +29,15 @@ namespace Mono.Areas.Admin.Controllers
         // GET: /Admin/Photo/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
-
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);   
+            
             Expression<Func<Photo, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (c => c.FileName.ToUpper().Contains(searchString.ToUpper()));
             }
 
             Func<IQueryable<Photo>, IOrderedQueryable<Photo>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Name_desc":
@@ -62,7 +49,10 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             var categories = unitOfWork.PhotoRepository.Get(filter: filter, orderBy: orderBy);
-            int pageNumber = (page ?? 1);
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
 
             return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
         }
@@ -86,10 +76,9 @@ namespace Mono.Areas.Admin.Controllers
                     Photo photo = new Photo { FileName = model.FileName };
                     WebImage image = WebImage.GetImageFromRequest();
                     
-
                     if (image == null)
                     {
-                        ViewBag.ErrorMessage = "No image.";
+                        ModelState.AddModelError(string.Empty, "No image.");
                     }
                     else if(unitOfWork.PhotoRepository.GetByID(photo.FileName) != null)
                     {
@@ -128,6 +117,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
+
             return View("Edit", new PhotoEditViewModel { FileName = photo.FileName, NewFileName = photo.FileName });
         }
 
@@ -179,15 +169,17 @@ namespace Mono.Areas.Admin.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
-            }
             Photo photo = unitOfWork.PhotoRepository.GetByID(id);
             if (photo == null)
             {
                 return HttpNotFound();
             }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
+            }
+
             return View("Delete", photo);
         }
 

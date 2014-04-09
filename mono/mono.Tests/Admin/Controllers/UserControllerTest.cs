@@ -11,132 +11,77 @@ using System.Linq.Expressions;
 using Mono.Data;
 using Mono.Model;
 using Mono.Models;
+using Mono.Tests.Admin.Fake;
 
 namespace Mono.Tests.Admin.Controllers
 {
     public class UserControllerTest
     {
-        private MyUser user;
-        private MyUser user1, user2, user3, user4, user5, user6;
-        private IQueryable<MyUser> users;
-
-        Restaurant restaurant1, restaurant2;
-        IQueryable<Restaurant> restaurantsOrdered;
-
-        public UserControllerTest()
+        [Fact]
+        public void Index()
         {
-            user = new MyUser { Id = "6" };
+            //ControllerHelper.newSearchPageNumber
 
-            user1 = new MyUser { UserName = "user1", FirstName = "first1", LastName = "last1" };
-            user2 = new MyUser { UserName = "aser2", FirstName = "first2", LastName = "last2" };
-            user3 = new MyUser { UserName = "udfg3", FirstName = "first3", LastName = "last3" };
-            user4 = new MyUser { UserName = "user4", FirstName = "first4", LastName = "last4" };
-            user5 = new MyUser { UserName = "user5", FirstName = "first5", LastName = "last5" };
-            user6 = new MyUser { UserName = "user6", FirstName = "first6", LastName = "last6" };
+            var mockIUnitOfWork = new Mock<IUnitOfWork>();
+            mockIUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<MyUser, bool>>>(), It.IsAny<Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>>>(), It.IsAny<String>())).Returns(UserFake.users);
 
-            users = new List<MyUser> { user1, user2, user3, user4, user5, user6 }.AsQueryable();
+            var UserController = new UserController(mockIUnitOfWork.Object);
 
-            restaurant1 = new Restaurant { ID = 6, Name = "restaurant1" };
-            restaurant2 = new Restaurant { ID = 3, Name = "restaurant2" };
+            var result = UserController.Index("", "", "", 1) as ViewResult;
+           
+            //ControllerHelper.newSearchPageNumber
+            
+            //var model = result.ViewData.Model as IEnumerable<AdminUserViewModel>;
+            //Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
+            //IEnumerable<AdminUserViewModel> usersAUVM = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(UserFake.users.ToList());
+            //IEnumerable<AdminUserViewModel> usersPagedList = usersAUVM.ToPagedList(1, Global.PageSize);
+            //Assert.Equal(usersPagedList, model);
 
-            restaurantsOrdered = new List<Restaurant> { restaurant1, restaurant2 }.AsQueryable();
+            Assert.Equal("Index", result.ViewName);
         }
 
-        public void IDNull()
+        public void Edit_Get_IDNull()
         {
-            var userController = new UserController(new Mock<IUnitOfWork>().Object);
-
+            var userController = new UserController(null);
             HttpStatusCodeResult result = userController.Edit((string)null) as HttpStatusCodeResult;
 
             Assert.Equal((int)HttpStatusCode.BadRequest, (int)result.StatusCode);
         }
 
-        public void UserNull(string id)
+        public void Edit_Get_NotFound()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-
-            MyUser user = null;
-            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID(id)).Returns(user);
+            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID("5")).Returns(UserFake.userNull);
 
             var userController = new UserController(mockIUnitOfWork.Object);
+            HttpStatusCodeResult result = userController.Edit("5") as HttpStatusCodeResult;
 
-            HttpStatusCodeResult result = userController.Edit(id) as HttpStatusCodeResult;
-                    
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
-        }
-
-        public void ID(string id)
-        {
-            IDNull();
-            UserNull(id);
-        }
-
-        private static string searchString = "user";
-        private Expression<Func<MyUser, bool>> filter = (u =>
-            u.UserName.ToUpper().Contains(searchString.ToUpper()) ||
-            u.FirstName.ToUpper().Contains(searchString.ToUpper()) ||
-            u.LastName.ToUpper().Contains(searchString.ToUpper())
-        );
-        private Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>> orderBy = (q => q.OrderBy(r => r.UserName));
-        private Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>> orderByDescending = (q => q.OrderByDescending(r => r.UserName));
-
-        [Fact]
-        public void Index_SortingAsc_Filter_PerPage_Page()
-        {
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<MyUser, bool>>>(), It.IsAny<Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>>>(), It.IsAny<String>())).Returns(orderBy(users.Where(filter)));
-
-            var UserController = new UserController(mockIUnitOfWork.Object);
-
-            var result = UserController.Index(null, searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<AdminUserViewModel>;
-
-            Assert.Equal("Index", result.ViewName);
-
-            Assert.Equal(user1.UserName, model.ElementAt(0).UserName);
-        }
-
-        [Fact]
-        public void Index_SortingDesc_Filter_PerPage_Page()
-        {
-            var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.Get(It.IsAny<Expression<Func<MyUser, bool>>>(), It.IsAny<Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>>>(), It.IsAny<String>())).Returns(orderByDescending(users.Where(filter)));
-
-            var UserController = new UserController(mockIUnitOfWork.Object);
-
-            var result = UserController.Index("Name_desc", searchString, null, 1) as ViewResult;
-            var model = result.ViewData.Model as IEnumerable<AdminUserViewModel>;
-
-            Assert.Equal("Index", result.ViewName);
-
-            Assert.Equal(user6.UserName, model.ElementAt(0).UserName);
         }
 
         [Fact]
         public void Edit_Get()
         {
-            ID("6");
-
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID("6")).Returns(user);
-            mockIUnitOfWork.Setup(m => m.RestaurantRepository.Get(null, It.IsAny<Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>>>(), "")).Returns(restaurantsOrdered);
+            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID("6")).Returns(UserFake.user);
+            mockIUnitOfWork.Setup(m => m.RestaurantRepository.Get(null, It.IsAny<Func<IQueryable<Restaurant>, IOrderedQueryable<Restaurant>>>(), "")).Returns(UserFake.restaurantsOrdered);
 
             var UserController = new UserController(mockIUnitOfWork.Object);
 
             var result = UserController.Edit("6") as ViewResult;
             var model = result.ViewData.Model as MyUser;
 
-            Assert.Equal(restaurantsOrdered, (result.ViewBag.RestaurantID as SelectList).Items);
+            Assert.Equal(UserFake.restaurantsOrdered, (result.ViewBag.RestaurantID as SelectList).Items);
             Assert.Equal("Edit", result.ViewName);
-            Assert.Equal(user, model);
+            Assert.Equal(UserFake.user, model);
         }
 
         [Fact]
         public void Edit_DataException()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID("6")).Returns(user);
-            mockIUnitOfWork.Setup(m => m.UserRepository.Update(user));
+            mockIUnitOfWork.Setup(m => m.UserRepository.GetByID("6")).Returns(UserFake.user);
+            mockIUnitOfWork.Setup(m => m.UserRepository.Update(UserFake.user));
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
 
             var UserController = new UserController(mockIUnitOfWork.Object);
@@ -149,11 +94,11 @@ namespace Mono.Tests.Admin.Controllers
         public void Edit_Valid()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.Update(user));         
+            mockIUnitOfWork.Setup(m => m.UserRepository.Update(UserFake.user));         
 
             var UserController = new UserController(mockIUnitOfWork.Object);
 
-            var result = UserController.Edit("6", 6) as RedirectToRouteResult;
+            var result = UserController.Edit("invalidID", 6) as RedirectToRouteResult;
 
             Assert.Equal("Index", result.RouteValues["action"]);
         }

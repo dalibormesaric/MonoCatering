@@ -12,6 +12,9 @@ using Mono.Data;
 using PagedList;
 using AutoMapper;
 using System.Linq.Expressions;
+using Mono.Helper;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace Mono.Areas.Admin.Controllers
 {
@@ -25,27 +28,12 @@ namespace Mono.Areas.Admin.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        // GET: /AdminUser/
+        // GET: /Admin/User/
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            ViewBag.FirstNameSortParm = sortOrder == "FirstName" ? "FirstName_desc" : "FirstName";
-            ViewBag.LastNameSortParm = sortOrder == "LastName" ? "LastName_desc" : "LastName";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
+            int pageNumber = ControllerHelper.newSearchPageNumber(ref searchString, page, currentFilter);   
 
             Expression<Func<MyUser, bool>> filter = null;
-
             if (!String.IsNullOrEmpty(searchString))
             {
                 filter = (u =>
@@ -56,7 +44,6 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             Func<IQueryable<MyUser>, IOrderedQueryable<MyUser>> orderBy = null;
-
             switch (sortOrder)
             {
                 case "Name_desc":
@@ -80,7 +67,12 @@ namespace Mono.Areas.Admin.Controllers
             }
 
             var users = unitOfWork.UserRepository.Get(filter: filter, orderBy: orderBy);
-            int pageNumber = (page ?? 1);
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+            ViewBag.FirstNameSortParm = sortOrder == "FirstName" ? "FirstName_desc" : "FirstName";
+            ViewBag.LastNameSortParm = sortOrder == "LastName" ? "LastName_desc" : "LastName";
 
             Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
             IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
@@ -88,7 +80,7 @@ namespace Mono.Areas.Admin.Controllers
             return View("Index", model.ToPagedList(pageNumber, Global.PageSize));
         }
 
-        // GET: /AdminUser/Edit/5
+        // GET: /Admin/User/Edit/5
         public ActionResult Edit(string id)
         {
             if (id == null)
@@ -110,7 +102,7 @@ namespace Mono.Areas.Admin.Controllers
             public int RestaurantID;
         }
 
-        // POST: /AdminUser/Edit/5
+        // POST: /Admin/User/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -132,6 +124,18 @@ namespace Mono.Areas.Admin.Controllers
                 user.RestaurantID = restaurantID;
                 unitOfWork.UserRepository.Update(user);
                 unitOfWork.Save();
+
+                UserManager<MyUser> UserManager = new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext()));
+                if (restaurantID == null)
+                {
+                    UserManager.AddToRole(id, "user");
+                    UserManager.RemoveFromRole(id, "restaurant");
+                }
+                else
+                {
+                    UserManager.AddToRole(id, "restaurant");
+                    UserManager.RemoveFromRole(id, "user");
+                }
             }
             catch (DataException /* dex */)
             {
