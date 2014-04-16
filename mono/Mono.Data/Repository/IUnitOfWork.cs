@@ -11,6 +11,7 @@ namespace Mono.Data
         global::Mono.Data.GenericRepository<global::Mono.Model.Ingredient> IngredientRepository { get; }
         global::System.Collections.Generic.List<global::Mono.Model.Ingredient> IngredientsForFood(global::Mono.Model.Food food);
         global::System.Collections.Generic.List<global::Mono.Model.Ingredient> IngredientsForFoodIngredient(global::System.Collections.Generic.List<int> ingredientsID);
+        global::System.Boolean IsAdmin(global::Mono.Model.MyUser user);
         global::Mono.Data.GenericRepository<global::Mono.Model.Offer> OfferRepository { get; }
         global::Mono.Data.GenericRepository<global::Mono.Model.Order> OrderRepository { get; }
         global::Mono.Data.GenericRepository<global::Mono.Model.Photo> PhotoRepository { get; }

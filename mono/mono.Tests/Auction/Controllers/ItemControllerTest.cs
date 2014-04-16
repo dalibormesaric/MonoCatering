@@ -48,7 +48,6 @@ namespace Mono.Tests.Auction.Controllers
 
             var itemController = new ItemController(mockIUnitOfWork.Object);
             itemController.ControllerContext = new ControllerContext(mockObject.isAjaxFalse(), new RouteData(), itemController);
-
             var result = itemController.Index(null) as ViewResult;
             var model = result.ViewData.Model as ItemViewModel;
 
@@ -150,7 +149,6 @@ namespace Mono.Tests.Auction.Controllers
             mockIUnitOfWork.Setup(m => m.FoodRepository.GetByID(It.IsAny<object>())).Returns(food);
 
             var itemController = new ItemController(mockIUnitOfWork.Object);
-
             var result = itemController.Add(3) as HttpStatusCodeResult;
 
             Assert.Equal((int)HttpStatusCode.NotFound, result.StatusCode);
@@ -166,7 +164,6 @@ namespace Mono.Tests.Auction.Controllers
             mockIUnitOfWork.Setup(m => m.IngredientsForFood(It.IsAny<Food>())).Returns(new List<Ingredient>());
 
             var itemController = new ItemController(mockIUnitOfWork.Object);
-
             var result = itemController.Add(1) as ViewResult;
 
             Assert.Equal("Add", result.ViewName);

@@ -63,6 +63,8 @@ namespace Mono.App_Start
         private static void RegisterServices(IKernel kernel)
         {
             kernel.Bind<IUnitOfWork>().To<UnitOfWork>();
+            kernel.Bind<IPhotoManager>().To<PhotoManager>();
+            kernel.Bind<HttpServerUtilityBase>().ToMethod(c => new HttpServerUtilityWrapper(HttpContext.Current.Server));
         }        
     }
 }

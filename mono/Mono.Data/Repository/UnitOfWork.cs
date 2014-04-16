@@ -270,6 +270,11 @@ namespace Mono.Data
             return categories;
         }
 
+        public virtual bool IsAdmin(MyUser user)
+        {
+            return (user.Roles.FirstOrDefault(f => f.Role.Name == "admin") != null);
+        }
+
         #endregion
     }
 }

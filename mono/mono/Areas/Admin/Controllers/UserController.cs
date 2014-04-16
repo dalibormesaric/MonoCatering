@@ -68,14 +68,16 @@ namespace Mono.Areas.Admin.Controllers
 
             var users = unitOfWork.UserRepository.Get(filter: filter, orderBy: orderBy);
 
+            Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
+            Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.IsAdmin, conf => conf.MapFrom(ol => unitOfWork.IsAdmin(ol)));
+
+            IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
+
             ViewBag.CurrentFilter = searchString;
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
             ViewBag.FirstNameSortParm = sortOrder == "FirstName" ? "FirstName_desc" : "FirstName";
             ViewBag.LastNameSortParm = sortOrder == "LastName" ? "LastName_desc" : "LastName";
-
-            Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
-            IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
 
             return View("Index", model.ToPagedList(pageNumber, Global.PageSize));
         }
@@ -88,7 +90,7 @@ namespace Mono.Areas.Admin.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             MyUser user = unitOfWork.UserRepository.GetByID(id);
-            if (user == null)
+            if (user == null || unitOfWork.IsAdmin(user))
             {
                 return HttpNotFound();
             }
@@ -114,8 +116,8 @@ namespace Mono.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
             MyUser user = unitOfWork.UserRepository.GetByID(id);
-            
-            if (user == null)
+
+            if (user == null || unitOfWork.IsAdmin(user))
             {
                 return RedirectToAction("Index");
             }
@@ -126,6 +128,7 @@ namespace Mono.Areas.Admin.Controllers
                 unitOfWork.Save();
 
                 UserManager<MyUser> UserManager = new UserManager<MyUser>(new UserStore<MyUser>(new MonoDbContext()));
+
                 if (restaurantID == null)
                 {
                     UserManager.AddToRole(id, "user");
@@ -142,7 +145,6 @@ namespace Mono.Areas.Admin.Controllers
                 //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
                 return RedirectToAction("Edit", new { id = id, saveChangesError = true });
             }
-            //todo add role restaurant to user or remove if restaurantID == null
 
             return RedirectToAction("Index");
         }
@@ -155,5 +157,6 @@ namespace Mono.Areas.Admin.Controllers
             }
             base.Dispose(disposing);
         }
+
     }
 }
