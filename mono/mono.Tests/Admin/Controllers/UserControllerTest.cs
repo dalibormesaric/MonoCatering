@@ -28,18 +28,17 @@ namespace Mono.Tests.Admin.Controllers
             var UserController = new UserController(mockIUnitOfWork.Object);
 
             var result = UserController.Index("", "", "", 1) as ViewResult;
-           
-            //ControllerHelper.newSearchPageNumber
-            
-            //var model = result.ViewData.Model as IEnumerable<AdminUserViewModel>;
-            //Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
-            //IEnumerable<AdminUserViewModel> usersAUVM = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(UserFake.users.ToList());
-            //IEnumerable<AdminUserViewModel> usersPagedList = usersAUVM.ToPagedList(1, Global.PageSize);
-            //Assert.Equal(usersPagedList, model);
 
+            //Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
+            //Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.IsAdmin, conf => conf.MapFrom(ol => unitOfWork.IsAdmin(ol)));
+            //IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
+           
+            //ViewBaq.
+            
             Assert.Equal("Index", result.ViewName);
         }
 
+        [Fact]
         public void Edit_Get_IDNull()
         {
             var userController = new UserController(null);
@@ -48,6 +47,7 @@ namespace Mono.Tests.Admin.Controllers
             Assert.Equal((int)HttpStatusCode.BadRequest, (int)result.StatusCode);
         }
 
+        [Fact]
         public void Edit_Get_NotFound()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
@@ -94,10 +94,9 @@ namespace Mono.Tests.Admin.Controllers
         public void Edit_Valid()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.UserRepository.Update(UserFake.user));         
+            mockIUnitOfWork.Setup(m => m.UserRepository.Update(UserFake.user));
 
             var UserController = new UserController(mockIUnitOfWork.Object);
-
             var result = UserController.Edit("invalidID", 6) as RedirectToRouteResult;
 
             Assert.Equal("Index", result.RouteValues["action"]);

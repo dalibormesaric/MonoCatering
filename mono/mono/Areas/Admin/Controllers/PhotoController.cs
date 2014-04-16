@@ -20,10 +20,14 @@ namespace Mono.Areas.Admin.Controllers
     public class PhotoController : Controller
     {
         private IUnitOfWork unitOfWork;
+        private IPhotoManager photoManager;
+        private HttpServerUtilityBase server;
 
-        public PhotoController(IUnitOfWork unitOfWork)
+        public PhotoController(IUnitOfWork unitOfWork, IPhotoManager photoManager, HttpServerUtilityBase server)
         {
             this.unitOfWork = unitOfWork;
+            this.photoManager = photoManager;
+            this.server = server;
         }
 
         // GET: /Admin/Photo/
@@ -74,8 +78,8 @@ namespace Mono.Areas.Admin.Controllers
                 if (ModelState.IsValid)
                 {
                     Photo photo = new Photo { FileName = model.FileName };
-                    WebImage image = WebImage.GetImageFromRequest();
-                    
+                    WebImage image = photoManager.getImageFromRequest();
+
                     if (image == null)
                     {
                         ModelState.AddModelError(string.Empty, "No image.");
@@ -89,8 +93,8 @@ namespace Mono.Areas.Admin.Controllers
                         unitOfWork.PhotoRepository.Insert(photo);
                         unitOfWork.Save();
 
-                        image.Resize(width: 300, height: 300, preserveAspectRatio: false);
-                        image.Save(filePath(photo.FileName), "png");
+                        photoManager.resize(ref image, width: 300, height: 300);
+                        photoManager.savePhoto(ref image, filePath(photo.FileName), "png");
 
                         return RedirectToAction("Index");
                     }
@@ -136,7 +140,7 @@ namespace Mono.Areas.Admin.Controllers
                     {
                         ModelState.AddModelError(string.Empty, "File name already taken.");
                     }
-                    else if (!System.IO.File.Exists(serverFilePath(model.FileName)))
+                    else if (!photoManager.photoExist(serverFilePath(model.FileName)))
                     {
                         ModelState.AddModelError(string.Empty, "Photo doesn't exist.");
                     }
@@ -147,7 +151,7 @@ namespace Mono.Areas.Admin.Controllers
                         unitOfWork.PhotoRepository.Insert(photo);
                         unitOfWork.Save();
 
-                        System.IO.File.Move(serverFilePath(model.FileName), serverFilePath(model.NewFileName));
+                        photoManager.changePhotoName(serverFilePath(model.FileName), serverFilePath(model.NewFileName));
 
                         return RedirectToAction("Index");
                     }
@@ -192,10 +196,9 @@ namespace Mono.Areas.Admin.Controllers
             {
                 Photo photo = unitOfWork.PhotoRepository.GetByID(id);
                 var path = serverFilePath(photo.FileName);
-
-                if(!System.IO.File.Exists(path))
+               
+                if(!photoManager.photoExist(path))
                     throw new Exception();
-
 
                 foreach(var category in unitOfWork.CategoryRepository.Get(c => c.PhotoID == photo.FileName))
                 {
@@ -211,7 +214,7 @@ namespace Mono.Areas.Admin.Controllers
 
                 unitOfWork.PhotoRepository.Delete(photo.FileName);
                 unitOfWork.Save();
-                System.IO.File.Delete(path);
+                photoManager.deletePhoto(path);
 
             }
             catch (Exception /* dex */)
@@ -238,7 +241,8 @@ namespace Mono.Areas.Admin.Controllers
 
         private string serverFilePath(string fileName)
         {
-            return Server.MapPath(filePath(fileName));
+            return server.MapPath(filePath(fileName));
         }
+
     }
 }

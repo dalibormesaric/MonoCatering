@@ -38,6 +38,9 @@
         <th>
             Restaurant
         </th>
+        <th>
+            Admin
+        </th>
         <th></th>
     </tr>
 
@@ -62,7 +65,13 @@
             @Html.DisplayFor(modelItem => item.Restaurant)
         </td>
         <td>
-            @Html.ActionLink("Edit restaurant", "Edit", new { id=item.ID })
+            @Html.DisplayFor(modelItem => item.IsAdmin)
+        </td>
+        <td>
+            @if (!item.IsAdmin) 
+            { 
+                @Html.ActionLink("Edit restaurant", "Edit", new { id = item.Id })
+            }
         </td>
     </tr>
 }

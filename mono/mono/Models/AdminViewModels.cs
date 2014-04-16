@@ -6,7 +6,7 @@ namespace Mono.Models
     public class AdminUserViewModel
     {
         [Required]
-        public string ID { get; set; }
+        public string Id { get; set; }
 
         [Required]
         [Display(Name = "User name")]
@@ -29,5 +29,8 @@ namespace Mono.Models
 
         [Display(Name = "Restaurant")]
         public string Restaurant { get; set; }
+
+        [Display(Name = "Admin user")]
+        public bool IsAdmin { get; set; }
     }
 }

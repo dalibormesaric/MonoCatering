@@ -8,6 +8,10 @@ using PagedList;
 using Mono.Data;
 using Mono.Areas.Admin.Models;
 using Moq;
+using System.Web.Helpers;
+using Microsoft.AspNet.Identity.EntityFramework;
+using System.IO;
+using System.Reflection;
 
 namespace Mono.Tests.Admin.Fake
 {
@@ -152,7 +156,7 @@ namespace Mono.Tests.Admin.Fake
         public static MyUser userNull = null;
         public static MyUser user = new MyUser { Id = "6" };
 
-        public static MyUser user1 = new MyUser { UserName = "user1", FirstName = "first1", LastName = "last1" };
+        public static MyUser user1 = new MyUser { UserName = "user1", FirstName = "first1", LastName = "last1"};
         public static MyUser user2 = new MyUser { UserName = "aser2", FirstName = "first2", LastName = "last2" };
         public static MyUser user3 = new MyUser { UserName = "udfg3", FirstName = "first3", LastName = "last3" };
         public static MyUser user4 = new MyUser { UserName = "user4", FirstName = "first4", LastName = "last4" };
@@ -160,10 +164,38 @@ namespace Mono.Tests.Admin.Fake
         public static MyUser user6 = new MyUser { UserName = "user6", FirstName = "first6", LastName = "last6" };
 
         public static IQueryable<MyUser> users = new List<MyUser> { user1, user2, user3, user4, user5, user6 }.AsQueryable().OrderBy(u => u.UserName);
-        
+
         public static Restaurant restaurant1 = new Restaurant { ID = 6, Name = "restaurant1" };
         public static Restaurant restaurant2 = new Restaurant { ID = 3, Name = "restaurant2" };
 
         public static IQueryable<Restaurant> restaurantsOrdered = new List<Restaurant> { restaurant1, restaurant2 }.AsQueryable();
+    }
+
+    public static class PhotoFake
+    {
+        public static Photo photoNull = null;
+        public static Photo photo = new Photo { FileName = "fileName" };
+
+        private static Mock mockImage = new Mock<System.Web.HttpPostedFileBase>();
+
+        public static PhotoUploadViewModel photoUploadViewModelImageNull = new PhotoUploadViewModel { FileName = "fileName" };
+        public static PhotoUploadViewModel photoUploadViewModel = new PhotoUploadViewModel { FileName = "fileName", Image = (System.Web.HttpPostedFileBase)mockImage.Object };
+
+        public static PhotoEditViewModel photoEditViewModel = new PhotoEditViewModel { FileName = "fileName", NewFileName = "newFileName" };
+
+        public static Photo photo1 = new Photo { FileName = "photo1" };
+        public static Photo photo2 = new Photo { FileName = "asser2" };
+        public static Photo photo3 = new Photo { FileName = "udsfg3" };
+        public static Photo photo4 = new Photo { FileName = "photo4" };
+        public static Photo photo5 = new Photo { FileName = "photo5" };
+        public static Photo photo6 = new Photo { FileName = "photo6" };
+
+        public static IQueryable<Photo> photos = new List<Photo> { photo1, photo2, photo3, photo4, photo5, photo6 }.AsQueryable().OrderBy(u => u.FileName);
+        public static IEnumerable<Photo> photosPagedList = photos.ToPagedList(1, Global.PageSize);
+
+        public static WebImage webImageNull = null;
+
+        private static string path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
+        public static WebImage webImage = new WebImage(new FileStream(Path.Combine(Path.GetDirectoryName(path), @"Admin\Fakes\_.png"), FileMode.Open, FileAccess.Read));
     }
 }
