@@ -13,7 +13,8 @@ namespace Mono
                         "~/Scripts/jquery-ui-{version}.js",
                         "~/Scripts/jquery.unobtrusive*",
                         "~/Scripts/jquery.validate.min.js",
-                        "~/Scripts/jquery.validate.unobtrusive.min.js"));          
+                        "~/Scripts/jquery.validate.unobtrusive.min.js",
+                        "~/Scripts/jquery.validate.fix.js"));          
 
             bundles.Add(new ScriptBundle("~/bundles/signalr").Include(
                         "~/Scripts/jquery.signalR-{version}.js",
