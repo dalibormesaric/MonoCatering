@@ -93,8 +93,8 @@ namespace Mono.Areas.Admin.Controllers
                         unitOfWork.PhotoRepository.Insert(photo);
                         unitOfWork.Save();
 
-                        photoManager.resize(ref image, width: 300, height: 300);
-                        photoManager.savePhoto(ref image, filePath(photo.FileName), "png");
+                        photoManager.resize(image, width: 300, height: 300);
+                        photoManager.savePhoto(image, filePath(photo.FileName), "png");
 
                         return RedirectToAction("Index");
                     }

@@ -457,6 +457,7 @@
     <Content Include="Areas\Admin\Views\User\Index.cshtml" />
     <Content Include="Views\Home\Restaurants.cshtml" />
     <Content Include="Areas\Admin\Views\Photo\PhotoUpload.cshtml" />
+    <Content Include="Scripts\jquery.validate.fix.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

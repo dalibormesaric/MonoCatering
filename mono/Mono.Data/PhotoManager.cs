@@ -24,12 +24,12 @@ namespace Mono.Data
             return WebImage.GetImageFromRequest();
         }
 
-        public virtual void resize(ref WebImage image, int width,int height)
+        public virtual void resize(WebImage image, int width,int height)
         {
             image.Resize(width, height, false);
         }
 
-        public virtual void savePhoto(ref WebImage image, string filePath, string imageFormat)
+        public virtual void savePhoto(WebImage image, string filePath, string imageFormat)
         {
             image.Save(filePath, imageFormat);
         }

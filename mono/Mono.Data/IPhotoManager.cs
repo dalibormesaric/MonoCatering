@@ -9,7 +9,7 @@ namespace Mono.Data
         void deletePhoto(string filePath);
         bool photoExist(string filePath);
         WebImage getImageFromRequest();
-        void resize(ref WebImage image, int width, int height);
-        void savePhoto(ref WebImage webImage, string filePath, string imageFormat);
+        void resize(WebImage image, int width, int height);
+        void savePhoto(WebImage webImage, string filePath, string imageFormat);
     }
 }
