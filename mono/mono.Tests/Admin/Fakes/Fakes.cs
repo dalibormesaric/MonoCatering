@@ -28,7 +28,7 @@ namespace Mono.Tests.Admin.Fake
         public static Category category6 = new Category { Name = "category6", SizeType = 0 };
 
         public static IQueryable<Category> categories = new List<Category> { category1, category2, category3, category4, category5, category6 }.AsQueryable().OrderBy(c => c.Name);
-        public static IEnumerable<Category> categoriesPagedList = categories.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<Category> categoriesPagedList = categories.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
         public static List<UnitOfWork.TypeSelectList> typeSelectList = new List<UnitOfWork.TypeSelectList> { new UnitOfWork.TypeSelectList { SizeValuesString = "Portion" } };
         public static List<Photo> photoList = new List<Photo> { new Photo { FileName = "fileName" } };      
@@ -79,7 +79,7 @@ namespace Mono.Tests.Admin.Fake
         public static Food food6 = new Food { Name = "food6", Category = category };
 
         public static IQueryable<Food> foods = new List<Food> { food1, food2, food3, food4, food5, food6 }.AsQueryable().OrderBy(f => f.Name);
-        public static IEnumerable<Food> foodsPagedList = foods.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<Food> foodsPagedList = foods.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
         public static Category category1 = new Category { ID = 6, Name = "category1", ChildCategory = new List<Category>(), Food = new List<Food>() };
         public static Category category2 = new Category { ID = 3, Name = "category2", ChildCategory = new List<Category>(), Food = new List<Food>() };
@@ -119,7 +119,7 @@ namespace Mono.Tests.Admin.Fake
         public static Ingredient ingredient6 = new Ingredient { Name = "ingredient6", Category = category, Food = food };
 
         public static IQueryable<Ingredient> ingredients = new List<Ingredient> { ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6 }.AsQueryable().OrderBy(i => i.Name);
-        public static IEnumerable<Ingredient> ingredientsPagedList = ingredients.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<Ingredient> ingredientsPagedList = ingredients.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
         public static Category category1 = new Category { ID = 6, Name = "category1" };
         public static Category category2 = new Category { ID = 3, Name = "category2" };
@@ -191,7 +191,7 @@ namespace Mono.Tests.Admin.Fake
         public static Photo photo6 = new Photo { FileName = "photo6" };
 
         public static IQueryable<Photo> photos = new List<Photo> { photo1, photo2, photo3, photo4, photo5, photo6 }.AsQueryable().OrderBy(u => u.FileName);
-        public static IEnumerable<Photo> photosPagedList = photos.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<Photo> photosPagedList = photos.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
         public static WebImage webImageNull = null;
 

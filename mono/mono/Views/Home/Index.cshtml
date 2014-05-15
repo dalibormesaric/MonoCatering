@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<Mono.Models.HomeViewModel>
+@using Mono.HtmlHelperExtension
+@{
     ViewBag.Title = "Home Page";
 }
 
@@ -6,3 +8,21 @@
     <h1>Restaurant</h1>
     <p class="lead">Restaurant application.</p>
 </div>
+
+<div id="topFood" style="overflow: auto;">
+    @foreach (var item in Model)
+    {
+        <div class="thumbnail" style="width: 250px; float:left; margin-right: 35px">
+            @Html.Image(item.PhotoID, null)
+            <div class="caption">
+                <h3>@(item.Name)</h3>
+                <p>Number of orders: <b>@item.Count</b></p>
+                @if (User.IsInRole("user"))
+                {
+                    <p>@Html.ActionLink("Go to item", "Add", "Item", new { area = "Auction", id = item.ID }, new { @class = "btn btn-default", @role = "button" })</p>
+                }
+            </div>
+        </div>
+    }
+</div>
+

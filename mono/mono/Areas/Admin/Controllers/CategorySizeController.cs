@@ -62,7 +62,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Value_desc" : "";
             ViewBag.TypeSortParm = sortOrder == "Type" ? "Type_desc" : "Type";
 
-            return View("Index", categorySizes.ToPagedList(pageNumber, Global.PageSize));
+            return View("Index", categorySizes.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         // GET: /Admin/CategorySize/Details/5

@@ -58,7 +58,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
 
-            return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
+            return View("Index", categories.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         // GET: /Admin/Photo/PhotoUpload

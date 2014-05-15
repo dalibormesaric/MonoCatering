@@ -64,7 +64,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 var foods = unitOfWork.FoodRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "Category");
                 
-                return View("Index", foods.ToPagedList(pageNumber, Global.PageSize));
+                return View("Index", foods.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
             }
             else
             {
@@ -77,7 +77,7 @@ namespace Mono.Areas.Admin.Controllers
 
                 var foods = orderBy(query);
                 
-                return View("Category", foods.ToPagedList(pageNumber, Global.PageSize));
+                return View("Category", foods.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
             }
         }
       

@@ -70,7 +70,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.CategorySortParm = sortOrder == "Category" ? "Category_desc" : "Category";
             ViewBag.FoodSortParm = sortOrder == "Food" ? "Food_desc" : "Food";
 
-            return View("Index", ingredients.ToPagedList(pageNumber, Global.PageSize));
+            return View("Index", ingredients.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         // GET: /Admin/Ingredient/Details/5
