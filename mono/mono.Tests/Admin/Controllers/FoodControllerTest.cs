@@ -52,6 +52,7 @@ namespace Mono.Tests.Admin.Controllers
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<int>())).Returns(FoodFake.categoryWithChilds);
+            mockIUnitOfWork.Setup(m => m.FoodRepository.FoodInCategory(It.IsAny<Category>())).Returns(new List<Food>());
 
             var foodController = new FoodController(mockIUnitOfWork.Object);
             var result = foodController.Category(5, "", "", "", (int?)null) as ViewResult;
@@ -304,7 +305,7 @@ namespace Mono.Tests.Admin.Controllers
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.FoodRepository.GetByID(6)).Returns(FoodFake.food);
-            mockIUnitOfWork.Setup(m => m.IngredientsForFood(FoodFake.food)).Returns(FoodFake.allIngreients);
+            mockIUnitOfWork.Setup(m => m.IngredientRepository.IngredientsForFood(FoodFake.food)).Returns(FoodFake.allIngreients);
 
             var foodController = new FoodController(mockIUnitOfWork.Object);
             var result = foodController.Ingredients(6) as ViewResult;

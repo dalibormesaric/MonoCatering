@@ -69,7 +69,7 @@ namespace Mono.Areas.Admin.Controllers
             var users = unitOfWork.UserRepository.Get(filter: filter, orderBy: orderBy);
 
             Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.Restaurant, conf => conf.MapFrom(ol => ol.Restaurant.Name));
-            Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.IsAdmin, conf => conf.MapFrom(ol => unitOfWork.IsAdmin(ol)));
+            Mapper.CreateMap<MyUser, AdminUserViewModel>().ForMember(dest => dest.IsAdmin, conf => conf.MapFrom(ol => unitOfWork.UserRepository.IsAdmin(ol)));
 
             IEnumerable<AdminUserViewModel> model = Mapper.Map<IEnumerable<MyUser>, IEnumerable<AdminUserViewModel>>(users.ToList());
 
@@ -90,7 +90,7 @@ namespace Mono.Areas.Admin.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             MyUser user = unitOfWork.UserRepository.GetByID(id);
-            if (user == null || unitOfWork.IsAdmin(user))
+            if (user == null || unitOfWork.UserRepository.IsAdmin(user))
             {
                 return HttpNotFound();
             }
@@ -117,7 +117,7 @@ namespace Mono.Areas.Admin.Controllers
             }
             MyUser user = unitOfWork.UserRepository.GetByID(id);
 
-            if (user == null || unitOfWork.IsAdmin(user))
+            if (user == null || unitOfWork.UserRepository.IsAdmin(user))
             {
                 return RedirectToAction("Index");
             }

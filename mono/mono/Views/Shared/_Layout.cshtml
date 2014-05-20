@@ -23,7 +23,14 @@
                 <ul class="nav navbar-nav">
                     @if (User.IsInRole("admin"))
                     {
-                        <li>@Html.ActionLink("Edit", "Index", "Admin", new { area = "Admin" }, null)</li>
+                        string v = "";
+                                
+                        if(ViewContext.RouteData.DataTokens["area"] == "Admin") 
+                        {
+                           v = "class=active";
+                        }
+                        
+                        <li @(v) >@Html.ActionLink("Edit", "Index", "Admin", new { area = "Admin" }, null)</li>
                     }
                     @if (User.IsInRole("user"))
                     {

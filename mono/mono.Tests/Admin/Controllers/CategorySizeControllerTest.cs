@@ -260,7 +260,7 @@ namespace Mono.Tests.Admin.Controllers
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategorySizeRepository.Get(It.IsAny<Expression<Func<CategorySize, bool>>>(), null, "")).Returns(new List<CategorySize> { CategorySizeFake.categorySize } );
-            mockIUnitOfWork.Setup(m => m.SizeValuesString(It.IsAny<int>()));
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesString(It.IsAny<int>()));
 
             var categorySizeController = new CategorySizeController(mockIUnitOfWork.Object);
             var result = categorySizeController.Type(6) as ViewResult;

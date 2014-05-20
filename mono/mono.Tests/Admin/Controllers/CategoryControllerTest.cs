@@ -75,7 +75,8 @@ namespace Mono.Tests.Admin.Controllers
         public void Details()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<int>())).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesString(It.IsAny<int>())).Returns("");
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = categoryController.Details(6) as ViewResult;
@@ -92,7 +93,7 @@ namespace Mono.Tests.Admin.Controllers
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -109,7 +110,7 @@ namespace Mono.Tests.Admin.Controllers
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Insert(CategoryFake.category));
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -125,7 +126,7 @@ namespace Mono.Tests.Admin.Controllers
         {          
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -167,7 +168,7 @@ namespace Mono.Tests.Admin.Controllers
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(CategoryFake.category);
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -186,7 +187,7 @@ namespace Mono.Tests.Admin.Controllers
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Update(CategoryFake.category));
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
             mockIUnitOfWork.Setup(m => m.Save()).Throws<DataException>();
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -203,7 +204,7 @@ namespace Mono.Tests.Admin.Controllers
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, null, "")).Returns(CategoryFake.categories);
             mockIUnitOfWork.Setup(m => m.CategoryRepository.Get(null, It.IsAny<Func<IQueryable<Category>, IOrderedQueryable<Category>>>(), "")).Returns(CategoryFake.categories);
-            mockIUnitOfWork.Setup(m => m.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesSelectList()).Returns(CategoryFake.typeSelectList);
             mockIUnitOfWork.Setup(m => m.PhotoRepository.Get(null, null, "")).Returns(CategoryFake.photoList);
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
@@ -243,7 +244,8 @@ namespace Mono.Tests.Admin.Controllers
         public void Delete_Get_ErrorMessage()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<int>())).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesString(It.IsAny<int>())).Returns("");
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = categoryController.Delete(6, true) as ViewResult;
@@ -258,7 +260,8 @@ namespace Mono.Tests.Admin.Controllers
         public void Delete_Get()
         {
             var mockIUnitOfWork = new Mock<IUnitOfWork>();
-            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(6)).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategoryRepository.GetByID(It.IsAny<int>())).Returns(CategoryFake.category);
+            mockIUnitOfWork.Setup(m => m.CategorySizeRepository.SizeValuesString(It.IsAny<int>())).Returns("");
 
             var categoryController = new CategoryController(mockIUnitOfWork.Object);
             var result = categoryController.Delete(6) as ViewResult;
