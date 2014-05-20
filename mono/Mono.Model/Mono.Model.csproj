@@ -52,17 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Photo.cs" />
-    <Compile Include="Offer.cs" />
-    <Compile Include="FoodIngredient.cs" />
-    <Compile Include="Order.cs" />
-    <Compile Include="Status.cs" />
-    <Compile Include="Ingredient.cs" />
-    <Compile Include="Food.cs" />
-    <Compile Include="Category.cs" />
-    <Compile Include="CategorySize.cs" />
-    <Compile Include="Restaurant.cs" />
-    <Compile Include="MyUser.cs" />
+    <Compile Include="Model\Photo.cs" />
+    <Compile Include="Model\Offer.cs" />
+    <Compile Include="Model\FoodIngredient.cs" />
+    <Compile Include="Model\Order.cs" />
+    <Compile Include="Model\Status.cs" />
+    <Compile Include="Model\Ingredient.cs" />
+    <Compile Include="Model\Food.cs" />
+    <Compile Include="Model\Category.cs" />
+    <Compile Include="Model\CategorySize.cs" />
+    <Compile Include="Model\Restaurant.cs" />
+    <Compile Include="Model\MyUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

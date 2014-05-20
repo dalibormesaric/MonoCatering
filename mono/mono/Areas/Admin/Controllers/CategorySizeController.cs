@@ -187,7 +187,7 @@ namespace Mono.Areas.Admin.Controllers
                 return HttpNotFound();
             }
 
-            ViewBag.SizeValuesString = unitOfWork.SizeValuesString((int)id);
+            ViewBag.SizeValuesString = unitOfWork.CategorySizeRepository.SizeValuesString((int)id);
 
             return View("Type");
         }

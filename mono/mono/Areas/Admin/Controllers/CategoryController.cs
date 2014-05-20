@@ -95,7 +95,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.Category = category.Name;
             ViewBag.CategoryID = id;
 
-            return Index(sortOrder, currentFilter, searchString, page, unitOfWork.SubCategories(category));
+            return Index(sortOrder, currentFilter, searchString, page, unitOfWork.CategoryRepository.SubCategories(category));
         }
 
         // GET: /Admin/Category/Details/5
@@ -107,7 +107,7 @@ namespace Mono.Areas.Admin.Controllers
                 return HttpNotFound();
             }
 
-            ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
+            ViewBag.SizeValues = unitOfWork.CategorySizeRepository.SizeValuesString(category.SizeType);
 
             return View("Details", category);
         }
@@ -199,7 +199,7 @@ namespace Mono.Areas.Admin.Controllers
             {
                 ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
-            ViewBag.SizeValues = unitOfWork.SizeValuesString(category.SizeType);
+            ViewBag.SizeValues = unitOfWork.CategorySizeRepository.SizeValuesString(category.SizeType);
 
             return View("Delete", category);
         }
@@ -266,7 +266,7 @@ namespace Mono.Areas.Admin.Controllers
         private void setViewBagsParametres(int? parentCategoryID, int? sizeType)
         {
             ViewBag.ParentCategoryID = new SelectList(unitOfWork.CategoryRepository.Get(orderBy: q => q.OrderBy(c => c.Name)), "ID", "Name", parentCategoryID);
-            ViewBag.SizeType = new SelectList(unitOfWork.SizeValuesSelectList(), "ID", "SizeValuesString", sizeType);
+            ViewBag.SizeType = new SelectList(unitOfWork.CategorySizeRepository.SizeValuesSelectList(), "ID", "SizeValuesString", sizeType);
             ViewBag.Photos = new SelectList(unitOfWork.PhotoRepository.Get().Select(p => p.FileName));
         }
     }

@@ -30,7 +30,7 @@ namespace Mono.Tests.Admin.Fake
         public static IQueryable<Category> categories = new List<Category> { category1, category2, category3, category4, category5, category6 }.AsQueryable().OrderBy(c => c.Name);
         public static IEnumerable<Category> categoriesPagedList = categories.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
-        public static List<UnitOfWork.TypeSelectList> typeSelectList = new List<UnitOfWork.TypeSelectList> { new UnitOfWork.TypeSelectList { SizeValuesString = "Portion" } };
+        public static List<CategorySizeRepository.TypeSelectList> typeSelectList = new List<CategorySizeRepository.TypeSelectList> { new CategorySizeRepository.TypeSelectList { SizeValuesString = "Portion" } };
         public static List<Photo> photoList = new List<Photo> { new Photo { FileName = "fileName" } };      
 
         public static Category categoryWithChilds = new Category { Name = "category", SizeType = 0, ChildCategory = new List<Category> { category2, category4 } };
@@ -61,7 +61,7 @@ namespace Mono.Tests.Admin.Fake
         public static CategorySize categorySize6 = new CategorySize { Value = "categorySize6", Type = 0 };
 
         public static IQueryable<CategorySize> categorySizes = new List<CategorySize> { categorySize1, categorySize2, categorySize3, categorySize4, categorySize5, categorySize6 }.AsQueryable().OrderBy(c => c.Order);
-        public static IEnumerable<CategorySize> categoriesPagedList = categorySizes.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<CategorySize> categoriesPagedList = categorySizes.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
     }
 
     public static class FoodFake
@@ -144,7 +144,7 @@ namespace Mono.Tests.Admin.Fake
         public static Restaurant restaurant6 = new Restaurant { Name = "restoran6", Address = "adresa 45, grad", Phone = "031 555 555", OIB = "12345678901", Description = "opis" };
         
         public static IQueryable<Restaurant> restaurants = new List<Restaurant> { restaurant1, restaurant2, restaurant3, restaurant4, restaurant5, restaurant6 }.AsQueryable().OrderBy(r => r.Name);
-        public static IEnumerable<Restaurant> restaurantsPagedList = restaurants.ToPagedList(1, Global.PageSize);
+        public static IEnumerable<Restaurant> restaurantsPagedList = restaurants.ToPagedList(1, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) );
 
         public static MyUser user1 = new MyUser { FirstName = "zzzz", LastName = "z" };
         public static MyUser user2 = new MyUser { FirstName = "aaaa", LastName = "a" };

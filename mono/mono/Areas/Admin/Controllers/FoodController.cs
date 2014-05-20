@@ -93,7 +93,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.Category = category.Name;
             ViewBag.CategoryID = id;
 
-            return Index(sortOrder, currentFilter, searchString, page, unitOfWork.FoodInCategory(category));
+            return Index(sortOrder, currentFilter, searchString, page, unitOfWork.FoodRepository.FoodInCategory(category));
         }
 
         // GET: /Admin/Food/Details/5
@@ -230,7 +230,7 @@ namespace Mono.Areas.Admin.Controllers
             
             ViewBag.Food = food.Name;
 
-            return View("Ingredients", unitOfWork.IngredientsForFood(food));
+            return View("Ingredients", unitOfWork.IngredientRepository.IngredientsForFood(food));
         }
 
         protected override void Dispose(bool disposing)

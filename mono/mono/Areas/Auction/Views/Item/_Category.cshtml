@@ -1,34 +1,40 @@
 ﻿@model Mono.Areas.Auction.Models.ItemViewModel
 @using Mono.HtmlHelperExtension
 
-<table class="table" style="border:1px solid #0094ff">
-    @foreach (var item in Model.ListCategoryFood)
+<table class="table" style="border:1px solid #cecaca">
+    @if(Model.ListCategoryFood.Count == 0)
     {
-        <tr>
-            <td style="width:150px;">
-                @Html.Image(item.PhotoID, null)
-            </td>
-            <td style="vertical-align:middle"> 
-                @if (item.Type == Mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
-                {
-                    using (Ajax.BeginForm("Index",new { id = item.ItemID }, 
-                        new AjaxOptions
-                        {
-                            HttpMethod = "get",
-                            InsertionMode = InsertionMode.Replace,
-                            UpdateTargetId = "subCategory" + item.ItemID.ToString()
-                        }))
-                    {
-                        <input type="submit" value=@item.Name class="btn btn-default" />
-                    }
-                    <div id="subCategory@(item.ItemID)"></div>
-                }
-                else
-                {                   
-                    @Html.ActionLink(@item.Name, "Add", new { id = item.ItemID })
-                }
-            </td>
-        </tr>
+        <tr><td>no items</td></tr>
     }
-
+    else
+    { 
+        foreach (var item in Model.ListCategoryFood)
+        {
+            <tr>
+                <td style="width:150px;">
+                    @Html.Image(item.PhotoID, null)
+                </td>
+                <td style="vertical-align:middle"> 
+                    @if (item.Type == Mono.Areas.Auction.Models.ListCategoryFoodItemType.Category)
+                    {
+                        using (Ajax.BeginForm("Index",new { id = item.ItemID }, 
+                            new AjaxOptions
+                            {
+                                HttpMethod = "get",
+                                InsertionMode = InsertionMode.Replace,
+                                UpdateTargetId = "subCategory" + item.ItemID.ToString()
+                            }))
+                        {
+                            <input type="submit" value=@item.Name class="btn btn-default" />
+                        }
+                        <div id="subCategory@(item.ItemID)"></div>
+                    }
+                    else
+                    {                   
+                        @Html.ActionLink(@item.Name, "Add", new { id = item.ItemID })
+                    }
+                </td>
+            </tr>
+        }
+    }
 </table>
