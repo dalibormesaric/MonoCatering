@@ -213,7 +213,6 @@
     <Compile Include="Areas\Auction\Controllers\OrderController.cs" />
     <Compile Include="Areas\Auction\Models\ItemViewModels.cs" />
     <Compile Include="ChatHub.cs" />
-    <Compile Include="Global.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\CategoryController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
@@ -238,6 +237,7 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Areas\Admin\Models\PhotoViewModels.cs" />
+    <Compile Include="Models\HomeViewModels.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Helper\HtmlHelperExtension.cs" />

@@ -53,8 +53,8 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.CurrentFilter = searchString;
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            
-            return View("Index", restaurants.ToPagedList(pageNumber, Global.PageSize));
+
+            return View("Index", restaurants.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         // GET: /Admin/Category/Employers/5

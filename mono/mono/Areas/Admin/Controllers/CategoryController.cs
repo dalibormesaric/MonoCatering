@@ -65,7 +65,7 @@ namespace Mono.Areas.Admin.Controllers
             if(subCategories == null)
             {
                 var categories = unitOfWork.CategoryRepository.Get(filter: filter, orderBy: orderBy, includeProperties: "ParentCategory");
-                return View("Index", categories.ToPagedList(pageNumber, Global.PageSize));
+                return View("Index", categories.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
             }
             else
             {
@@ -78,7 +78,7 @@ namespace Mono.Areas.Admin.Controllers
 
                 var categories = orderBy(query);
 
-                return View("SubCategory", categories.ToPagedList(pageNumber, Global.PageSize));
+                return View("SubCategory", categories.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
             }
 
         }

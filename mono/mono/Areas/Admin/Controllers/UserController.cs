@@ -79,7 +79,7 @@ namespace Mono.Areas.Admin.Controllers
             ViewBag.FirstNameSortParm = sortOrder == "FirstName" ? "FirstName_desc" : "FirstName";
             ViewBag.LastNameSortParm = sortOrder == "LastName" ? "LastName_desc" : "LastName";
 
-            return View("Index", model.ToPagedList(pageNumber, Global.PageSize));
+            return View("Index", model.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         // GET: /Admin/User/Edit/5

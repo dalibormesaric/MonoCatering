@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.IO;
 using System.Web.Helpers;
 using System.Data;
+using Mono.Models;
 
 namespace Mono.Controllers
 {
@@ -27,7 +28,9 @@ namespace Mono.Controllers
 
         public ActionResult Index()
         {
-            return View();
+            var foods = unitOfWork.FoodIngredientRepository.Get(q => q.Order.Status == Status.Accepted, null, "Food").GroupBy(q => q.FoodID, q => new { q.Food.Name, q.Food.PhotoID }).OrderByDescending(q => q.Count()).Take(10).Select(q => new HomeViewModel { ID = q.Key, Name = q.First().Name, PhotoID = q.First().PhotoID, Count = q.Count() });
+
+            return View(foods);
         }
 
         public ActionResult Restaurants(string sortOrder, string currentFilter, string searchString, int? page)
@@ -70,7 +73,7 @@ namespace Mono.Controllers
             var restaurants = unitOfWork.RestaurantRepository.Get(filter: filter, orderBy: orderBy);
             int pageNumber = (page ?? 1);
 
-            return View("Restaurants", restaurants.ToPagedList(pageNumber, Global.PageSize));
+            return View("Restaurants", restaurants.ToPagedList(pageNumber, int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["PageSize"].ToString()) ));
         }
 
         public ActionResult Contact()
